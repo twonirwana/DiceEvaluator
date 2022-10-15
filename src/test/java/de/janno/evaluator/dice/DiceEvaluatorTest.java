@@ -1,0 +1,258 @@
+package de.janno.evaluator.dice;
+
+import de.janno.evaluator.ExpressionException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+public class DiceEvaluatorTest {
+    private static Stream<Arguments> generateData() {
+        return Stream.of(
+                Arguments.of("", null, List.of()),
+                Arguments.of("1d6", List.of(3), List.of(3)),
+                Arguments.of("1d6 ", List.of(3), List.of(3)),
+                Arguments.of(" 1d6", List.of(3), List.of(3)),
+                Arguments.of("1D6", List.of(3), List.of(3)),
+                Arguments.of("D6", List.of(3), List.of(3)),
+                Arguments.of("d6", List.of(3), List.of(3)),
+                Arguments.of("-d6", List.of(3), List.of(-3)),
+                Arguments.of("-2d6", List.of(3, 4), List.of(-3, -4)),
+                Arguments.of("3d6", List.of(3, 4, 5), List.of(3, 4, 5)),
+                Arguments.of("3d6c", List.of(3, 4, 5), List.of(3)),
+                Arguments.of("3d!6c", List.of(3, 2, 6, 6, 5), List.of(5)),
+                Arguments.of("3d6>3", List.of(3, 4, 5), List.of(4, 5)),
+                Arguments.of("3d6>3c", List.of(3, 4, 5), List.of(2)),
+                Arguments.of("3d6<3", List.of(3, 4, 5), List.of()),
+                Arguments.of("3d6<3c", List.of(3, 4, 5), List.of(0)),
+                Arguments.of("1d6+1d4 + 1d5", List.of(3, 4, 5), List.of(3, 4, 5)),
+                Arguments.of("1d6+1d4 - 1d5", List.of(3, 4, 5), List.of(3, 4, -5)),
+                Arguments.of("1d6 + 3", List.of(3), List.of(3, 3)),
+                Arguments.of("3d6 + 2d8", List.of(6, 6, 6, 8, 8), List.of(6, 6, 6, 8, 8)),
+                Arguments.of("3d6 - 2d8", List.of(6, 6, 6, 8, 8), List.of(6, 6, 6, -8, -8)),
+                Arguments.of("1d6 + 3=", List.of(3), List.of(6)),
+                Arguments.of("1d(6 + 3=)", List.of(), List.of(9)),
+                Arguments.of("1d(6 + 3)", List.of(), List.of(3)),
+                Arguments.of("1d6 * 3", List.of(3), List.of(9)),
+                Arguments.of("1d6 * 3 -3", List.of(3), List.of(9, -3)),
+                Arguments.of("1d6 * (3 -3=)", List.of(3), List.of(0)),
+                Arguments.of("1d6 - 2", List.of(3), List.of(3, -2)),
+                Arguments.of("1d6 / 2", List.of(4), List.of(2)),
+                Arguments.of("2d6k1", List.of(3, 4), List.of(4)),
+                Arguments.of("2d6l1", List.of(3, 4), List.of(3)),
+                Arguments.of("2d6l1+2", List.of(3, 4), List.of(3, 2)),
+                Arguments.of("d!6", List.of(6, 6, 4), List.of(6, 6, 4)),
+                Arguments.of("D!6", List.of(6, 6, 4), List.of(6, 6, 4)),
+                Arguments.of("2d!6", List.of(3, 6, 6, 4), List.of(3, 6, 6, 4)),
+                Arguments.of("2D!6", List.of(3, 6, 6, 4), List.of(3, 6, 6, 4)),
+                Arguments.of("2d!6 + 1d6", List.of(3, 6, 6, 4, 1), List.of(3, 6, 6, 4, 1)),
+                Arguments.of("d!!6", List.of(6, 6, 4), List.of(16)),
+                Arguments.of("D!!6", List.of(6, 6, 4), List.of(16)),
+                Arguments.of("2d!!6", List.of(3, 6, 6, 4), List.of(3, 16)),
+                Arguments.of("2D!!6", List.of(3, 6, 6, 4), List.of(3, 16)),
+                Arguments.of("2d!!6 + 1d6", List.of(3, 6, 6, 4, 1), List.of(3, 16, 1)),
+                Arguments.of("min(2d6= , 3d10=)", List.of(3, 6, 6, 4, 1), List.of(9)),
+                Arguments.of("max(2d6= , 3d10=)", List.of(3, 6, 6, 4, 1), List.of(11)),
+                Arguments.of("min(2d6=,11)", List.of(3, 6), List.of(9)),
+                Arguments.of("max(2d6=,11)", List.of(3, 6), List.of(11)),
+                Arguments.of("max(11,11)", List.of(), List.of(11, 11)),
+                Arguments.of("min(11,11)", List.of(), List.of(11, 11)),
+                Arguments.of("[1/2/3]", List.of(), List.of(1, 2, 3)),
+                Arguments.of("d[1/2/3]", List.of(2), List.of(2)),
+                Arguments.of("2d[1/2/3]", List.of(2, 1), List.of(2, 1)),
+                Arguments.of("10d100", List.of(), List.of(100, 100, 100, 100, 100, 100, 100, 100, 100, 100)),
+                Arguments.of("2+-3", List.of(), List.of(2, -3)),
+                Arguments.of("6 / 3", List.of(), List.of(2)),
+                Arguments.of("-1", List.of(), List.of(-1)),
+                Arguments.of("3-1", List.of(), List.of(3, -1)),
+                Arguments.of("min((max(((10-6=)*2),7,(15))),19+min(1,5)=)", List.of(), List.of(15)),
+                Arguments.of("()", List.of(), List.of()),
+                Arguments.of("6 (5)", List.of(), List.of(6, 5)),
+                Arguments.of("(1d6) (1d6)", List.of(3, 4), List.of(3, 4)),
+                Arguments.of("min(1,min(3+2,2))+-max(4)*2", List.of(), List.of(1, -8)),
+                Arguments.of("min((10,15),20)", List.of(), List.of(10)),
+                Arguments.of("min(10,15),20", List.of(), List.of(10, 20)),
+                Arguments.of("1d6,(1d6,1)", List.of(1, 2), List.of(1, 2, 1)),
+                Arguments.of("3+2+1+1=", List.of(), List.of(7))
+        );
+    }
+
+    private static List<String> values(List<Result> in) {
+        return in.stream()
+                .flatMap(r -> r.getElements().stream())
+                .map(ResultElement::getValue)
+                .toList();
+    }
+
+    private static Stream<Arguments> generateStringDiceData() {
+        return Stream.of(
+                Arguments.of("d[head/ torso/ left arm/ right arm/ left leg/ right leg]", List.of(3), List.of("left arm")),
+                Arguments.of("d[head]", List.of(1), List.of("head")),
+                Arguments.of("3d[head/ torso/ left arm/ right arm/ left leg/ right leg]", List.of(3, 2, 1), List.of("left arm", "torso", "head")),
+                Arguments.of("3d[head/ torso/ left arm/ right arm/ left leg/ right leg] + 2d6", List.of(3, 2, 1, 4, 5), List.of("left arm", "torso", "head", "4", "5")),
+                Arguments.of("1d6 + x + 1", List.of(3), List.of("3", "x", "1")),
+                Arguments.of("1d6 + [x/y] + 1", List.of(3), List.of("3", "x", "y", "1")),
+                Arguments.of("1d6 + [1d6] + 1", List.of(3), List.of("3", "1d6", "1")),
+                Arguments.of("1d6 + [1D6] + 1", List.of(3), List.of("3", "1D6", "1")),
+                Arguments.of("3d[10/20/30] + 2d6", List.of(3, 2, 1, 4, 5), List.of("30", "20", "10", "4", "5"))
+        );
+    }
+
+    private static Stream<Arguments> generateColorDiceData() {
+        return Stream.of(
+                Arguments.of("color(3d6,'red')", List.of(3, 2, 1), List.of("3", "2", "1"), List.of("red", "red", "red")),
+                Arguments.of("(color(3d6,'red')+color(3d4,'black'))c", List.of(), List.of("3", "3"), List.of("red", "black")),
+                Arguments.of("(color(3d6,'red')+color(3d4,'black'))=", List.of(), List.of("18", "12"), List.of("red", "black")),
+                Arguments.of("(color(3d6,'red')+color(3d4,'black'))k2", List.of(1, 2, 3, 2, 2, 2), List.of("3", "2", "2", "2"), List.of("red", "red", "black", "black")),
+                Arguments.of("(color(3d6,'red')+color(3d4,'black'))l2", List.of(1, 2, 3, 2, 2, 2), List.of("1", "2", "2", "2"), List.of("red", "red", "black", "black")),
+                Arguments.of("asc((color(3d6,'red')+color(3d4,'black')))", List.of(1, 2, 3, 2, 2, 2), List.of("2", "2", "2", "1", "2", "3"), List.of("black", "black", "black", "red", "red", "red")),
+                Arguments.of("desc((color(3d6,'red')+color(3d4,'black')))", List.of(1, 2, 3, 2, 2, 2), List.of("3", "2", "1", "2", "2", "2"), List.of("red", "red", "red", "black", "black", "black"))
+        );
+    }
+
+    private static Stream<Arguments> generateErrorData() {
+        return Stream.of(
+                Arguments.of("=1", "Operator = has left associativity but the left value was: empty"),
+                Arguments.of("1-", "Operator - has right associativity but the right value was: empty"),
+                Arguments.of("1*", "Operator * does not support unary operations"),
+                Arguments.of("*1", "Operator * does not support unary operations"),
+                Arguments.of("10 5 +", "Operator + does not support unary operations"),
+                Arguments.of("10**5", "Operator * does not support unary operations"),
+                Arguments.of("min()", "Invalid argument count for min"),
+                Arguments.of("min(,2)", "A separator can't be followed by another separator or open bracket"),
+                Arguments.of("min(1,)", "argument is missing"),
+                Arguments.of("min3(45)", "A function, in this case 'min', must be followed a open function bracket: ("),
+                Arguments.of(")", "expression can't start with a close bracket"),
+                Arguments.of("(", "Parentheses mismatched"),
+                Arguments.of("3d+4", "Operator [d, D] has right associativity but the right value was: +"),
+                Arguments.of(",3", "expression can't start with a separator"),
+                Arguments.of("10*", "Operator * does not support unary operations")
+        );
+    }
+
+    @Test
+    void debug() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 4, 5), 1000);
+
+        List<Result> res = underTest.evaluate("d((e, 1,3))");
+
+        System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(ResultElement::getValue).toList());
+    }
+
+    @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
+    @MethodSource("generateData")
+    void rollExpression(String diceExpression, List<Integer> diceNumbers, List<Integer> expected) throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
+        List<Result> res = underTest.evaluate(diceExpression);
+
+        assertThat(res.stream().flatMap(r -> r.getElements().stream()).flatMap(e -> e.asInteger().stream())).containsExactlyElementsOf(expected);
+    }
+
+    @Test
+    void sortAsc() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
+
+        List<Result> res = underTest.evaluate("asc(4d20)");
+
+        assertThat(values(res)).containsExactly("1", "3", "12", "20");
+    }
+
+
+    @Test
+    void sortDesc() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
+
+        List<Result> res = underTest.evaluate("desc(4d20)");
+
+        assertThat(values(res)).containsExactly("20", "12", "3", "1");
+    }
+
+    @Test
+    void sortAlphaAsc() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
+
+        List<Result> res = underTest.evaluate("asc(4d20 + 5a +b)");
+
+        assertThat(values(res)).containsExactly("1", "3", "12", "20", "5a", "b");
+    }
+
+    @Test
+    void sortAlphaDesc() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
+
+        List<Result> res = underTest.evaluate("desc(4d20 + 5a + b)");
+
+        assertThat(values(res)).containsExactly("b", "5a", "20", "12", "3", "1");
+    }
+
+    @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
+    @MethodSource("generateStringDiceData")
+    void rollStringDiceExpression(String diceExpression, List<Integer> diceNumbers, List<String> expected) throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
+        List<Result> res = underTest.evaluate(diceExpression);
+
+        assertThat(values(res)).containsExactlyElementsOf(expected);
+    }
+
+    @Test
+    void NotSingleIntegerException() {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000);
+        assertThatThrownBy(() -> underTest.evaluate("2d6 / 3"))
+                .isInstanceOf(ExpressionException.class)
+                .hasMessage("Operator '/' requires as left operand a single integer but was '[4, 1]'");
+    }
+
+    @Test
+    void divisorZero() {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        assertThatThrownBy(() -> underTest.evaluate("10 / 0"))
+                .isInstanceOf(ArithmeticException.class)
+                .hasMessage("/ by zero");
+    }
+
+    @Test
+    void getRandomElements() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        List<Result> res = underTest.evaluate("1d6 + 3d20 + 10");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsProducingTheResult().stream())
+                .map(r -> r.stream().map(ResultElement::getValue).toList()))
+                .containsExactlyInAnyOrder(List.of("3"), List.of("2", "1", "4"));
+    }
+
+    @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}-{3}")
+    @MethodSource("generateColorDiceData")
+    void rollStringDiceExpressionWithColor(String diceExpression, List<Integer> diceNumbers, List<String> expectedValues, List<String> expectedColors) throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
+        List<Result> res = underTest.evaluate(diceExpression);
+
+        assertThat(values(res)).containsExactlyElementsOf(expectedValues);
+        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(ResultElement::getColor)).containsExactlyElementsOf(expectedColors);
+    }
+
+    @Test
+    void maxDice() {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+
+        assertThatThrownBy(() -> underTest.evaluate("1001d6"))
+                .isInstanceOf(ExpressionException.class)
+                .hasMessage("The number of dice must be less or equal then 1000 but was 1001");
+    }
+
+    @ParameterizedTest(name = "{index} {0} -> {1}")
+    @MethodSource("generateErrorData")
+    void testError(String input, String expectedMessage) {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        assertThatThrownBy(() -> underTest.evaluate(input))
+                .isInstanceOf(ExpressionException.class)
+                .hasMessage(expectedMessage);
+    }
+
+
+}
