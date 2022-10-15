@@ -8,6 +8,7 @@ import de.janno.evaluator.dice.ResultElement;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
@@ -15,7 +16,7 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 public class Count extends Operator<Result> {
 
     public Count() {
-        super("c", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, getOderNumberOf(Count.class));
+        super(Set.of("c", "C"), Operator.Associativity.LEFT, getOderNumberOf(Count.class), null, null);
     }
 
     @Override
