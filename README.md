@@ -1,6 +1,5 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![codecov](https://codecov.io/gh/twonirwana/DiceEvaluator/branch/main/graph/badge.svg?token=)](https://codecov.io/gh/twonirwana/DiscordDiceBot)
-
+[![codecov](https://codecov.io/gh/twonirwana/DiceEvaluator/branch/master/graph/badge.svg?token=TTBM46YQFT)](https://codecov.io/gh/twonirwana/DiceEvaluator)
 # The Dice Evaluator
 
 Dice [infix notation](https://en.wikipedia.org/wiki/Infix_notation) (aka calculator notation) expression evaluator,
