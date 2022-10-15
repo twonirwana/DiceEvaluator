@@ -1,5 +1,5 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![codecov](https://codecov.io/gh/twonirwana/DiceEvaluator/branch/main/graph/badge.svg?token=OLH7L312D7)](https://codecov.io/gh/twonirwana/DiscordDiceBot)
+[![codecov](https://codecov.io/gh/twonirwana/DiceEvaluator/branch/main/graph/badge.svg?token=)](https://codecov.io/gh/twonirwana/DiscordDiceBot)
 
 # The Dice Evaluator
 
