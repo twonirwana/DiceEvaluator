@@ -77,15 +77,10 @@ two results, the first one containing the result elements of the `3d6` and the s
 * intersection operator
 * lesserEqual filter
 * higherEqual filter
-* catch ArithmeticException?
-* Eine möglichkeit den gleich Dice Roll auf zwei verschiedene Varianten zu evaluieren -> Roll as StaticVariabbleSet
+* Double evaluation for an expression to test for botch or critical success
 * Functions
     * eats: elements of on set remove specific other elements (1s remove 10s)
-    * AddIf
-    * ifEquals/ifLower/ifHigher?
-    * rpg specific
-    * map
-    * color (group in allen operators)
+    * AddIf/ifEquals/ifLower/ifHigher?
 
 # List of breaking changes
 
