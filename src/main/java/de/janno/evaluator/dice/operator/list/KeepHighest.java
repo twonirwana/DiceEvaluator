@@ -19,7 +19,7 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 public class KeepHighest extends Operator<Result> {
 
     public KeepHighest() {
-        super(Set.of("k", "K"), Operator.Associativity.LEFT, getOderNumberOf(KeepHighest.class), null, null);
+        super(Set.of("k", "K"), null, null, Operator.Associativity.LEFT, getOderNumberOf(KeepHighest.class));
     }
 
     @Override

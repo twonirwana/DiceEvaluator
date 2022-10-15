@@ -18,7 +18,7 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 public class KeepLowest extends Operator<Result> {
 
     public KeepLowest() {
-        super(Set.of("l", "L"), Operator.Associativity.LEFT, getOderNumberOf(KeepLowest.class), null, null);
+        super(Set.of("l", "L"), null, null, Operator.Associativity.LEFT, getOderNumberOf(KeepLowest.class));
     }
 
     @Override
