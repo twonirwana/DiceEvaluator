@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("jacoco")
+    id("jacoco-report-aggregation")
 }
 
 repositories {
