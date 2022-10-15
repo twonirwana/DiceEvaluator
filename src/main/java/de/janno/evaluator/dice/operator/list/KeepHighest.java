@@ -9,6 +9,7 @@ import lombok.NonNull;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyInteger;
@@ -18,8 +19,9 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 public class KeepHighest extends Operator<Result> {
 
     public KeepHighest() {
-        super("k", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(KeepHighest.class));
+        super(Set.of("k", "K"), Operator.Associativity.LEFT, getOderNumberOf(KeepHighest.class), null, null);
     }
+
     @Override
     public @NonNull Result evaluate(@NonNull List<Result> operands) throws ExpressionException {
         Result left = operands.get(0);

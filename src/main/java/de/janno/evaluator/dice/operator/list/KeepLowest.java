@@ -8,6 +8,7 @@ import de.janno.evaluator.dice.ResultElement;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyInteger;
@@ -17,7 +18,7 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 public class KeepLowest extends Operator<Result> {
 
     public KeepLowest() {
-        super("l", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(KeepLowest.class));
+        super(Set.of("l", "L"), Operator.Associativity.LEFT, getOderNumberOf(KeepLowest.class), null, null);
     }
 
     @Override
