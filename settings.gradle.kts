@@ -1,1 +1,1 @@
-rootProject.name = "diceEvaluator"
+rootProject.name = "dice-evaluator"

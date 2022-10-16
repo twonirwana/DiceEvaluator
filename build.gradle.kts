@@ -1,12 +1,13 @@
 plugins {
     id("java")
     id("jacoco-report-aggregation")
-    id("com.github.johnrengelman.shadow") version "7.1.2"
     id("maven-publish")
+    id("com.palantir.git-version") version "0.15.0"
 }
 
 group = "de.janno.evaluator"
-version = "0.0.1-beta"
+val gitVersion: groovy.lang.Closure<String> by extra
+version = gitVersion()
 description = "Dice expression parser and evaluator"
 
 repositories {
@@ -45,7 +46,7 @@ tasks.jacocoTestReport {
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
