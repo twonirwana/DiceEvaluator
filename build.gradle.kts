@@ -45,9 +45,9 @@ tasks.jacocoTestReport {
     }
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets.main.get().allSource)
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 publishing {
@@ -63,9 +63,8 @@ publishing {
     }
 
     publications {
-        register("mavenJava", MavenPublication::class) {
+        create<MavenPublication>("mavenJava") {
             from(components["java"])
-            artifact(sourcesJar.get())
         }
     }
 }
