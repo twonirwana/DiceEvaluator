@@ -25,12 +25,12 @@ jobs:
           distribution: 'adopt'
       #- name: Validate Gradle wrapper
       #  uses: gradle/wrapper-validation-action@1fca1b1af7c3ed6cb9059346aaa89179c82abf11252837115e546c4da38e8b0c
-      - name: Git Publish package
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- name: Git Publish package
+      #  uses: gradle/gradle-build-action@v2
+      #  with:
+      #    arguments: publish
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Nexus Publish package
         uses: gradle/gradle-build-action@v2
         with:
