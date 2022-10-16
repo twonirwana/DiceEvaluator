@@ -5,8 +5,9 @@ plugins {
     id("maven-publish")
 }
 
-group = "de.janno.diceEvaluator"
+group = "de.janno.evaluator"
 version = "0.0.1-beta"
+description = "Dice expression parser and evaluator"
 
 repositories {
     mavenCentral()
