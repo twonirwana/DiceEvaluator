@@ -81,15 +81,3 @@ two results, the first one containing the result elements of the `3d6` and the s
 * Functions
     * eats: elements of on set remove specific other elements (1s remove 10s)
     * AddIf/ifEquals/ifLower/ifHigher?
-
-# List of breaking changes
-
-* d!! is different
-* target dice < and > now compare lesser/greater and not lesserEqual/greaterEqual
-* no sum (now as option in bottom command)
-* sort (asc and desc), min and max are now functions
-* no fudge dice, but can be done with custom side dice
-* no weighed fudge dice
-* no multiply dice but it can be done with `(<diceExpression> =)*(<diceExpression> =)`
-* multiple different rolls with ',' not '&'
-* no multiple same rolls with 'x', they can be done with `,`
