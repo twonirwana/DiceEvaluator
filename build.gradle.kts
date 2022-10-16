@@ -4,9 +4,10 @@ plugins {
     id("jacoco-report-aggregation")
     id("maven-publish")
     id("com.palantir.git-version") version "0.15.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
-group = "de.janno.evaluator"
+group = "io.github.twonirwana"
 val gitVersion: groovy.lang.Closure<String> by extra
 version = gitVersion()
 description = "Dice expression parser and evaluator"
@@ -14,6 +15,7 @@ description = "Dice expression parser and evaluator"
 repositories {
     mavenCentral()
 }
+
 
 dependencies {
     compileOnly("org.projectlombok:lombok:1.18.24")
@@ -28,6 +30,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.23.1")
 
 }
+
 
 java {
     toolchain {
@@ -63,6 +66,15 @@ publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
+        }
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
         }
     }
 }
