@@ -1,8 +1,8 @@
 plugins {
-    id("java")
     id("java-library")
     id("jacoco-report-aggregation")
     id("maven-publish")
+    id("signing")
     id("com.palantir.git-version") version "0.15.0"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
@@ -65,10 +65,47 @@ publishing {
 
     publications {
         create<MavenPublication>("mavenJava") {
+            artifactId = "dice-evaluator"
             from(components["java"])
+            versionMapping {
+                usage("java-api") {
+                    fromResolutionOf("runtimeClasspath")
+                }
+                usage("java-runtime") {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name.set("dice-evaluator")
+                description.set("Dice infix notation (aka calculator notation) expression parser and evaluator")
+                url.set("https://github.com/twonirwana/DiceEvaluator")
+                licenses {
+                    license {
+                        name.set("GNU Affero General Public License v3.0")
+                        url.set("https://www.gnu.org/licenses/agpl-3.0.en.html")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("2nirana")
+                        name.set("Janno")
+                        email.set("jvs@mailbox.org")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/twonirwana/DiceEvaluator.git")
+                    developerConnection.set("scm:git:ssh://github.com/twonirwana/DiceEvaluator.git")
+                    url.set("https://github.com/twonirwana/DiceEvaluator")
+                }
+            }
         }
     }
 }
+
+signing {
+    sign(publishing.publications["mavenJava"])
+}
+
 
 nexusPublishing {
     repositories {
