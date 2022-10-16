@@ -32,6 +32,8 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(18))
     }
+    withJavadocJar()
+    withSourcesJar()
 }
 
 tasks.getByName<Test>("test") {
@@ -43,11 +45,6 @@ tasks.jacocoTestReport {
         xml.required.set(true)
         html.required.set(false)
     }
-}
-
-java {
-    withJavadocJar()
-    withSourcesJar()
 }
 
 publishing {
