@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("jacoco-report-aggregation")
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 repositories {

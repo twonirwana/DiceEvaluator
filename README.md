@@ -7,7 +7,7 @@ Dice [infix notation](https://en.wikipedia.org/wiki/Infix_notation) (aka calcula
 using the [shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm).
 The dice can have numbers or text/symbols on them. Some operators work only on numbers. It is also possible to color
 dice and dice with different colors will not be combined when given to operators or functions.
-This implementation was inspired from [Javaluator](https://github.com/fathzer/javaluator).
+This implementation was inspired by [Javaluator](https://github.com/fathzer/javaluator).
 The dice evaluator works on lists, summing the results together is optional.
 
 ## Goals
