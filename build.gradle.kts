@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("java-library")
     id("jacoco-report-aggregation")
     id("maven-publish")
     id("com.palantir.git-version") version "0.15.0"
