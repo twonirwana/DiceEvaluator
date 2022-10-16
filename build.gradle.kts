@@ -2,7 +2,11 @@ plugins {
     id("java")
     id("jacoco-report-aggregation")
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("maven-publish")
 }
+
+group = "de.janno.diceEvaluator"
+//version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -36,5 +40,30 @@ tasks.jacocoTestReport {
     reports {
         xml.required.set(true)
         html.required.set(false)
+    }
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    classifier = "sources"
+    from(sourceSets.main.get().allSource)
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/twonirwana/DiceEvaluator")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+
+    publications {
+        register("mavenJava", MavenPublication::class) {
+            from(components["java"])
+            artifact(sourcesJar.get())
+        }
     }
 }
