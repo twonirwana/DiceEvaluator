@@ -66,18 +66,11 @@ publishing {
         create<MavenPublication>("mavenJava") {
             artifactId = "dice-evaluator"
             from(components["java"])
-            versionMapping {
-                usage("java-api") {
-                    fromResolutionOf("runtimeClasspath")
-                }
-                usage("java-runtime") {
-                    fromResolutionResult()
-                }
-            }
             pom {
                 name.set("dice-evaluator")
                 description.set("Dice infix notation (aka calculator notation) expression parser and evaluator")
                 url.set("https://github.com/twonirwana/DiceEvaluator")
+                version = gitVersion()
                 licenses {
                     license {
                         name.set("GNU Affero General Public License v3.0")
