@@ -50,7 +50,6 @@ tasks.jacocoTestReport {
         html.required.set(false)
     }
 }
-
 publishing {
     repositories {
         maven {
@@ -88,7 +87,7 @@ publishing {
                 developers {
                     developer {
                         id.set("2nirana")
-                        name.set("Janno")
+                        name.set("Janno von Stülpnagel")
                         email.set("jvs@mailbox.org")
                     }
                 }
