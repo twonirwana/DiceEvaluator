@@ -6,6 +6,7 @@ import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Operator;
 import de.janno.evaluator.dice.Result;
 import de.janno.evaluator.dice.ResultElement;
+import de.janno.evaluator.dice.ResultUtil;
 import de.janno.evaluator.dice.operator.OperatorOrder;
 import lombok.NonNull;
 
@@ -27,7 +28,7 @@ public final class NegateOrNegativUnion extends Operator<Result> {
             ImmutableList<ResultElement> negated = right.getElements().stream()
                     .map(e -> new ResultElement(String.valueOf(e.asInteger().orElseThrow() * -1), e.getColor()))
                     .collect(ImmutableList.toImmutableList());
-            return new Result(getName(),
+            return new Result(ResultUtil.getRightUnaryExpression(getPrimaryName(), operands),
                     negated,
                     right.getRandomElementsProducingTheResult(),
                     ImmutableList.of(right));
@@ -43,7 +44,7 @@ public final class NegateOrNegativUnion extends Operator<Result> {
                         .toList()
                 ).build();
 
-        return new Result(getName(),
+        return new Result(ResultUtil.getBinaryOperatorExpression(getPrimaryName(), operands),
                 res,
                 ImmutableList.<ImmutableList<ResultElement>>builder()
                         .addAll(left.getRandomElementsProducingTheResult())

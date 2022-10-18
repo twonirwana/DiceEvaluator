@@ -7,6 +7,7 @@ import de.janno.evaluator.Operator;
 import de.janno.evaluator.dice.NumberSupplier;
 import de.janno.evaluator.dice.Result;
 import de.janno.evaluator.dice.ResultElement;
+import de.janno.evaluator.dice.ResultUtil;
 import lombok.NonNull;
 
 import java.util.List;
@@ -32,17 +33,20 @@ public final class RegularDice extends Operator<Result> {
         final int numberOfDice;
         final Result right;
         final ImmutableList<Result> childrenResults;
+        final String expression;
         if (operands.size() == 1) {
             right = operands.get(0);
             numberOfDice = 1;
             childrenResults = ImmutableList.of(right);
+            expression = ResultUtil.getRightUnaryExpression(getPrimaryName(), operands);
         } else if (operands.size() == 2) {
             Result left = operands.get(0);
             right = operands.get(1);
             childrenResults = ImmutableList.of(left, right);
             numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
+            expression = ResultUtil.getBinaryOperatorExpression(getPrimaryName(), operands);
         } else {
-            throw new ExpressionException("More then two operands for " + getName());
+            throw new IllegalStateException("More then two operands for " + getName());
         }
         if (numberOfDice > maxNumberOfDice) {
             throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
@@ -51,16 +55,12 @@ public final class RegularDice extends Operator<Result> {
         if (right.asInteger().isPresent()) {
             int sidesOfDie = right.asInteger().get();
             diceResult = toResultElements(rollDice(numberOfDice, sidesOfDie, numberSupplier));
-            return new Result(getName(),
-                    diceResult,
-                    ImmutableList.of(diceResult),
-                    childrenResults);
         } else {
             diceResult = IntStream.range(0, numberOfDice)
                     .mapToObj(i -> pickOneOf(right.getElements(), numberSupplier))
                     .collect(ImmutableList.toImmutableList());
         }
-        return new Result(getName(),
+        return new Result(expression,
                 diceResult,
                 ImmutableList.of(diceResult),
                 childrenResults);

@@ -1,5 +1,6 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![codecov](https://codecov.io/gh/twonirwana/DiceEvaluator/branch/main/graph/badge.svg?token=TTBM46YQFT)](https://codecov.io/gh/twonirwana/DiceEvaluator)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.twonirwana/dice-evaluator)](https://search.maven.org/artifact/io.github.twonirwana/dice-evaluator)
 
 # The Dice Evaluator
 
@@ -30,7 +31,7 @@ The dice evaluator works on lists, summing the results together is optional.
 
 # Usage
 
-The evaluator processes a dice expression and returns a list of results, each containing a list of elements. Elements
+The evaluator processes dice expression and returns a list of results, each containing a list of elements. Elements
 have a value (a number or a text) and can have a color. For example `2d6` rolls two six-sided dice and returns a list
 with two elements, each with a value between 1 and 6. To get the sum of the roll, simple add a `=` at the end, for
 example in this case `2d6=`.
@@ -72,6 +73,7 @@ two results, the first one containing the result elements of the `3d6` and the s
 
 # TODO
 
+* brackets into the result expression
 * generalize the list expression [1/2/3/abc] to (1,2,3,abc)?
 * group/aggegate operator
 * intersection operator

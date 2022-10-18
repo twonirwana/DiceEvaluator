@@ -5,6 +5,7 @@ import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Operator;
 import de.janno.evaluator.dice.Result;
 import de.janno.evaluator.dice.ResultElement;
+import de.janno.evaluator.dice.ResultUtil;
 import lombok.NonNull;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class Count extends Operator<Result> {
                     .map(e -> new ResultElement(String.valueOf(e.getValue().size()), e.getKey()))
                     .collect(ImmutableList.toImmutableList());
         }
-        return new Result(getName(),
+        return new Result(ResultUtil.getLeftUnaryExpression(getPrimaryName(), operands),
                 res,
                 left.getRandomElementsProducingTheResult(),
                 ImmutableList.of(left)

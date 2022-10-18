@@ -103,6 +103,10 @@ public abstract class Operator<T> {
         return names.toString();
     }
 
+    public @NonNull String getPrimaryName() {
+        return names.iterator().next();
+    }
+
     public Associativity getAssociativityForOperantType(OperatorType operatorType) {
         if (operatorType == OperatorType.UNARY && unaryAssociativity != null) {
             return unaryAssociativity;

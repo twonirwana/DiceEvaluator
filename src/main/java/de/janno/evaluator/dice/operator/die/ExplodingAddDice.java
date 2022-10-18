@@ -7,6 +7,7 @@ import de.janno.evaluator.Operator;
 import de.janno.evaluator.dice.NumberSupplier;
 import de.janno.evaluator.dice.Result;
 import de.janno.evaluator.dice.ResultElement;
+import de.janno.evaluator.dice.ResultUtil;
 import lombok.NonNull;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public final class ExplodingAddDice extends Operator<Result> {
             Result right = operands.get(0);
             int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
             ImmutableList<ResultElement> diceResult = toResultElements(explodingAddDice(1, sidesOfDie, numberSupplier));
-            return new Result(getName(),
+            return new Result(ResultUtil.getRightUnaryExpression(getPrimaryName(), operands),
                     diceResult,
                     ImmutableList.of(diceResult),
                     ImmutableList.of(right));
@@ -46,7 +47,7 @@ public final class ExplodingAddDice extends Operator<Result> {
         }
         int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
         ImmutableList<ResultElement> diceResult = toResultElements(explodingAddDice(numberOfDice, sidesOfDie, numberSupplier));
-        return new Result(getName(),
+        return new Result(ResultUtil.getBinaryOperatorExpression(getPrimaryName(), operands),
                 diceResult,
                 ImmutableList.of(diceResult),
                 ImmutableList.of(left, right));

@@ -23,7 +23,7 @@ public class DiceEvaluator extends AbstractEvaluator<Result> {
 
     private static final int DEFAULT_MAX_NUMBER_OF_DICE = 1000;
 
-    private static final Pattern LIST_REGEX = Pattern.compile("(.+(/.+)*)");
+    private static final Pattern LIST_REGEX = Pattern.compile("(.+(/.+)+)");
 
     public DiceEvaluator() {
         this(new RandomNumberSupplier(), DEFAULT_MAX_NUMBER_OF_DICE);
@@ -65,13 +65,13 @@ public class DiceEvaluator extends AbstractEvaluator<Result> {
     protected @NonNull Result toValue(@NonNull String literal) {
         Matcher matcher = LIST_REGEX.matcher(literal);
         if (matcher.find()) {
-            String list = matcher.group(1);
-            return new Result("", Arrays.stream(list.split("/"))
+            List<String> list = Arrays.asList(matcher.group(1).split("/"));
+            return new Result(list.toString(), list.stream()
                     .map(String::trim)
                     .map(s -> new ResultElement(s, ResultElement.NO_COLOR))
                     .collect(ImmutableList.toImmutableList()), ImmutableList.of(), ImmutableList.of());
         }
-        return new Result("", ImmutableList.of(new ResultElement(literal, ResultElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
+        return new Result(literal, ImmutableList.of(new ResultElement(literal, ResultElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
     }
 
     @Override

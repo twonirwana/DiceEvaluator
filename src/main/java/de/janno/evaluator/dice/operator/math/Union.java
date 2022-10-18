@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.Operator;
 import de.janno.evaluator.dice.Result;
 import de.janno.evaluator.dice.ResultElement;
+import de.janno.evaluator.dice.ResultUtil;
 import lombok.NonNull;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public final class Union extends Operator<Result> {
                 .addAll(left.getElements())
                 .addAll(right.getElements())
                 .build();
-        return new Result(getName(),
+        return new Result(ResultUtil.getBinaryOperatorExpression(getPrimaryName(), operands),
                 res,
                 ImmutableList.<ImmutableList<ResultElement>>builder()
                         .addAll(left.getRandomElementsProducingTheResult())

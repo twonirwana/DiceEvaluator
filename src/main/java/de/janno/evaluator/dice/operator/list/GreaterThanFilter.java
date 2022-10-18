@@ -5,6 +5,7 @@ import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Operator;
 import de.janno.evaluator.dice.Result;
 import de.janno.evaluator.dice.ResultElement;
+import de.janno.evaluator.dice.ResultUtil;
 import lombok.NonNull;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class GreaterThanFilter extends Operator<Result> {
         ImmutableList<ResultElement> diceResult = left.getElements().stream()
                 .filter(i -> i.asInteger().isPresent() && i.asInteger().get() > rightNumber)
                 .collect(ImmutableList.toImmutableList());
-        return new Result(getName(),
+        return new Result(ResultUtil.getBinaryOperatorExpression(getPrimaryName(), operands),
                 diceResult,
                 ImmutableList.<ImmutableList<ResultElement>>builder()
                         .addAll(left.getRandomElementsProducingTheResult())

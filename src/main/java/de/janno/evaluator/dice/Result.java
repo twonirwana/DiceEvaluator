@@ -10,7 +10,7 @@ import java.util.Optional;
 public class Result {
 
     @NonNull
-    String operatorSymbol;
+    String expression;
     @NonNull
     ImmutableList<ResultElement> elements;
     @NonNull
@@ -27,5 +27,13 @@ public class Result {
 
     public boolean containsOnlyIntegers() {
         return elements.stream().map(ResultElement::asInteger).allMatch(Optional::isPresent);
+    }
+
+    public String getResultString(){
+        return elements.toString();
+    }
+
+    public String getRandomElementsString(){
+        return randomElementsProducingTheResult.toString();
     }
 }

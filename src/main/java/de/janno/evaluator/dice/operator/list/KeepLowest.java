@@ -5,6 +5,7 @@ import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Operator;
 import de.janno.evaluator.dice.Result;
 import de.janno.evaluator.dice.ResultElement;
+import de.janno.evaluator.dice.ResultUtil;
 import lombok.NonNull;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class KeepLowest extends Operator<Result> {
                         .limit(rightNumber)
                 )
                 .collect(ImmutableList.toImmutableList());
-        return new Result(getName(),
+        return new Result(ResultUtil.getBinaryOperatorExpression(getPrimaryName(), operands),
                 keep,
                 ImmutableList.<ImmutableList<ResultElement>>builder()
                         .addAll(left.getRandomElementsProducingTheResult())

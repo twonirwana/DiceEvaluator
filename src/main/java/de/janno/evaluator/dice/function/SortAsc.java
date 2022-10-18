@@ -5,6 +5,7 @@ import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Function;
 import de.janno.evaluator.dice.Result;
 import de.janno.evaluator.dice.ResultElement;
+import de.janno.evaluator.dice.ResultUtil;
 import lombok.NonNull;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class SortAsc extends Function<Result> {
                 .flatMap(result -> result.getElements().stream())
                 .sorted()
                 .collect(ImmutableList.toImmutableList());
-        return new Result(getName(),
+        return new Result(ResultUtil.getExpression(getPrimaryName(), arguments),
                 res,
                 arguments.stream()
                         .flatMap(r -> r.getRandomElementsProducingTheResult().stream())

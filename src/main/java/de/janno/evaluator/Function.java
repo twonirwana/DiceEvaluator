@@ -62,10 +62,14 @@ public abstract class Function<T> {
     }
 
     public String getName() {
-        if(names.size() == 1){
+        if (names.size() == 1) {
             return names.iterator().next();
         }
         return names.toString();
+    }
+
+    public @NonNull String getPrimaryName() {
+        return names.iterator().next();
     }
 
     abstract protected @NonNull T evaluate(@NonNull List<T> arguments) throws ExpressionException;
