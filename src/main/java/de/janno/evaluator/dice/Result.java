@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Value
 public class Result {
@@ -29,11 +30,14 @@ public class Result {
         return elements.stream().map(ResultElement::asInteger).allMatch(Optional::isPresent);
     }
 
-    public String getResultString(){
-        return elements.toString();
+    public String getResultString() {
+        return elements.stream().map(ResultElement::toString).collect(Collectors.joining(", "));
     }
 
-    public String getRandomElementsString(){
+    public String getRandomElementsString() {
+        if (randomElementsProducingTheResult.size() == 1) {
+            return randomElementsProducingTheResult.get(0).stream().map(ResultElement::toString).collect(Collectors.joining(", "));
+        }
         return randomElementsProducingTheResult.toString();
     }
 }

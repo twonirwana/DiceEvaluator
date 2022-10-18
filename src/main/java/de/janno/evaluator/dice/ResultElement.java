@@ -36,7 +36,7 @@ public class ResultElement implements Comparable<ResultElement> {
 
     @Override
     public String toString() {
-        String outputColor = NO_COLOR.equals(color) ? "" : "(%s)".formatted(color);
-        return "%s%s".formatted(value, outputColor);
+        String outputColor = NO_COLOR.equals(color) ? "" : "%s:".formatted(color);
+        return "%s%s".formatted(outputColor, value);
     }
 }
