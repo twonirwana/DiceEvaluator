@@ -36,9 +36,7 @@ have a value (a number or a text) and can have a color. For example `2d6` rolls 
 with two elements, each with a value between 1 and 6. To get the sum of the roll, simple add a `=` at the end, for
 example in this case `2d6=`.
 List can be included into the expression by using brackets. For example `1d[2/2/4/4/6/6]`will a die which has two sides
-with 2, two sides with 4 and two sides with 6. The result will be a list with one element, which has a value of 2, 4 or
-
-6.
+with 2, two sides with 4 and two sides with 6. The result will be a list with one element, which has a value of 2, 4 or 6.
 
 To use text in the expression it is often necessary to escape the text with `'`. For example `1d['head'/'tail']` will
 flip a coin. Without the escape characters the d in head would be interpreted as dice operator.
