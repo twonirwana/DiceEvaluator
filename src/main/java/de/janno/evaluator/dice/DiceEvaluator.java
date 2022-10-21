@@ -2,6 +2,7 @@ package de.janno.evaluator.dice;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.Resources;
 import de.janno.evaluator.*;
 import de.janno.evaluator.dice.function.*;
 import de.janno.evaluator.dice.operator.die.ExplodingAddDice;
@@ -14,6 +15,9 @@ import de.janno.evaluator.dice.operator.math.NegateOrNegativUnion;
 import de.janno.evaluator.dice.operator.math.Union;
 import lombok.NonNull;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -81,5 +85,14 @@ public class DiceEvaluator extends AbstractEvaluator<Result> {
             return ImmutableList.of(new Result("", ImmutableList.of(), ImmutableList.of(), ImmutableList.of()));
         }
         return super.evaluate(expression);
+    }
+
+    public static String getHelpText() {
+        URL url = Resources.getResource("help.md");
+        try {
+            return Resources.toString(url, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

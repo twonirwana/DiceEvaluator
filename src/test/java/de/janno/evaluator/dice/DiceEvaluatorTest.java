@@ -24,6 +24,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("d6", List.of(3), List.of(3)),
                 Arguments.of("-d6", List.of(3), List.of(-3)),
                 Arguments.of("-2d6", List.of(3, 4), List.of(-3, -4)),
+                Arguments.of("0d6", List.of(), List.of()),
                 Arguments.of("3d6", List.of(3, 4, 5), List.of(3, 4, 5)),
                 Arguments.of("3d6c", List.of(3, 4, 5), List.of(3)),
                 Arguments.of("3d!6c", List.of(3, 2, 6, 6, 5), List.of(5)),
@@ -301,5 +302,9 @@ public class DiceEvaluatorTest {
                 .hasMessage(expectedMessage);
     }
 
-
+    @Test
+    void testHelp(){
+        assertThat(DiceEvaluator.getHelpText())
+                .contains("Regular Dice");
+    }
 }

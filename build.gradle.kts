@@ -51,6 +51,7 @@ tasks.jacocoTestReport {
     }
 }
 publishing {
+    println("Version: " + gitVersion())
     repositories {
         maven {
             name = "GitHubPackages"
