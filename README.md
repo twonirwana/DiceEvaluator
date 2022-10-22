@@ -39,6 +39,7 @@ To use text in the expression it is often necessary to escape the text with `'`.
 flip a coin. Without the escape characters the d in head would be interpreted as dice operator.
 List can be included into the expression by using brackets. For example `1d[2/2/4/4/6/6]`will a die which has two sides
 with 2, two sides with 4 and two sides with 6. The result will be a list with one element, which has a value of 2, 4 or
+
 6. Lists also escape characters, so `1d[head/tail]` will also flip a coin.
 
 Multiple expression can be separated by ','. For example `3d6, 4d8` will roll two six-sided dice and return a list with
@@ -68,7 +69,7 @@ d6.
 | Keep Lowest               | `<list> l <numberToKept>`          | `3d6l2`                      | keeps the the lowest values out a list, like the result of multiple dice                                                                                                                                       | 11        | left                                | one or more numbers     | a single number                    |
 | Exploding Add Dice        | `<numberOfDice>d!!<numberOfFaces>` | `3d!!6`                      | Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the die previous resul total. A result of the reroll the sum of the value.                                       | 12        | left for binary and right for unary | none or a single number | a single number                    |
 | Exploding Dice            | `<numberOfDice>d!<numberOfFaces>`  | `4d!6` or `d!6`              | Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the dice set total. A reroll will be represented as two dice result values                                       | 13        | left for binary and right for unary | none or a single number | a single number                    |
-| Regular Dice              | `<numberOfDice>d<numberOfFaces>`   | `3d20` or `d20` or 3d[2/4/8] | Throws a number of dice given by the left number. The number sides are given by the right number. If the right side a list, a element of the list is randomly picked. The result is a list with the dice throw | 14        | left for binary and right for unary | none or a single number | a single number or multiple values |
+| Regular Dice              | `<numberOfDice>d<numberOfFaces>`   | `3d20`, `d20` or `3d[2/4/8]` | Throws a number of dice given by the left number. The number sides are given by the right number. If the right side a list, a element of the list is randomly picked. The result is a list with the dice throw | 14        | left for binary and right for unary | none or a single number | a single number or multiple values |
 
 ## Functions
 
@@ -90,4 +91,4 @@ d6.
 * group/aggregate operator
 * intersection operator
 * Double evaluation for an expression to test for botch or critical success
- * AddIf/ifEquals/ifLower/ifHigher?
+* AddIf/ifEquals/ifLower/ifHigher?
