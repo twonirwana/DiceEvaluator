@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import de.janno.evaluator.*;
 import de.janno.evaluator.dice.function.*;
+import de.janno.evaluator.dice.function.Double;
 import de.janno.evaluator.dice.operator.die.ExplodingAddDice;
 import de.janno.evaluator.dice.operator.die.ExplodingDice;
 import de.janno.evaluator.dice.operator.die.RegularDice;
@@ -52,6 +53,8 @@ public class DiceEvaluator extends AbstractEvaluator<Result> {
                         .add(new KeepLowest())
                         .add(new GreaterThanFilter())
                         .add(new LesserThanFilter())
+                        .add(new GreaterEqualThanFilter())
+                        .add(new LesserEqualThanFilter())
                         .add(new Count())
                         .build())
                 .functions(ImmutableList.<Function<Result>>builder()
@@ -60,6 +63,8 @@ public class DiceEvaluator extends AbstractEvaluator<Result> {
                         .add(new SortDesc())
                         .add(new Min())
                         .add(new Max())
+                        .add(new Cancel())
+                        .add(new Double())
                         .build())
                 .separator(",")
                 .build());
@@ -69,6 +74,7 @@ public class DiceEvaluator extends AbstractEvaluator<Result> {
     protected @NonNull Result toValue(@NonNull String literal) {
         Matcher matcher = LIST_REGEX.matcher(literal);
         if (matcher.find()) {
+            //Todo is this needed: ('Head'+'Tail') is the same as [Head,Tail] but needs escaping
             List<String> list = Arrays.asList(matcher.group(1).split("/"));
             return new Result(list.toString(), list.stream()
                     .map(String::trim)

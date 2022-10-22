@@ -30,8 +30,12 @@ public class DiceEvaluatorTest {
                 Arguments.of("3d!6c", List.of(3, 2, 6, 6, 5), List.of(5)),
                 Arguments.of("3d6>3", List.of(3, 4, 5), List.of(4, 5)),
                 Arguments.of("3d6>3c", List.of(3, 4, 5), List.of(2)),
+                Arguments.of("3d6>=3", List.of(1, 3, 4), List.of(3, 4)),
+                Arguments.of("3d6>=3c", List.of(1, 3, 4), List.of(2)),
                 Arguments.of("3d6<3", List.of(3, 4, 5), List.of()),
                 Arguments.of("3d6<3c", List.of(3, 4, 5), List.of(0)),
+                Arguments.of("3d6<=3", List.of(1, 3, 4), List.of(1, 3)),
+                Arguments.of("3d6<=3c", List.of(1, 3, 4), List.of(2)),
                 Arguments.of("1d6+1d4 + 1d5", List.of(3, 4, 5), List.of(3, 4, 5)),
                 Arguments.of("1d6+1d4 - 1d5", List.of(3, 4, 5), List.of(3, 4, -5)),
                 Arguments.of("1d6 + 3", List.of(3), List.of(3, 3)),
@@ -80,7 +84,13 @@ public class DiceEvaluatorTest {
                 Arguments.of("min((10,15),20)", List.of(), List.of(10)),
                 Arguments.of("min(10,15),20", List.of(), List.of(10, 20)),
                 Arguments.of("1d6,(1d6,1)", List.of(1, 2), List.of(1, 2, 1)),
-                Arguments.of("3+2+1+1=", List.of(), List.of(7))
+                Arguments.of("3+2+1+1=", List.of(), List.of(7)),
+                Arguments.of("cancel(9+10+1+2,10,1)", List.of(), List.of(9, 2)),
+                Arguments.of("cancel(9+10+1+2+1,10,1)", List.of(), List.of(9, 2, 1)),
+                Arguments.of("cancel(9+10+1+2+10,10,1)", List.of(), List.of(9, 2, 10)),
+                Arguments.of("double(9+10+1,10)", List.of(), List.of(9, 10, 10, 1)),
+                Arguments.of("double(9+10+1,10+9)", List.of(), List.of(9, 9, 10, 10, 1)),
+                Arguments.of("double(9+10+1,10+9+9)", List.of(), List.of(9, 9, 10, 10, 1))
         );
     }
 
@@ -101,7 +111,15 @@ public class DiceEvaluatorTest {
                 Arguments.of("1d6 + [x/y] + 1", List.of(3), List.of("3", "x", "y", "1")),
                 Arguments.of("1d6 + [1d6] + 1", List.of(3), List.of("3", "1d6", "1")),
                 Arguments.of("1d6 + [1D6] + 1", List.of(3), List.of("3", "1D6", "1")),
-                Arguments.of("3d[10/20/30] + 2d6", List.of(3, 2, 1, 4, 5), List.of("30", "20", "10", "4", "5"))
+                Arguments.of("3d[10/20/30] + 2d6", List.of(3, 2, 1, 4, 5), List.of("30", "20", "10", "4", "5")),
+                Arguments.of("d('head'+'torso'+'left arm'+'right arm'+'left leg'+'right leg')", List.of(3), List.of("left arm")),
+                Arguments.of("d('head')", List.of(1), List.of("head")),
+                Arguments.of("3d('head'+'torso'+'left arm'+'right arm'+'left leg'+'right leg')", List.of(3, 2, 1), List.of("left arm", "torso", "head")),
+                Arguments.of("3d('head'+'torso'+'left arm'+'right arm'+'left leg'+'right leg') + 2d6", List.of(3, 2, 1, 4, 5), List.of("left arm", "torso", "head", "4", "5")),
+                Arguments.of("1d6 + (x+y) + 1", List.of(3), List.of("3", "x", "y", "1")),
+                Arguments.of("1d6 + '1d6' + 1", List.of(3), List.of("3", "1d6", "1")),
+                Arguments.of("1d6 + '1D6' + 1", List.of(3), List.of("3", "1D6", "1")),
+                Arguments.of("3d(10+20+30) + 2d6", List.of(3, 2, 1, 4, 5), List.of("30", "20", "10", "4", "5"))
         );
     }
 
@@ -141,7 +159,7 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 4, 5), 1000);
 
-        List<Result> res = underTest.evaluate("d((e, 1,3))");
+        List<Result> res = underTest.evaluate("(1+3+4)<=3");
 
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(ResultElement::getValue).toList());
     }
@@ -303,7 +321,7 @@ public class DiceEvaluatorTest {
     }
 
     @Test
-    void testHelp(){
+    void testHelp() {
         assertThat(DiceEvaluator.getHelpText())
                 .contains("Regular Dice");
     }

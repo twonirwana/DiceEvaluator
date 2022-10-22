@@ -15,7 +15,7 @@ import de.janno.evaluator.dice.operator.math.Union;
 
 public final class OperatorOrder {
 
-    private final static ImmutableList<Class<? extends Operator<Result>>> operatorOrderList =
+    final static ImmutableList<Class<? extends Operator<Result>>> operatorOrderList =
             ImmutableList.<Class<? extends Operator<Result>>>builder()
                     .add(Sum.class) //sum must be applied as last
                     .add(Union.class)
@@ -25,6 +25,8 @@ public final class OperatorOrder {
                     .add(Count.class) //count should be after all list filters
                     .add(GreaterThanFilter.class)
                     .add(LesserThanFilter.class)
+                    .add(GreaterEqualThanFilter.class)
+                    .add(LesserEqualThanFilter.class)
                     .add(KeepHighest.class)
                     .add(KeepLowest.class)
                     //dice should be first
