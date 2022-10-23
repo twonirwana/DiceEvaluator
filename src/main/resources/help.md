@@ -7,8 +7,8 @@
 | Keep Highest         | k          | 3d6k2               |
 | Keep Lowest          | l          | 3d6l2               |
 | Sum                  | =          | 3d6=                |
-| Union                | +          | 3d6+2d12            |
-| Negative Union       | -          | 3d6-2d12  or -2d6   |
+| Appending            | +          | 3d6+2d12            |
+| Negative Appending   | -          | 3d6-2d12  or -2d6   |
 | Divide               | /          | 12/6                |
 | Multiply             | *          | 12*d6               |
 | Greater Then Filter  | >          | 3d6>3               |
@@ -22,5 +22,5 @@
 | Min                  | min()      | min(3d4, 8)         |
 | Max                  | max()      | max(3d4, 8)         |
 | Color                | color()    | color(3d4, 'red')   |
-| Chancel              | chancel()  | chancel(8d10, 10, 1) |
+| Chancel              | chancel()  | chancel(8d10, 10, 1)|
 | Double               | double()   | double(8d10, 10)    |

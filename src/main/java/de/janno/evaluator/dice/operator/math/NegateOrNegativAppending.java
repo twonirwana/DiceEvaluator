@@ -14,9 +14,9 @@ import java.util.List;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyInteger;
 
-public final class NegateOrNegativUnion extends RollOperator {
-    public NegateOrNegativUnion() {
-        super(ImmutableSet.of("-"), Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(NegateOrNegativUnion.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(NegateOrNegativUnion.class));
+public final class NegateOrNegativAppending extends RollOperator {
+    public NegateOrNegativAppending() {
+        super(ImmutableSet.of("-"), Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(NegateOrNegativAppending.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(NegateOrNegativAppending.class));
     }
 
 

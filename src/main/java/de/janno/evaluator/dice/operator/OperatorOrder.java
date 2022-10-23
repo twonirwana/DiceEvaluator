@@ -7,8 +7,8 @@ import de.janno.evaluator.dice.operator.die.RegularDice;
 import de.janno.evaluator.dice.operator.list.*;
 import de.janno.evaluator.dice.operator.math.Divide;
 import de.janno.evaluator.dice.operator.math.Multiply;
-import de.janno.evaluator.dice.operator.math.NegateOrNegativUnion;
-import de.janno.evaluator.dice.operator.math.Union;
+import de.janno.evaluator.dice.operator.math.NegateOrNegativAppending;
+import de.janno.evaluator.dice.operator.math.Appending;
 
 
 public final class OperatorOrder {
@@ -16,8 +16,8 @@ public final class OperatorOrder {
     final static ImmutableList<Class<? extends RollOperator>> operatorOrderList =
             ImmutableList.<Class<? extends RollOperator>>builder()
                     .add(Sum.class) //sum must be applied as last
-                    .add(Union.class)
-                    .add(NegateOrNegativUnion.class)
+                    .add(Appending.class)
+                    .add(NegateOrNegativAppending.class)
                     .add(Multiply.class)
                     .add(Divide.class)
                     .add(Count.class) //count should be after all list filters

@@ -12,8 +12,8 @@ import de.janno.evaluator.dice.operator.die.RegularDice;
 import de.janno.evaluator.dice.operator.list.*;
 import de.janno.evaluator.dice.operator.math.Divide;
 import de.janno.evaluator.dice.operator.math.Multiply;
-import de.janno.evaluator.dice.operator.math.NegateOrNegativUnion;
-import de.janno.evaluator.dice.operator.math.Union;
+import de.janno.evaluator.dice.operator.math.NegateOrNegativAppending;
+import de.janno.evaluator.dice.operator.math.Appending;
 import lombok.NonNull;
 
 import java.io.IOException;
@@ -44,9 +44,9 @@ public class DiceEvaluator extends AbstractEvaluator<Roll> {
                         .add(new RegularDice(numberSupplier, maxNumberOfDice))
                         .add(new ExplodingDice(numberSupplier, maxNumberOfDice))
                         .add(new ExplodingAddDice(numberSupplier, maxNumberOfDice))
-                        .add(new Union())
+                        .add(new Appending())
                         .add(new Sum())
-                        .add(new NegateOrNegativUnion())
+                        .add(new NegateOrNegativAppending())
                         .add(new Divide())
                         .add(new Multiply())
                         .add(new KeepHighest())

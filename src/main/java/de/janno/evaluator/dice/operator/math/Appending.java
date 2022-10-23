@@ -11,9 +11,9 @@ import java.util.List;
 
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
-public final class Union extends RollOperator {
-    public Union() {
-        super("+", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(Union.class));
+public final class Appending extends RollOperator {
+    public Appending() {
+        super("+", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(Appending.class));
     }
 
     @Override
