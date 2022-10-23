@@ -8,9 +8,10 @@
 # You can also reference a tag or branch, but the action may change without warning.
 
 name: Publish package to GitHub Packages
-on:
-  release:
-    types: [ created ]
+on: workflow_dispatch
+#on:
+#  release:
+#    types: [ created ]
 jobs:
   publish:
     runs-on: ubuntu-latest

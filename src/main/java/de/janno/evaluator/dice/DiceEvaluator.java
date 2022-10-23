@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DiceEvaluator extends AbstractEvaluator<Result> {
+public class DiceEvaluator extends AbstractEvaluator<Roll> {
 
     private static final int DEFAULT_MAX_NUMBER_OF_DICE = 1000;
 
@@ -35,12 +35,12 @@ public class DiceEvaluator extends AbstractEvaluator<Result> {
     }
 
     public DiceEvaluator(@NonNull NumberSupplier numberSupplier, int maxNumberOfDice) {
-        super(Parameters.<Result>builder()
+        super(Parameters.<Roll>builder()
                 .expressionBracket(BracketPair.PARENTHESES)
                 .functionBracket(BracketPair.PARENTHESES)
                 .escapeBracket(BracketPair.APOSTROPHE)
                 .escapeBracket(BracketPair.BRACKETS)
-                .operators(ImmutableList.<Operator<Result>>builder()
+                .operators(ImmutableList.<Operator<Roll>>builder()
                         .add(new RegularDice(numberSupplier, maxNumberOfDice))
                         .add(new ExplodingDice(numberSupplier, maxNumberOfDice))
                         .add(new ExplodingAddDice(numberSupplier, maxNumberOfDice))
@@ -57,7 +57,7 @@ public class DiceEvaluator extends AbstractEvaluator<Result> {
                         .add(new LesserEqualThanFilter())
                         .add(new Count())
                         .build())
-                .functions(ImmutableList.<Function<Result>>builder()
+                .functions(ImmutableList.<Function<Roll>>builder()
                         .add(new Color())
                         .add(new SortAsc())
                         .add(new SortDesc())
@@ -71,24 +71,24 @@ public class DiceEvaluator extends AbstractEvaluator<Result> {
     }
 
     @Override
-    protected @NonNull Result toValue(@NonNull String literal) {
+    protected @NonNull Roll toValue(@NonNull String literal) {
         Matcher matcher = LIST_REGEX.matcher(literal);
         if (matcher.find()) {
             //Todo is this needed: ('Head'+'Tail') is the same as [Head,Tail] but needs escaping
             List<String> list = Arrays.asList(matcher.group(1).split("/"));
-            return new Result(list.toString(), list.stream()
+            return new Roll(list.toString(), list.stream()
                     .map(String::trim)
-                    .map(s -> new ResultElement(s, ResultElement.NO_COLOR))
+                    .map(s -> new RollElement(s, RollElement.NO_COLOR))
                     .collect(ImmutableList.toImmutableList()), ImmutableList.of(), ImmutableList.of());
         }
-        return new Result(literal, ImmutableList.of(new ResultElement(literal, ResultElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
+        return new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
     }
 
     @Override
-    public @NonNull List<Result> evaluate(@NonNull String expression) throws ExpressionException {
+    public @NonNull List<Roll> evaluate(@NonNull String expression) throws ExpressionException {
         expression = expression.trim();
         if (Strings.isNullOrEmpty(expression)) {
-            return ImmutableList.of(new Result("", ImmutableList.of(), ImmutableList.of(), ImmutableList.of()));
+            return ImmutableList.of(new Roll("", ImmutableList.of(), ImmutableList.of(), ImmutableList.of()));
         }
         return super.evaluate(expression);
     }

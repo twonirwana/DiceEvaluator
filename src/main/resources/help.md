@@ -1,7 +1,7 @@
 | Name                 | Notation   | Example              |
 |----------------------|------------|----------------------|
 | Regular Dice         | d          | d6, 3d6              |
-| Custom Dice          | d[x/y/...] | 3d['Head'/'Tail']    |
+| Custom Dice          | d[x/y/...] | 3d[Head/Tail]        |
 | Exploding Dice       | d!         | 4d6!                 |
 | Exploding Add Dice   | d!!        | 4d6!"                |
 | Keep Highest         | k          | 3d6k2                |

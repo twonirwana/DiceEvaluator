@@ -6,7 +6,7 @@ import lombok.NonNull;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public final class EvaluationHelper {
+public final class DiceHelper {
     public static @NonNull ImmutableList<Integer> explodingDice(int number, int sides, @NonNull NumberSupplier numberSupplier) {
         ImmutableList.Builder<Integer> resultBuilder = ImmutableList.builder();
         int diceToRoll = number;
@@ -18,10 +18,10 @@ public final class EvaluationHelper {
         return resultBuilder.build();
     }
 
-    public static @NonNull ImmutableList<ResultElement> toResultElements(@NonNull List<Integer> in) {
+    public static @NonNull ImmutableList<RollElement> toRollElements(@NonNull List<Integer> in) {
         return in.stream()
                 .map(String::valueOf)
-                .map(i -> new ResultElement(i, ResultElement.NO_COLOR))
+                .map(i -> new RollElement(i, RollElement.NO_COLOR))
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -48,7 +48,7 @@ public final class EvaluationHelper {
                 .collect(ImmutableList.toImmutableList());
     }
 
-    public static @NonNull ResultElement pickOneOf(List<ResultElement> list, @NonNull NumberSupplier numberSupplier) {
+    public static @NonNull RollElement pickOneOf(List<RollElement> list, @NonNull NumberSupplier numberSupplier) {
         return list.get(numberSupplier.get(0, list.size()) - 1);
     }
 }

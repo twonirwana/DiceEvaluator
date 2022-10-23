@@ -94,10 +94,10 @@ public class DiceEvaluatorTest {
         );
     }
 
-    private static List<String> values(List<Result> in) {
+    private static List<String> values(List<Roll> in) {
         return in.stream()
                 .flatMap(r -> r.getElements().stream())
-                .map(ResultElement::getValue)
+                .map(RollElement::getValue)
                 .toList();
     }
 
@@ -159,16 +159,16 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 4, 5), 1000);
 
-        List<Result> res = underTest.evaluate("(1+3+4)<=3");
+        List<Roll> res = underTest.evaluate("(1+3+4)<=3");
 
-        System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(ResultElement::getValue).toList());
+        System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
     }
 
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
     @MethodSource("generateData")
     void rollExpression(String diceExpression, List<Integer> diceNumbers, List<Integer> expected) throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
-        List<Result> res = underTest.evaluate(diceExpression);
+        List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(res.stream().flatMap(r -> r.getElements().stream()).flatMap(e -> e.asInteger().stream())).containsExactlyElementsOf(expected);
     }
@@ -177,7 +177,7 @@ public class DiceEvaluatorTest {
     void sortAsc() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
 
-        List<Result> res = underTest.evaluate("asc(4d20)");
+        List<Roll> res = underTest.evaluate("asc(4d20)");
 
         assertThat(values(res)).containsExactly("1", "3", "12", "20");
     }
@@ -187,7 +187,7 @@ public class DiceEvaluatorTest {
     void sortDesc() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
 
-        List<Result> res = underTest.evaluate("desc(4d20)");
+        List<Roll> res = underTest.evaluate("desc(4d20)");
 
         assertThat(values(res)).containsExactly("20", "12", "3", "1");
     }
@@ -196,7 +196,7 @@ public class DiceEvaluatorTest {
     void sortAlphaAsc() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
 
-        List<Result> res = underTest.evaluate("asc(4d20 + 5a +b)");
+        List<Roll> res = underTest.evaluate("asc(4d20 + 5a +b)");
 
         assertThat(values(res)).containsExactly("1", "3", "12", "20", "5a", "b");
     }
@@ -205,7 +205,7 @@ public class DiceEvaluatorTest {
     void sortAlphaDesc() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
 
-        List<Result> res = underTest.evaluate("desc(4d20 + 5a + b)");
+        List<Roll> res = underTest.evaluate("desc(4d20 + 5a + b)");
 
         assertThat(values(res)).containsExactly("b", "5a", "20", "12", "3", "1");
     }
@@ -214,7 +214,7 @@ public class DiceEvaluatorTest {
     @MethodSource("generateStringDiceData")
     void rollStringDiceExpression(String diceExpression, List<Integer> diceNumbers, List<String> expected) throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
-        List<Result> res = underTest.evaluate(diceExpression);
+        List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(values(res)).containsExactlyElementsOf(expected);
     }
@@ -238,17 +238,17 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
-        List<Result> res = underTest.evaluate("1d6 + 3d20 + 10");
+        List<Roll> res = underTest.evaluate("1d6 + 3d20 + 10");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsProducingTheResult().stream())
-                .map(r -> r.stream().map(ResultElement::getValue).toList()))
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RollElement::getValue).toList()))
                 .containsExactlyInAnyOrder(List.of("3"), List.of("2", "1", "4"));
     }
 
     @Test
     void toStringTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
-        List<Result> res = underTest.evaluate("1d6 + 3d20 + 10 +min(2d6,3d4)");
+        List<Roll> res = underTest.evaluate("1d6 + 3d20 + 10 +min(2d6,3d4)");
 
         assertThat(res).hasSize(1);
         assertThat(res.get(0).getRandomElementsString()).isEqualTo("[[3], [2, 1, 4], [6, 6], [4, 4, 4]]");
@@ -259,7 +259,7 @@ public class DiceEvaluatorTest {
     @Test
     void toStringBracketTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
-        List<Result> res = underTest.evaluate("3d(20 + 10=)");
+        List<Roll> res = underTest.evaluate("3d(20 + 10=)");
 
         assertThat(res).hasSize(1);
         assertThat(res.get(0).getRandomElementsString()).isEqualTo("3, 2, 1");
@@ -270,7 +270,7 @@ public class DiceEvaluatorTest {
     @Test
     void toStringColorTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
-        List<Result> res = underTest.evaluate("color(1d6,'red') + color(3d20,'blue')");
+        List<Roll> res = underTest.evaluate("color(1d6,'red') + color(3d20,'blue')");
 
         assertThat(res).hasSize(1);
         assertThat(res.get(0).getRandomElementsString()).isEqualTo("[[3], [2, 1, 4]]");
@@ -281,7 +281,7 @@ public class DiceEvaluatorTest {
     @Test
     void toStringMultiExpressionTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
-        List<Result> res = underTest.evaluate("1d6 + 3d20, 10 +min(2d6,3d4)");
+        List<Roll> res = underTest.evaluate("1d6 + 3d20, 10 +min(2d6,3d4)");
 
         assertThat(res).hasSize(2);
         assertThat(res.get(0).getRandomElementsString()).isEqualTo("[[3], [2, 1, 4]]");
@@ -296,10 +296,10 @@ public class DiceEvaluatorTest {
     @MethodSource("generateColorDiceData")
     void rollStringDiceExpressionWithColor(String diceExpression, List<Integer> diceNumbers, List<String> expectedValues, List<String> expectedColors) throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
-        List<Result> res = underTest.evaluate(diceExpression);
+        List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(values(res)).containsExactlyElementsOf(expectedValues);
-        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(ResultElement::getColor)).containsExactlyElementsOf(expectedColors);
+        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getColor)).containsExactlyElementsOf(expectedColors);
     }
 
     @Test

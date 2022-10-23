@@ -2,36 +2,34 @@ package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.ExpressionException;
-import de.janno.evaluator.Function;
-import de.janno.evaluator.dice.Result;
-import de.janno.evaluator.dice.ResultElement;
-import de.janno.evaluator.dice.ResultUtil;
+import de.janno.evaluator.dice.Roll;
+import de.janno.evaluator.dice.RollElement;
 import lombok.NonNull;
 
 import java.util.List;
 
-public class Cancel extends Function<Result> {
+public class Cancel extends RollFunction {
     public Cancel() {
         super("cancel", 3);
     }
 
     @Override
-    protected @NonNull Result evaluate(@NonNull List<Result> arguments) throws ExpressionException {
-        Result input = arguments.get(0);
-        Result typeA = arguments.get(1);
-        Result typeB = arguments.get(2);
+    protected @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
+        Roll input = arguments.get(0);
+        Roll typeA = arguments.get(1);
+        Roll typeB = arguments.get(2);
 
-        List<ResultElement> noMatch = input.getElements().stream()
+        List<RollElement> noMatch = input.getElements().stream()
                 .filter(r -> !typeA.getElements().contains(r) && !typeB.getElements().contains(r))
                 .collect(ImmutableList.toImmutableList());
-        List<ResultElement> typeAMatch = input.getElements().stream()
+        List<RollElement> typeAMatch = input.getElements().stream()
                 .filter(r -> typeA.getElements().contains(r))
                 .collect(ImmutableList.toImmutableList());
-        List<ResultElement> typeBMatch = input.getElements().stream()
+        List<RollElement> typeBMatch = input.getElements().stream()
                 .filter(r -> typeB.getElements().contains(r))
                 .collect(ImmutableList.toImmutableList());
 
-        ImmutableList.Builder<ResultElement> resultBuilder = ImmutableList.<ResultElement>builder()
+        ImmutableList.Builder<RollElement> resultBuilder = ImmutableList.<RollElement>builder()
                 .addAll(noMatch);
 
         if (typeAMatch.size() > typeBMatch.size()) {
@@ -39,17 +37,17 @@ public class Cancel extends Function<Result> {
         } else if (typeAMatch.size() < typeBMatch.size()) {
             resultBuilder.addAll(getChancel(typeBMatch, typeAMatch));
         }
-        return new Result(ResultUtil.getExpression(getPrimaryName(), arguments),
+        return new Roll(getExpression(getPrimaryName(), arguments),
                 resultBuilder.build(),
-                input.getRandomElementsProducingTheResult(),
-                ImmutableList.<Result>builder()
-                        .addAll(input.getChildrenResults())
-                        .addAll(typeA.getChildrenResults())
-                        .addAll(typeB.getChildrenResults())
+                input.getRandomElementsInRoll(),
+                ImmutableList.<Roll>builder()
+                        .addAll(input.getChildrenRolls())
+                        .addAll(typeA.getChildrenRolls())
+                        .addAll(typeB.getChildrenRolls())
                         .build());
     }
 
-    private List<ResultElement> getChancel(List<ResultElement> bigger, List<ResultElement> smaller) {
+    private List<RollElement> getChancel(List<RollElement> bigger, List<RollElement> smaller) {
         return bigger.subList(smaller.size(), bigger.size());
     }
 }

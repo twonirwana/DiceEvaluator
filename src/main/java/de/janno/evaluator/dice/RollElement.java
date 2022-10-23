@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Value
 @RequiredArgsConstructor
-public class ResultElement implements Comparable<ResultElement> {
+public class RollElement implements Comparable<RollElement> {
     public static final String NO_COLOR = "";
     @NonNull
     String value;
@@ -24,14 +24,14 @@ public class ResultElement implements Comparable<ResultElement> {
     }
 
     @Override
-    public int compareTo(@NonNull ResultElement resultElement) {
-        if (!this.getColor().equals(resultElement.getColor())) {
-            return this.getColor().compareTo(resultElement.getColor());
+    public int compareTo(@NonNull RollElement rollElement) {
+        if (!this.getColor().equals(rollElement.getColor())) {
+            return this.getColor().compareTo(rollElement.getColor());
         }
-        if (asInteger().isPresent() && resultElement.asInteger().isPresent()) {
-            return asInteger().get().compareTo(resultElement.asInteger().get());
+        if (asInteger().isPresent() && rollElement.asInteger().isPresent()) {
+            return asInteger().get().compareTo(rollElement.asInteger().get());
         }
-        return this.getValue().compareTo(resultElement.getValue());
+        return this.getValue().compareTo(rollElement.getValue());
     }
 
     @Override

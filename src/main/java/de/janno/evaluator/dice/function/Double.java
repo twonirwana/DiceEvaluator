@@ -2,26 +2,24 @@ package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.ExpressionException;
-import de.janno.evaluator.Function;
-import de.janno.evaluator.dice.Result;
-import de.janno.evaluator.dice.ResultElement;
-import de.janno.evaluator.dice.ResultUtil;
+import de.janno.evaluator.dice.Roll;
+import de.janno.evaluator.dice.RollElement;
 import lombok.NonNull;
 
 import java.util.List;
 
-public class Double extends Function<Result> {
+public class Double extends RollFunction {
 
     public Double() {
         super("double", 2);
     }
 
     @Override
-    protected @NonNull Result evaluate(@NonNull List<Result> arguments) throws ExpressionException {
-        Result input = arguments.get(0);
-        Result toDuplicate = arguments.get(1);
+    protected @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
+        Roll input = arguments.get(0);
+        Roll toDuplicate = arguments.get(1);
 
-        ImmutableList<ResultElement> resultElements = input.getElements().stream()
+        ImmutableList<RollElement> rollElements = input.getElements().stream()
                 .flatMap(r -> {
                     if (toDuplicate.getElements().contains(r)) {
                         return ImmutableList.of(r, r).stream();
@@ -31,12 +29,12 @@ public class Double extends Function<Result> {
                 })
                 .collect(ImmutableList.toImmutableList());
 
-        return new Result(ResultUtil.getExpression(getPrimaryName(), arguments),
-                resultElements,
-                input.getRandomElementsProducingTheResult(),
-                ImmutableList.<Result>builder()
-                        .addAll(input.getChildrenResults())
-                        .addAll(toDuplicate.getChildrenResults())
+        return new Roll(getExpression(getPrimaryName(), arguments),
+                rollElements,
+                input.getRandomElementsInRoll(),
+                ImmutableList.<Roll>builder()
+                        .addAll(input.getChildrenRolls())
+                        .addAll(toDuplicate.getChildrenRolls())
                         .build());
     }
 }

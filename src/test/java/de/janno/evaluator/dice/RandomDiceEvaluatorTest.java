@@ -12,7 +12,7 @@ public class RandomDiceEvaluatorTest {
     void testWithRandom() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator();
 
-        List<Result> res = underTest.evaluate("1d6");
+        List<Roll> res = underTest.evaluate("1d6");
 
         assertThat(res.size()).isEqualTo(1);
         assertThat(res.get(0).getElements().size()).isEqualTo(1);
