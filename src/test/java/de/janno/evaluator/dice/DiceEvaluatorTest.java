@@ -251,7 +251,7 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("1d6 + 3d20 + 10 +min(2d6,3d4)");
 
         assertThat(res).hasSize(1);
-        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[[3], [2, 1, 4], [6, 6], [4, 4, 4]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [2, 1, 4] [6, 6] [4, 4, 4]");
         assertThat(res.get(0).getResultString()).isEqualTo("3, 2, 1, 4, 10, 4, 4, 4");
         assertThat(res.get(0).getExpression()).isEqualTo("1d6+3d20+10+min(2d6,3d4)");
     }
@@ -273,7 +273,7 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("color(1d6,'red') + color(3d20,'blue')");
 
         assertThat(res).hasSize(1);
-        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[[3], [2, 1, 4]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [2, 1, 4]");
         assertThat(res.get(0).getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
         assertThat(res.get(0).getExpression()).isEqualTo("color(1d6,red)+color(3d20,blue)");
     }
@@ -284,10 +284,10 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("1d6 + 3d20, 10 +min(2d6,3d4)");
 
         assertThat(res).hasSize(2);
-        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[[3], [2, 1, 4]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [2, 1, 4]");
         assertThat(res.get(0).getResultString()).isEqualTo("3, 2, 1, 4");
         assertThat(res.get(0).getExpression()).isEqualTo("1d6+3d20");
-        assertThat(res.get(1).getRandomElementsString()).isEqualTo("[[6, 6], [4, 4, 4]]");
+        assertThat(res.get(1).getRandomElementsString()).isEqualTo("[6, 6] [4, 4, 4]");
         assertThat(res.get(1).getResultString()).isEqualTo("10, 4, 4, 4");
         assertThat(res.get(1).getExpression()).isEqualTo("10+min(2d6,3d4)");
     }
