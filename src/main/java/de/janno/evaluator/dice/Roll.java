@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 import lombok.Value;
 
+import java.util.AbstractCollection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,6 @@ public class Roll {
         if (randomElementsInRoll.size() == 1) {
             return randomElementsInRoll.get(0).stream().map(RollElement::toString).collect(Collectors.joining(", "));
         }
-        return randomElementsInRoll.toString();
+        return randomElementsInRoll.stream().map(AbstractCollection::toString).collect(Collectors.joining(" "));
     }
 }
