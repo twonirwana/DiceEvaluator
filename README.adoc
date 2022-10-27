@@ -33,6 +33,7 @@ Therefor the default must be only append elements together and a special operato
 The evaluator processes dice expression and returns a list of rolls, each containing a list of elements.
 Elements have a value (a number or a text) and can have a color.
 For example `2d6` rolls two six-sided dice and returns a list with two elements, each with a value between 1 and 6. To get the sum of the roll, simple add a `=` at the end, for example in this case `2d6=`.
+The same applies to numbers `3 + 5` has as result a list with the elements 3 and 5, only if written as `3 + 5=` the result is 8.
 The same applies to numbers `3 + 5` has as result a list with the elements 3 and 5, only if written as `3 + 5=` the result is 8. To use text in the expression it is often necessary to escape the text with `'`. For example `1d('head' + 'tail')` will flip a coin.
 Without the escape characters the d in head would be interpreted as dice operator.
 List can be included into the expression by using brackets.
