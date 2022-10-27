@@ -3,7 +3,6 @@ package de.janno.evaluator.dice;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.Optional;
 
@@ -16,8 +15,17 @@ public class RollElement implements Comparable<RollElement> {
     @NonNull
     String color;
 
+    private static boolean isInteger(String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     public Optional<Integer> asInteger() {
-        if (NumberUtils.isParsable(value)) {
+        if (isInteger(value)) {
             return Optional.of(Integer.parseInt(value));
         }
         return Optional.empty();

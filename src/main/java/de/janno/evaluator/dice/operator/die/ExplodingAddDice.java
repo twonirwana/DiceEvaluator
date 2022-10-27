@@ -42,7 +42,7 @@ public final class ExplodingAddDice extends RollOperator {
         Roll left = operands.get(0);
         Roll right = operands.get(1);
         int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
-        if (numberOfDice > maxNumberOfDice) {
+        if (Math.abs(numberOfDice) > maxNumberOfDice) {
             throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
         }
         int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));

@@ -48,7 +48,7 @@ public final class RegularDice extends RollOperator {
         } else {
             throw new IllegalStateException("More then two operands for " + getName());
         }
-        if (numberOfDice > maxNumberOfDice) {
+        if (Math.abs(numberOfDice) > maxNumberOfDice) {
             throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
         }
         final ImmutableList<RollElement> rollElements;

@@ -16,8 +16,6 @@ public final class OperatorOrder {
     final static ImmutableList<Class<? extends RollOperator>> operatorOrderList =
             ImmutableList.<Class<? extends RollOperator>>builder()
                     .add(Sum.class) //sum must be applied as last
-                    .add(Appending.class)
-                    .add(NegateOrNegativAppending.class)
                     .add(Multiply.class)
                     .add(Divide.class)
                     .add(Count.class) //count should be after all list filters
@@ -28,6 +26,8 @@ public final class OperatorOrder {
                     .add(KeepHighest.class)
                     .add(KeepLowest.class)
                     //dice should be first
+                    .add(Appending.class)
+                    .add(NegateOrNegativAppending.class)
                     .add(ExplodingAddDice.class)
                     .add(ExplodingDice.class)
                     .add(RegularDice.class)

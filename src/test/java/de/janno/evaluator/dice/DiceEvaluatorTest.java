@@ -29,6 +29,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("3d6c", List.of(3, 4, 5), List.of(3)),
                 Arguments.of("3d!6c", List.of(3, 2, 6, 6, 5), List.of(5)),
                 Arguments.of("3d6>3", List.of(3, 4, 5), List.of(4, 5)),
+                Arguments.of("3d6+6>3", List.of(3, 4, 5), List.of(4, 5, 6)),
                 Arguments.of("3d6>3c", List.of(3, 4, 5), List.of(2)),
                 Arguments.of("3d6>=3", List.of(1, 3, 4), List.of(3, 4)),
                 Arguments.of("3d6>=3c", List.of(1, 3, 4), List.of(2)),
@@ -45,13 +46,13 @@ public class DiceEvaluatorTest {
                 Arguments.of("1d(6 + 3=)", List.of(), List.of(9)),
                 Arguments.of("1d(6 + 3)", List.of(), List.of(3)),
                 Arguments.of("1d6 * 3", List.of(3), List.of(9)),
-                Arguments.of("1d6 * 3 -3", List.of(3), List.of(9, -3)),
+                Arguments.of("(1d6 * 3) -3", List.of(3), List.of(9, -3)),
                 Arguments.of("1d6 * (3 -3=)", List.of(3), List.of(0)),
                 Arguments.of("1d6 - 2", List.of(3), List.of(3, -2)),
                 Arguments.of("1d6 / 2", List.of(4), List.of(2)),
                 Arguments.of("2d6k1", List.of(3, 4), List.of(4)),
                 Arguments.of("2d6l1", List.of(3, 4), List.of(3)),
-                Arguments.of("2d6l1+2", List.of(3, 4), List.of(3, 2)),
+                Arguments.of("(2d6l1)+2", List.of(3, 4), List.of(3, 2)),
                 Arguments.of("d!6", List.of(6, 6, 4), List.of(6, 6, 4)),
                 Arguments.of("D!6", List.of(6, 6, 4), List.of(6, 6, 4)),
                 Arguments.of("2d!6", List.of(3, 6, 6, 4), List.of(3, 6, 6, 4)),
@@ -80,7 +81,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("()", List.of(), List.of()),
                 Arguments.of("6 (5)", List.of(), List.of(6, 5)),
                 Arguments.of("(1d6) (1d6)", List.of(3, 4), List.of(3, 4)),
-                Arguments.of("min(1,min(3+2,2))+-max(4)*2", List.of(), List.of(1, -8)),
+                Arguments.of("min(1,min(3+2,2))+-(max(4)*2)", List.of(), List.of(1, -8)),
                 Arguments.of("min((10,15),20)", List.of(), List.of(10)),
                 Arguments.of("min(10,15),20", List.of(), List.of(10, 20)),
                 Arguments.of("1d6,(1d6,1)", List.of(1, 2), List.of(1, 2, 1)),
@@ -90,7 +91,11 @@ public class DiceEvaluatorTest {
                 Arguments.of("cancel(9+10+1+2+10,10,1)", List.of(), List.of(9, 2, 10)),
                 Arguments.of("double(9+10+1,10)", List.of(), List.of(9, 10, 10, 1)),
                 Arguments.of("double(9+10+1,10+9)", List.of(), List.of(9, 9, 10, 10, 1)),
-                Arguments.of("double(9+10+1,10+9+9)", List.of(), List.of(9, 9, 10, 10, 1))
+                Arguments.of("double(9+10+1,10+9+9)", List.of(), List.of(9, 9, 10, 10, 1)),
+                Arguments.of("1d+6", List.of(2), List.of(2)),
+                Arguments.of("+6+6", List.of(), List.of(6, 6)),
+                Arguments.of("+6*6", List.of(), List.of(36)),
+                Arguments.of("+6*+6", List.of(), List.of(36))
         );
     }
 
@@ -119,7 +124,10 @@ public class DiceEvaluatorTest {
                 Arguments.of("1d6 + (x+y) + 1", List.of(3), List.of("3", "x", "y", "1")),
                 Arguments.of("1d6 + '1d6' + 1", List.of(3), List.of("3", "1d6", "1")),
                 Arguments.of("1d6 + '1D6' + 1", List.of(3), List.of("3", "1D6", "1")),
-                Arguments.of("3d(10+20+30) + 2d6", List.of(3, 2, 1, 4, 5), List.of("30", "20", "10", "4", "5"))
+                Arguments.of("3d(10+20+30) + 2d6", List.of(3, 2, 1, 4, 5), List.of("30", "20", "10", "4", "5")),
+                Arguments.of("ifEqual(1d6,3,'three','not three')", List.of(3), List.of("three")),
+                Arguments.of("ifEqual(1d6,3,'three','not three')", List.of(2), List.of("not three")),
+                Arguments.of("3.5+2.5", List.of(), List.of("3.5", "2.5"))
         );
     }
 
@@ -141,7 +149,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("1-", "Operator - has right associativity but the right value was: empty"),
                 Arguments.of("1*", "Operator * does not support unary operations"),
                 Arguments.of("*1", "Operator * does not support unary operations"),
-                Arguments.of("10 5 +", "Operator + does not support unary operations"),
+                Arguments.of("10 5 +", "Operator + has right associativity but the right value was: empty"),
                 Arguments.of("10**5", "Operator * does not support unary operations"),
                 Arguments.of("min()", "Invalid argument count for min"),
                 Arguments.of("min(,2)", "A separator can't be followed by another separator or open bracket"),
@@ -149,9 +157,9 @@ public class DiceEvaluatorTest {
                 Arguments.of("min3(45)", "A function, in this case 'min', must be followed a open function bracket: ("),
                 Arguments.of(")", "expression can't start with a close bracket"),
                 Arguments.of("(", "Parentheses mismatched"),
-                Arguments.of("3d+4", "Operator [d, D] has right associativity but the right value was: +"),
                 Arguments.of(",3", "expression can't start with a separator"),
-                Arguments.of("10*", "Operator * does not support unary operations")
+                Arguments.of("10*", "Operator * does not support unary operations"),
+                Arguments.of("10*2.5", "Operator '*' requires as right operand a single integer but was '[2.5]'")
         );
     }
 
@@ -159,7 +167,7 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 4, 5), 1000);
 
-        List<Roll> res = underTest.evaluate("(1+3+4)<=3");
+        List<Roll> res = underTest.evaluate("1d+4");
 
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
     }
@@ -310,6 +318,26 @@ public class DiceEvaluatorTest {
                 .isInstanceOf(ExpressionException.class)
                 .hasMessage("The number of dice must be less or equal then 1000 but was 1001");
     }
+
+    @Test
+    void maxNegativeDice() {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        assertThatThrownBy(() -> underTest.evaluate("-1001d6"))
+                .isInstanceOf(ExpressionException.class)
+                .hasMessage("The number of dice must be less or equal then 1000 but was 1001");
+    }
+
+    @Test
+    void bigResult() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+
+        List<Roll> res = underTest.evaluate("1000d999999999999999999999999999999");
+
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getElements().size()).isEqualTo(1000);
+        assertThat(res.get(0).getElements().stream()).allMatch(r -> r.getValue().equals("999999999999999999999999999999"));
+    }
+
 
     @ParameterizedTest(name = "{index} {0} -> {1}")
     @MethodSource("generateErrorData")

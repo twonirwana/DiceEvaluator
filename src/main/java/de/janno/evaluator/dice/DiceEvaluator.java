@@ -65,6 +65,7 @@ public class DiceEvaluator extends AbstractEvaluator<Roll> {
                         .add(new Max())
                         .add(new Cancel())
                         .add(new Double())
+                        .add(new IfEqual())
                         .build())
                 .separator(",")
                 .build());
