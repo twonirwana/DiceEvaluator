@@ -159,13 +159,16 @@ public class DiceEvaluatorTest {
                 Arguments.of("(", "Parentheses mismatched"),
                 Arguments.of(",3", "expression can't start with a separator"),
                 Arguments.of("10*", "Operator * does not support unary operations"),
-                Arguments.of("10*2.5", "Operator '*' requires as right operand a single integer but was '[2.5]'")
+                Arguments.of("10*2.5", "Operator '*' requires as right operand a single integer but was '[2.5]'"),
+                Arguments.of("2147483647+1=", "integer overflow"),
+                Arguments.of("2147483647*2=", "integer overflow"),
+                Arguments.of("1/0", "/ by zero")
         );
     }
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 4, 5), 1000);
+        DiceEvaluator underTest = new DiceEvaluator((a,b) -> b, 1000);
 
         List<Roll> res = underTest.evaluate("1d+4");
 
@@ -344,7 +347,7 @@ public class DiceEvaluatorTest {
     void testError(String input, String expectedMessage) {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
         assertThatThrownBy(() -> underTest.evaluate(input))
-                .isInstanceOf(ExpressionException.class)
+                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
                 .hasMessage(expectedMessage);
     }
 

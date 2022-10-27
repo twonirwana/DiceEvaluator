@@ -21,16 +21,21 @@ public class Sum extends RollOperator {
         super("=", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, getOderNumberOf(Sum.class));
     }
 
+    private static int sumExact(List<RollElement> elements) {
+        return elements.stream()
+                .map(RollElement::asInteger)
+                .flatMap(Optional::stream)
+                .reduce(0, Math::addExact);
+    }
+
     @Override
     public @NonNull Roll evaluate(@NonNull List<Roll> operands) throws ExpressionException {
         Roll left = operands.get(0);
         checkContainsOnlyInteger(getName(), left, "left");
 
+
         ImmutableList<RollElement> res = left.getElements().stream().collect(Collectors.groupingBy(RollElement::getColor)).entrySet().stream()
-                .map(e -> new RollElement(String.valueOf(e.getValue().stream()
-                        .map(RollElement::asInteger)
-                        .flatMap(Optional::stream)
-                        .mapToInt(Integer::valueOf).sum()), e.getKey()))
+                .map(e -> new RollElement(String.valueOf(sumExact(e.getValue())), e.getKey()))
                 .collect(ImmutableList.toImmutableList());
 
         return new Roll(getLeftUnaryExpression(getPrimaryName(), operands),
