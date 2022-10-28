@@ -125,8 +125,12 @@ public class DiceEvaluatorTest {
                 Arguments.of("1d6 + '1d6' + 1", List.of(3), List.of("3", "1d6", "1")),
                 Arguments.of("1d6 + '1D6' + 1", List.of(3), List.of("3", "1D6", "1")),
                 Arguments.of("3d(10+20+30) + 2d6", List.of(3, 2, 1, 4, 5), List.of("30", "20", "10", "4", "5")),
-                Arguments.of("ifEqual(1d6,3,'three','not three')", List.of(3), List.of("three")),
-                Arguments.of("ifEqual(1d6,3,'three','not three')", List.of(2), List.of("not three")),
+                Arguments.of("ifE(1d6,3,'three','not three')", List.of(3), List.of("three")),
+                Arguments.of("ifE(1d6,3,'three','not three')", List.of(2), List.of("not three")),
+                Arguments.of("ifG(1d6,3,'three','not three')", List.of(5), List.of("three")),
+                Arguments.of("ifG(1d6,3,'three','not three')", List.of(2), List.of("not three")),
+                Arguments.of("ifL(1d6,3,'three','not three')", List.of(2), List.of("three")),
+                Arguments.of("ifL(1d6,3,'three','not three')", List.of(4), List.of("not three")),
                 Arguments.of("3.5+2.5", List.of(), List.of("3.5", "2.5"))
         );
     }
@@ -159,16 +163,18 @@ public class DiceEvaluatorTest {
                 Arguments.of("(", "Parentheses mismatched"),
                 Arguments.of(",3", "expression can't start with a separator"),
                 Arguments.of("10*", "Operator * does not support unary operations"),
-                Arguments.of("10*2.5", "Operator '*' requires as right operand a single integer but was '[2.5]'"),
+                Arguments.of("10*2.5", "'*' requires as right input a single integer but was '[2.5]'"),
                 Arguments.of("2147483647+1=", "integer overflow"),
                 Arguments.of("2147483647*2=", "integer overflow"),
-                Arguments.of("1/0", "/ by zero")
+                Arguments.of("1/0", "/ by zero"),
+                Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as first argument input a single integer but was '[6, 6]'"),
+                Arguments.of("ifL(1d6,2d6,'three','not three')", "'ifL' requires as second argument input a single integer but was '[6, 6]'")
         );
     }
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator((a,b) -> b, 1000);
+        DiceEvaluator underTest = new DiceEvaluator((a, b) -> b, 1000);
 
         List<Roll> res = underTest.evaluate("1d+4");
 
@@ -235,7 +241,7 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000);
         assertThatThrownBy(() -> underTest.evaluate("2d6 / 3"))
                 .isInstanceOf(ExpressionException.class)
-                .hasMessage("Operator '/' requires as left operand a single integer but was '[4, 1]'");
+                .hasMessage("'/' requires as left input a single integer but was '[4, 1]'");
     }
 
     @Test

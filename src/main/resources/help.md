@@ -24,4 +24,6 @@
 | Color                | color()    | color(3d4, 'red')  |
 | Chancel              | chancel()  | chancel(8d10,10,1) |
 | Double               | double()   | double(8d10, 10)   |
-| ifEqual              | ifEqual()  | ifEqual(d6,6,Y,N)  |
+| If Equal             | ifE()      | ifE(d6,6,Y,N)      |
+| If Greater           | ifG()      | ifG(d6,3,Y,N)      |
+| If Lesser            | ifL()      | ifL(d6,3,Y,N)      |
