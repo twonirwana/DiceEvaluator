@@ -12,6 +12,10 @@ public abstract class AbstractEvaluator<T> {
     private final Tokenizer<T> tokenizer;
     private final Parameters<T> parameters;
 
+    /**
+     * constructor of the evaluator
+     * @param parameters to configure the evaluator
+     */
     protected AbstractEvaluator(Parameters<T> parameters) {
         tokenizer = new Tokenizer<>(parameters);
         this.parameters = parameters;
@@ -67,6 +71,8 @@ public abstract class AbstractEvaluator<T> {
     /**
      * Evaluates a literal and converts it to a value
      *
+     * @param literal The literal to convert
+     * @return The value
      * @throws ExpressionException if the literal can't be converted to a value.
      */
     protected abstract T toValue(String literal) throws ExpressionException;
@@ -81,6 +87,8 @@ public abstract class AbstractEvaluator<T> {
     /**
      * Evaluates an expression.
      *
+     * @param expression The expression to evaluate
+     * @return The result of the evaluation. This can be multiple values, if the expression can't be reduced to a single value.
      * @throws ExpressionException if the expression is not correct.
      */
     public List<T> evaluate(String expression) throws ExpressionException {

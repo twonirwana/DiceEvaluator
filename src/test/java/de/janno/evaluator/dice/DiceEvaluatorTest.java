@@ -1,6 +1,7 @@
 package de.janno.evaluator.dice;
 
 import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.random.GivenNumberSupplier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

@@ -1,4 +1,4 @@
-package de.janno.evaluator.dice;
+package de.janno.evaluator.dice.random;
 
 import java.util.*;
 
