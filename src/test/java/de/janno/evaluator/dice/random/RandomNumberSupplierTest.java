@@ -15,7 +15,7 @@ class RandomNumberSupplierTest {
     @Test
     void d6Test() {
         List<Integer> res = IntStream.range(0, 1_000_000)
-                .map(i -> underTest.get(1, 6))
+                .map(i -> underTest.get(0, 6))
                 .boxed()
                 .toList();
 
@@ -27,12 +27,12 @@ class RandomNumberSupplierTest {
     @Test
     void from10to100Test() {
         List<Integer> res = IntStream.range(0, 1_000_000)
-                .map(i -> underTest.get(10, 100))
+                .map(i -> underTest.get(9, 100))
                 .boxed()
                 .toList();
 
         assertThat(res).allMatch(i -> i >= 10 && i <= 100);
         assertThat(res).contains(10, 100);
-        assertThat(res.stream().mapToInt(i -> i).average().orElseThrow()).isEqualTo(55, offset(0.01));
+        assertThat(res.stream().mapToInt(i -> i).average().orElseThrow()).isEqualTo(55, offset(0.05));
     }
 }

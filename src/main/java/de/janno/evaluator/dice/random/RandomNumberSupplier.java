@@ -9,7 +9,7 @@ import com.google.common.base.Preconditions;
 public class RandomNumberSupplier implements NumberSupplier {
     private final ThreadLocalSfc64Random randomSource;
 
-    public RandomNumberSupplier(){
+    public RandomNumberSupplier() {
         randomSource = new ThreadLocalSfc64Random();
     }
 
@@ -23,6 +23,6 @@ public class RandomNumberSupplier implements NumberSupplier {
         if (minExcl + 1 == maxIncl) {
             return maxIncl;
         }
-        return randomSource.nextInt(minExcl, maxIncl + 1);
+        return randomSource.nextInt(minExcl + 1, maxIncl + 1);
     }
 }
