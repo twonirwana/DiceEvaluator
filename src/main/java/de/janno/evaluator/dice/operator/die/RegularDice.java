@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Operator;
-import de.janno.evaluator.dice.NumberSupplier;
+import de.janno.evaluator.dice.random.NumberSupplier;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import de.janno.evaluator.dice.operator.RollOperator;

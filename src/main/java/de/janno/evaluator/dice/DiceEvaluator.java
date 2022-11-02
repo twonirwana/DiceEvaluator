@@ -14,6 +14,8 @@ import de.janno.evaluator.dice.operator.math.Divide;
 import de.janno.evaluator.dice.operator.math.Multiply;
 import de.janno.evaluator.dice.operator.math.NegateOrNegativAppending;
 import de.janno.evaluator.dice.operator.math.Appending;
+import de.janno.evaluator.dice.random.NumberSupplier;
+import de.janno.evaluator.dice.random.RandomNumberSupplier;
 import lombok.NonNull;
 
 import java.io.IOException;
