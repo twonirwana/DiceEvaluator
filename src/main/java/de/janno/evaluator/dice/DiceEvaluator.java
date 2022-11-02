@@ -70,6 +70,7 @@ public class DiceEvaluator extends AbstractEvaluator<Roll> {
                         .add(new IfEqual())
                         .add(new IfGreater())
                         .add(new IfLesser())
+                        .add(new GroupCount())
                         .build())
                 .separator(",")
                 .build());

@@ -228,6 +228,15 @@ public class DiceEvaluatorTest {
         assertThat(values(res)).containsExactly("b", "5a", "20", "12", "3", "1");
     }
 
+    @Test
+    void groupCount() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+
+        List<Roll> res = underTest.evaluate("groupC(4d20 + 10d10 + 3d6 + 10 + color(3d6,'red')+color(3d4,'black'))");
+
+        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(Object::toString)).containsExactly("11x10", "4x20", "black:3x4", "3x6", "red:3x6");
+    }
+
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
     @MethodSource("generateStringDiceData")
     void rollStringDiceExpression(String diceExpression, List<Integer> diceNumbers, List<String> expected) throws ExpressionException {

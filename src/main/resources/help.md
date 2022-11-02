@@ -27,3 +27,4 @@
 | If Equal             | ifE()      | ifE(d6,6,Y,N)      |
 | If Greater           | ifG()      | ifG(d6,3,Y,N)      |
 | If Lesser            | ifL()      | ifL(d6,3,Y,N)      |
+| Group Count          | groupC()   | groupC(20d6)       |
