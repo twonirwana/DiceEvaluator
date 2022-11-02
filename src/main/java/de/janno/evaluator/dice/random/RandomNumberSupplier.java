@@ -20,6 +20,7 @@ public class RandomNumberSupplier implements NumberSupplier {
 
     public int get(int minExcl, int maxIncl) {
         Preconditions.checkArgument(minExcl < maxIncl, "minExcl must be smaller than maxIncl");
+        Preconditions.checkArgument(maxIncl < Integer.MAX_VALUE, "maxIncl must be smaller than " + Integer.MAX_VALUE);
         if (minExcl + 1 == maxIncl) {
             return maxIncl;
         }
