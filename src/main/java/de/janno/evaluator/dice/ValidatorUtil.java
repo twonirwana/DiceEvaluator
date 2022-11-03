@@ -8,15 +8,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class ValidatorUtil {
-    public static ExpressionException throwNotIntegerExpression(@NonNull String inputName, @NonNull Roll roll, @NonNull String side) {
-        return new ExpressionException(String.format("'%s' requires as %s input a single integer but was '%s'", inputName, side, roll.getElements().stream()
+    public static ExpressionException throwNotIntegerExpression(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) {
+        return new ExpressionException(String.format("'%s' requires as %s input a single integer but was '%s'", inputName, location, roll.getElements().stream()
                 .map(RollElement::getValue)
                 .toList()));
     }
 
-    public static void checkContainsOnlyInteger(@NonNull String inputName, @NonNull Roll roll, @NonNull String side) throws ExpressionException {
+    public static void checkContainsOnlyInteger(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) throws ExpressionException {
         if (!roll.containsOnlyIntegers()) {
-            throw new ExpressionException(String.format("'%s' requires as %s input only integers but was '%s'", inputName, side, roll.getElements().stream()
+            throw new ExpressionException(String.format("'%s' requires as %s input only integers but was '%s'", inputName, location, roll.getElements().stream()
+                    .map(RollElement::getValue).toList()));
+        }
+    }
+
+    public static void checkContainsSingleElement(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) throws ExpressionException {
+        if (roll.getElements().size() != 1) {
+            throw new ExpressionException(String.format("'%s' requires as %s input with a single element but was '%s'", inputName, location, roll.getElements().stream()
                     .map(RollElement::getValue).toList()));
         }
     }

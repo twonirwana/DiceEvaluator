@@ -7,11 +7,11 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
+import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
 
 public class IfLesser extends RollFunction {
     public IfLesser() {
-        super("ifL", 4);
+        super("ifL", 3, 4);
     }
 
     @Override
@@ -19,13 +19,18 @@ public class IfLesser extends RollFunction {
         Roll input = arguments.get(0);
         Roll compareTo = arguments.get(1);
         Roll trueResult = arguments.get(2);
-        Roll falseResult = arguments.get(3);
+        final Roll falseResult;
+        if (arguments.size() == 3) {
+            falseResult = input;
+        } else {
+            falseResult = arguments.get(3);
+        }
+        checkContainsSingleElement(getName(), input, "first argument");
+        checkContainsSingleElement(getName(), compareTo, "second argument");
 
-        final int inputNumber = input.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), input, "first argument"));
-        final int compareToNumber = compareTo.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), compareTo, "second argument"));
         final Roll result;
 
-        if (inputNumber < compareToNumber) {
+        if (input.getElements().get(0).compareTo(compareTo.getElements().get(0)) < 0) {
             result = trueResult;
         } else {
             result = falseResult;

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyInteger;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
@@ -27,7 +26,6 @@ public class KeepHighest extends RollOperator {
     public @NonNull Roll evaluate(@NonNull List<Roll> operands) throws ExpressionException {
         Roll left = operands.get(0);
         Roll right = operands.get(1);
-        checkContainsOnlyInteger(getName(), left, "left");
         final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
         //todo right color only filtered by same color?
         ImmutableList<RollElement> keep = left.getElements().stream()

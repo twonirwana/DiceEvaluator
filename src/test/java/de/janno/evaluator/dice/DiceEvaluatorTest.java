@@ -127,11 +127,20 @@ public class DiceEvaluatorTest {
                 Arguments.of("1d6 + '1D6' + 1", List.of(3), List.of("3", "1D6", "1")),
                 Arguments.of("3d(10+20+30) + 2d6", List.of(3, 2, 1, 4, 5), List.of("30", "20", "10", "4", "5")),
                 Arguments.of("ifE(1d6,3,'three','not three')", List.of(3), List.of("three")),
+                Arguments.of("ifE(ifE(ifE(1d6,3,'three'),2,'two'),1,'one')", List.of(3), List.of("three")),
+                Arguments.of("ifE(ifE(ifE(1d6,3,'three'),2,'two'),1,'one')", List.of(2), List.of("two")),
+                Arguments.of("ifE(ifE(ifE(1d6,3,'three'),2,'two'),1,'one')", List.of(1), List.of("one")),
+                Arguments.of("ifE(ifE(ifE(1d6,3,'three'),2,'two'),1,'one')", List.of(4), List.of("4")),
+                Arguments.of("ifE(ifE(ifE(1d6,3,'three'),2,'two'),1,'one','else')", List.of(4), List.of("else")),
                 Arguments.of("ifE(1d6,3,'three','not three')", List.of(2), List.of("not three")),
                 Arguments.of("ifG(1d6,3,'three','not three')", List.of(5), List.of("three")),
                 Arguments.of("ifG(1d6,3,'three','not three')", List.of(2), List.of("not three")),
+                Arguments.of("ifG(1d6,3,'three')", List.of(2), List.of("2")),
                 Arguments.of("ifL(1d6,3,'three','not three')", List.of(2), List.of("three")),
                 Arguments.of("ifL(1d6,3,'three','not three')", List.of(4), List.of("not three")),
+                Arguments.of("ifL(1d6,3,'three')", List.of(4), List.of("4")),
+                Arguments.of("[b/2/a]k2", List.of(), List.of("b", "a")),
+                Arguments.of("[b/2/a]l2", List.of(), List.of("2", "a")),
                 Arguments.of("3.5+2.5", List.of(), List.of("3.5", "2.5"))
         );
     }
@@ -168,8 +177,11 @@ public class DiceEvaluatorTest {
                 Arguments.of("2147483647+1=", "integer overflow"),
                 Arguments.of("2147483647*2=", "integer overflow"),
                 Arguments.of("1/0", "/ by zero"),
-                Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as first argument input a single integer but was '[6, 6]'"),
-                Arguments.of("ifL(1d6,2d6,'three','not three')", "'ifL' requires as second argument input a single integer but was '[6, 6]'")
+                Arguments.of("color(3d6,[a/b])", "'color' requires as second argument input with a single element but was '[a, b]'"),
+                Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as first argument input with a single element but was '[6, 6]'"),
+                Arguments.of("ifL(1d6,2d6,'three','not three')", "'ifL' requires as second argument input with a single element but was '[6, 6]'"),
+                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as second argument input with a single element but was '[6, 6]'"),
+                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as second argument input with a single element but was '[6, 6]'")
         );
     }
 

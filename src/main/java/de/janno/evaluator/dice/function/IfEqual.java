@@ -9,7 +9,7 @@ import java.util.List;
 
 public class IfEqual extends RollFunction {
     public IfEqual() {
-        super("ifE", 4);
+        super("ifE", 3, 4);
     }
 
     @Override
@@ -17,7 +17,12 @@ public class IfEqual extends RollFunction {
         Roll input = arguments.get(0);
         Roll equal = arguments.get(1);
         Roll trueResult = arguments.get(2);
-        Roll falseResult = arguments.get(3);
+        final Roll falseResult;
+        if (arguments.size() == 3) {
+            falseResult = input;
+        } else {
+            falseResult = arguments.get(3);
+        }
 
         final Roll result;
         if (input.getElements().equals(equal.getElements())) {
