@@ -23,7 +23,7 @@ public final class ValidatorUtil {
 
     public static void checkContainsSingleElement(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) throws ExpressionException {
         if (roll.getElements().size() != 1) {
-            throw new ExpressionException(String.format("'%s' requires as %s input with a single element but was '%s'", inputName, location, roll.getElements().stream()
+            throw new ExpressionException(String.format("'%s' requires as %s a single element but was '%s'", inputName, location, roll.getElements().stream()
                     .map(RollElement::getValue).toList()));
         }
     }
