@@ -62,8 +62,8 @@ The number of dice is limited to 1000 and every number approve 2147483647 will b
 |Lesser Then Filter |`<list> < <number>` |`3d6<3` |Keeps only the elements of the left list that are lesser as the right number |5 |left |one or more numbers |a single number
 |Greater Equal Then Filter |`<list> >= <number>` |`3d6>=3` |Keeps only the elements of the left list that are bigger or equal as the right number |6 |left |one or more numbers |a single number
 |Lesser Equal Then Filter |`<list> <= <number>` |`3d6<=3` |Keeps only the elements of the left list that are lesser or equal as the right number |7 |left |one or more numbers |a single number
-|Keep Highest |`<list> k <numberToKept>` |`3d6k2` |keeps the the highest values out a list, like the roll of multiple dice |8 |left |one or more numbers |a single number
-|Keep Lowest |`<list> l <numberToKept>` |`3d6l2` |keeps the the lowest values out a list, like the roll of multiple dice |9 |left |one or more numbers |a single number
+|Keep Highest |`<list> k <numberToKept>` |`3d6k2` |keeps the highest values out a list, like the roll of multiple dice |8 |left |one or more values |a single number
+|Keep Lowest |`<list> l <numberToKept>` |`3d6l2` |keeps the lowest values out a list, like the roll of multiple dice |9 |left |one or more values |a single number
 |Appending |`<left> + <right>` |`2d6 + 2` or `+3` |Combines the rolls of both sides to a single list. If used as unary operator, it will be ignored e.g. `+5` will processed to `5` |10 (max for unary) |left for binary and right for unary |none or more value |one or more value
 |Negative Appending |`<left> - <right>` |`2 - 1` or `-d6` |Combines the rolls of both sides to a single list. The right side is multiplied by -1. |11 |left for binary and right for unary |none or more value |one or more numbers
 |Exploding Add Dice |`<numberOfDice>d!!<numberOfFaces>` |`3d!!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the die previous resul total. A roll of the reroll the sum of the value. |12 |left for binary and right for unary |none or a single number (max 1000) |a single number
