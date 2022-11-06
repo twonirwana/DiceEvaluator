@@ -1,7 +1,7 @@
 package de.janno.evaluator.dice.random;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
+import de.janno.evaluator.ExpressionException;
 
 /**
  * Provides random numbers
@@ -14,13 +14,20 @@ public class RandomNumberSupplier implements NumberSupplier {
     }
 
     @VisibleForTesting
-    RandomNumberSupplier(long seed) {
+    public RandomNumberSupplier(long seed) {
         randomSource = new ThreadLocalSfc64Random(seed);
     }
 
-    public int get(int minExcl, int maxIncl) {
-        Preconditions.checkArgument(minExcl < maxIncl, "minExcl must be smaller than maxIncl");
-        Preconditions.checkArgument(maxIncl < Integer.MAX_VALUE, "maxIncl must be smaller than " + Integer.MAX_VALUE);
+    public int get(int minExcl, int maxIncl) throws ExpressionException {
+        if (minExcl == Integer.MAX_VALUE) {
+            throw new ExpressionException("Cannot give a random number for minExcl =%d".formatted(Integer.MAX_VALUE));
+        }
+        if (maxIncl == Integer.MAX_VALUE) {
+            throw new ExpressionException("Cannot give a random number for maxIncl =%d".formatted(Integer.MAX_VALUE));
+        }
+        if (minExcl >= maxIncl) {
+            throw new ExpressionException("Random number between %d (excl) and %d (incl) is not possible".formatted(minExcl, maxIncl));
+        }
         if (minExcl + 1 == maxIncl) {
             return maxIncl;
         }

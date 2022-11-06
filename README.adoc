@@ -18,6 +18,8 @@ The dice evaluator works on lists, summing the rolls together is optional.
 * Operators can handle, when possible and intuitive, lists of elements/numbers
 * Custom exception for errors in the expression evaluation
 * Usage of as few symbols as possible
+* No infinity loops possible and configurable limits for expensive operations
+* Make testing easy be providing the options to provide a custom, non-random, number generator
 
 === Development Decisions
 
@@ -66,9 +68,9 @@ The number of dice is limited to 1000 and every number approve 2147483647 will b
 |Keep Lowest |`<list> l <numberToKept>` |`3d6l2` |keeps the lowest values out a list, like the roll of multiple dice |9 |left |one or more values |a single number
 |Appending |`<left> + <right>` |`2d6 + 2` or `+3` |Combines the rolls of both sides to a single list. If used as unary operator, it will be ignored e.g. `+5` will processed to `5` |10 (max for unary) |left for binary and right for unary |none or more value |one or more value
 |Negative Appending |`<left> - <right>` |`2 - 1` or `-d6` |Combines the rolls of both sides to a single list. The right side is multiplied by -1. |11 |left for binary and right for unary |none or more value |one or more numbers
-|Exploding Add Dice |`<numberOfDice>d!!<numberOfFaces>` |`3d!!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the die previous resul total. A roll of the reroll the sum of the value. |12 |left for binary and right for unary |none or a single number (max 1000) |a single number
-|Exploding Dice |`<numberOfDice>d!<numberOfFaces>` |`4d!6` or `d!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the dice set total. A reroll will be represented as two dice roll values |13 |left for binary and right for unary |none or a single number (max 1000) |a single number
-|Regular Dice |`<numberOfDice>d<numberOfFaces>` |`3d20`, `d20` or `3d[2/4/8]` |Throws a number of dice given by the left number. The number sides are given by the right number. If the right side a list, a element of the list is randomly picked. The roll is a list with the dice throw |14 |left for binary and right for unary |none or a single number (max 1000) |a single number or multiple values
+|Exploding Add Dice |`<numberOfDice>d!!<numberOfFaces>` |`3d!!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the die previous resul total. A roll of the reroll the sum of the value. |12 |left for binary and right for unary |none or a single positiv number (max 1000) |a single number
+|Exploding Dice |`<numberOfDice>d!<numberOfFaces>` |`4d!6` or `d!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the dice set total. A reroll will be represented as two dice roll values |13 |left for binary and right for unary |none or a single number (max 1000) |a single positiv number
+|Regular Dice |`<numberOfDice>d<numberOfFaces>` |`3d20`, `d20` or `3d[2/4/8]` |Throws a number of dice given by the left number. The number sides are given by the right number. If the right side a list, a element of the list is randomly picked. The roll is a list with the dice throw |14 |left for binary and right for unary |none or a single number (max 1000) |a single positiv number or multiple values
 |===
 
 === Functions
@@ -96,4 +98,4 @@ The number of dice is limited to 1000 and every number approve 2147483647 will b
 * intersection operator
 * Double evaluation for an expression to test for botch or critical success
 ** => possible solution: defining constance in the expression: \{3d6:diceA} (latexmath:[$diceA$]=)+(ifEqual(latexmath:[$diceA$]=6c,3,`critical success',`no critical success'),’’)
-* AddIf//ifLower/ifHigher?
+* AddIf/AddIfLower/AddIfHigher?

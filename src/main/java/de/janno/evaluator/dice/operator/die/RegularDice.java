@@ -4,14 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Operator;
-import de.janno.evaluator.dice.random.NumberSupplier;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import de.janno.evaluator.dice.operator.RollOperator;
+import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static de.janno.evaluator.dice.DiceHelper.*;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -56,9 +55,11 @@ public final class RegularDice extends RollOperator {
             int sidesOfDie = right.asInteger().get();
             rollElements = toRollElements(rollDice(numberOfDice, sidesOfDie, numberSupplier));
         } else {
-            rollElements = IntStream.range(0, numberOfDice)
-                    .mapToObj(i -> pickOneOf(right.getElements(), numberSupplier))
-                    .collect(ImmutableList.toImmutableList());
+            ImmutableList.Builder<RollElement> builder = ImmutableList.builder();
+            for (int i = 0; i < numberOfDice; i++) {
+                builder.add(pickOneOf(right.getElements(), numberSupplier));
+            }
+            rollElements = builder.build();
         }
         return new Roll(expression,
                 rollElements,

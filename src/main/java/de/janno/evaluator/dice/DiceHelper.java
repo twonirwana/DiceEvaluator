@@ -1,14 +1,20 @@
 package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
+import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 public final class DiceHelper {
-    public static @NonNull ImmutableList<Integer> explodingDice(int number, int sides, @NonNull NumberSupplier numberSupplier) {
+    public static @NonNull ImmutableList<Integer> explodingDice(int number, int sides, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
+        if (sides == 0) {
+            return ImmutableList.of();
+        }
+        if (sides < 0) {
+            throw new ExpressionException("Sides of dice to roll must be positive");
+        }
         ImmutableList.Builder<Integer> resultBuilder = ImmutableList.builder();
         int diceToRoll = number;
         while (diceToRoll > 0) {
@@ -26,14 +32,22 @@ public final class DiceHelper {
                 .collect(ImmutableList.toImmutableList());
     }
 
-    public static @NonNull ImmutableList<Integer> explodingAddDice(int number, int sides, @NonNull NumberSupplier numberSupplier) {
-        return IntStream.range(0, number)
-                .mapToObj(i -> rollExplodingAddDie(sides, numberSupplier))
-                .collect(ImmutableList.toImmutableList());
+    public static @NonNull ImmutableList<Integer> explodingAddDice(int number, int sides, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
+        if (sides == 0) {
+            return ImmutableList.of();
+        }
+        if (sides < 0) {
+            throw new ExpressionException("Sides of dice to roll must be positive");
+        }
+        ImmutableList.Builder<Integer> resultBuilder = ImmutableList.builder();
+        for (int i = 0; i < number; i++) {
+            resultBuilder.add(rollExplodingAddDie(sides, numberSupplier));
+        }
+        return resultBuilder.build();
     }
 
 
-    public static int rollExplodingAddDie(int sides, @NonNull NumberSupplier numberSupplier) {
+    public static int rollExplodingAddDie(int sides, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
         int current = numberSupplier.get(0, sides);
         int res = current;
         while (current == sides) {
@@ -43,13 +57,21 @@ public final class DiceHelper {
         return res;
     }
 
-    public static @NonNull ImmutableList<Integer> rollDice(int number, int sides, @NonNull NumberSupplier numberSupplier) {
-        return IntStream.range(0, number)
-                .mapToObj(i -> numberSupplier.get(0, sides))
-                .collect(ImmutableList.toImmutableList());
+    public static @NonNull ImmutableList<Integer> rollDice(int number, int sides, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
+        if (sides == 0) {
+            return ImmutableList.of();
+        }
+        if (sides < 0) {
+            throw new ExpressionException("Sides of dice to roll must be positive");
+        }
+        ImmutableList.Builder<Integer> resultBuilder = ImmutableList.builder();
+        for (int i = 0; i < number; i++) {
+            resultBuilder.add(numberSupplier.get(0, sides));
+        }
+        return resultBuilder.build();
     }
 
-    public static @NonNull RollElement pickOneOf(List<RollElement> list, @NonNull NumberSupplier numberSupplier) {
+    public static @NonNull RollElement pickOneOf(List<RollElement> list, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
         return list.get(numberSupplier.get(0, list.size()) - 1);
     }
 }

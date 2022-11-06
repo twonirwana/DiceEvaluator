@@ -44,7 +44,7 @@ public abstract class AbstractEvaluator<T> {
             Operator<T> operator = token.getOperator().get();
             int argumentCount = token.getOperatorType().orElseThrow().argumentCount;
             if (values.size() < argumentCount) {
-                throw new ExpressionException("Not enough values, %s needs %d but there where only %s".formatted(operator, argumentCount, values));
+                throw new ExpressionException("Not enough values, %s needs %d but there where only %s".formatted(operator.getNames(), argumentCount, values));
             }
             values.push(operator.evaluate(getArguments(values, argumentCount)));
         } else {

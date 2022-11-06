@@ -2,6 +2,7 @@ package de.janno.evaluator.dice;
 
 import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
+import de.janno.evaluator.dice.random.RandomNumberSupplier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -153,7 +154,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("ifL(1d6,3,'three')", List.of(4), List.of("4")),
                 Arguments.of("[b/2/a]k2", List.of(), List.of("b", "a")),
                 Arguments.of("[b/2/a]l2", List.of(), List.of("2", "a")),
-                Arguments.of("3.5+2.5", List.of(), List.of("3.5", "2.5"))
+                Arguments.of("3.5+2.5", List.of(), List.of("3.5", "2.5")),
+                Arguments.of("1d0", List.of(), List.of())
         );
     }
 
@@ -190,12 +192,15 @@ public class DiceEvaluatorTest {
                 Arguments.of("2147483647*2=", "integer overflow"),
                 Arguments.of("1/0", "/ by zero"),
                 Arguments.of("color(3d6,[a/b])", "'color' requires as second argument a single element but was '[a, b]'"),
-                Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as 1 argument a single element but was '[6, 6]'"),
-                Arguments.of("ifL(1d6,2d6,'three','not three')", "'ifL' requires as 2 argument a single element but was '[6, 6]'"),
-                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[6, 6]'"),
-                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[6, 6]'"),
-                Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[6, 6]'"),
-                Arguments.of("'3''5'", "There need to be an operator or a separator between two values")
+                Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as 1 argument a single element but was '[4, 1]'"),
+                Arguments.of("ifL(1d6,2d6,'three','not three')", "'ifL' requires as 2 argument a single element but was '[6, 3]'"),
+                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 6]'"),
+                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 2]'"),
+                Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[4, 1]'"),
+                Arguments.of("'3''5'", "There need to be an operator or a separator between two values"),
+                Arguments.of("1d-1", "Not enough values, [d, D] needs 2 but there where only [Roll(expression=1, elements=[1], randomElementsInRoll=[], childrenRolls=[])]"),
+                Arguments.of("d-1", "Not enough values, [d, D] needs 1 but there where only []"),
+                Arguments.of("d'-1'", "Sides of dice to roll must be positive")
         );
     }
 
@@ -417,7 +422,7 @@ public class DiceEvaluatorTest {
     @ParameterizedTest(name = "{index} {0} -> {1}")
     @MethodSource("generateErrorData")
     void testError(String input, String expectedMessage) {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000);
         assertThatThrownBy(() -> underTest.evaluate(input))
                 .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
                 .hasMessage(expectedMessage);
