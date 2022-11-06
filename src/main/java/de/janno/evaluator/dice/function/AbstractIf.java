@@ -3,6 +3,7 @@ package de.janno.evaluator.dice.function;
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.dice.Roll;
+import de.janno.evaluator.dice.RollElement;
 import lombok.NonNull;
 
 import java.util.List;
@@ -25,7 +26,10 @@ public abstract class AbstractIf extends RollFunction {
             if (compare(input, counter, compareTo, counter + 1)) {
                 return new Roll(getExpression(getPrimaryName(), arguments),
                         trueResult.getElements(),
-                        input.getRandomElementsInRoll(),
+                        ImmutableList.<ImmutableList<RollElement>>builder()
+                                .addAll(input.getRandomElementsInRoll())
+                                .addAll(trueResult.getRandomElementsInRoll())
+                                .build(),
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(trueResult.getChildrenRolls())
@@ -35,14 +39,20 @@ public abstract class AbstractIf extends RollFunction {
         }
 
         final Roll result;
+        final ImmutableList<ImmutableList<RollElement>> randomElementsInRoll;
         if (counter == arguments.size()) {
             result = arguments.get(0);
+            randomElementsInRoll = input.getRandomElementsInRoll();
         } else {
             result = arguments.get(arguments.size() - 1);
+            randomElementsInRoll = ImmutableList.<ImmutableList<RollElement>>builder()
+                    .addAll(input.getRandomElementsInRoll())
+                    .addAll(result.getRandomElementsInRoll())
+                    .build();
         }
         return new Roll(getExpression(getPrimaryName(), arguments),
                 result.getElements(),
-                input.getRandomElementsInRoll(),
+                randomElementsInRoll,
                 ImmutableList.<Roll>builder()
                         .addAll(input.getChildrenRolls())
                         .addAll(result.getChildrenRolls())

@@ -298,6 +298,36 @@ public class DiceEvaluatorTest {
     }
 
     @Test
+    void getRandomElementsIfE_true() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000);
+        List<Roll> res = underTest.evaluate("ifE(1d20,1,1d20)");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RollElement::getValue).toList()))
+                .containsExactlyInAnyOrder(List.of("1"), List.of("2"));
+    }
+
+    @Test
+    void getRandomElementsIfE_false() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3), 1000);
+        List<Roll> res = underTest.evaluate("ifE(1d20,1,1d20)");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RollElement::getValue).toList()))
+                .containsExactlyInAnyOrder(List.of("3"));
+    }
+
+    @Test
+    void getRandomElementsIfE_else() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 4), 1000);
+        List<Roll> res = underTest.evaluate("ifE(1d20,1,1d20, 1d20)");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RollElement::getValue).toList()))
+                .containsExactlyInAnyOrder(List.of("3"), List.of("4"));
+    }
+
+    @Test
     void toStringTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
         List<Roll> res = underTest.evaluate("1d6 + 3d20 + 10 +min(2d6,3d4)");
