@@ -196,7 +196,7 @@ public abstract class AbstractEvaluator<T> {
             } else {
                 // If the token is literal then add its value to the output queue.
                 if (previous.flatMap(Token::getLiteral).isPresent()) {
-                    throw new ExpressionException("A literal can't follow another literal");
+                    throw new ExpressionException("There need to be an operator or a separator between two values");
                 }
                 processTokenToValues(values, token);
             }

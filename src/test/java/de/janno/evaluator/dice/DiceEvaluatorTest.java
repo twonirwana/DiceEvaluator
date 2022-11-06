@@ -194,7 +194,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("ifL(1d6,2d6,'three','not three')", "'ifL' requires as 2 argument a single element but was '[6, 6]'"),
                 Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[6, 6]'"),
                 Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[6, 6]'"),
-                Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[6, 6]'")
+                Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[6, 6]'"),
+                Arguments.of("'3''5'", "There need to be an operator or a separator between two values")
         );
     }
 
