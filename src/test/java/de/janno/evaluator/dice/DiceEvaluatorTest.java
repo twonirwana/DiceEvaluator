@@ -350,7 +350,7 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("3d(20 + 10=)");
 
         assertThat(res).hasSize(1);
-        assertThat(res.get(0).getRandomElementsString()).isEqualTo("3, 2, 1");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3, 2, 1]");
         assertThat(res.get(0).getResultString()).isEqualTo("3, 2, 1");
         assertThat(res.get(0).getExpression()).isEqualTo("3d20+10=");
     }

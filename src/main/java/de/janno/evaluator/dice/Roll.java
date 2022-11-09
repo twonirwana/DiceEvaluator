@@ -36,9 +36,6 @@ public class Roll {
     }
 
     public String getRandomElementsString() {
-        if (randomElementsInRoll.size() == 1) {
-            return randomElementsInRoll.get(0).stream().map(RollElement::toString).collect(Collectors.joining(", "));
-        }
         return randomElementsInRoll.stream().map(AbstractCollection::toString).collect(Collectors.joining(" "));
     }
 }
