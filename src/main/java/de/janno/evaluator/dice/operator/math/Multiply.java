@@ -3,6 +3,7 @@ package de.janno.evaluator.dice.operator.math;
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Operator;
+import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import de.janno.evaluator.dice.operator.RollOperator;
@@ -30,7 +31,7 @@ public final class Multiply extends RollOperator {
 
         return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
                 res,
-                ImmutableList.<ImmutableList<RollElement>>builder()
+                ImmutableList.<ImmutableList<RandomElement>>builder()
                         .addAll(left.getRandomElementsInRoll())
                         .addAll(right.getRandomElementsInRoll())
                         .build(),

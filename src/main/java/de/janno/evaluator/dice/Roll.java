@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 import lombok.Value;
 
-import java.util.AbstractCollection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class Roll {
     @NonNull
     ImmutableList<RollElement> elements;
     @NonNull
-    ImmutableList<ImmutableList<RollElement>> randomElementsInRoll;
+    ImmutableList<ImmutableList<RandomElement>> randomElementsInRoll;
     @NonNull
     ImmutableList<Roll> childrenRolls;
 
@@ -36,6 +35,8 @@ public class Roll {
     }
 
     public String getRandomElementsString() {
-        return randomElementsInRoll.stream().map(AbstractCollection::toString).collect(Collectors.joining(" "));
+        return randomElementsInRoll.stream()
+                .map(l -> l.stream().map(RandomElement::getValue).toList().toString())
+                .collect(Collectors.joining(" "));
     }
 }

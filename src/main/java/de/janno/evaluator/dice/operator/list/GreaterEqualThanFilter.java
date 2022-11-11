@@ -2,6 +2,7 @@ package de.janno.evaluator.dice.operator.list;
 
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import de.janno.evaluator.dice.operator.RollOperator;
@@ -32,7 +33,7 @@ public class GreaterEqualThanFilter extends RollOperator {
                 .collect(ImmutableList.toImmutableList());
         return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
                 diceResult,
-                ImmutableList.<ImmutableList<RollElement>>builder()
+                ImmutableList.<ImmutableList<RandomElement>>builder()
                         .addAll(left.getRandomElementsInRoll())
                         .addAll(right.getRandomElementsInRoll())
                         .build(),

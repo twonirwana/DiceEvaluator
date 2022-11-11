@@ -4,13 +4,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Operator;
-import de.janno.evaluator.dice.random.NumberSupplier;
+import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import de.janno.evaluator.dice.operator.RollOperator;
+import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static de.janno.evaluator.dice.DiceHelper.explodingDice;
 import static de.janno.evaluator.dice.DiceHelper.toRollElements;
@@ -29,28 +31,48 @@ public final class ExplodingDice extends RollOperator {
 
     @Override
     public @NonNull Roll evaluate(@NonNull List<Roll> operands) throws ExpressionException {
-
+        ImmutableList.Builder<ImmutableList<RandomElement>> randomElements = ImmutableList.builder();
         if (operands.size() == 1) {
-            Roll right = operands.get(0);
-            int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
-            ImmutableList<RollElement> rollElements = toRollElements(explodingDice(1, sidesOfDie, numberSupplier));
+            final Roll right = operands.get(0);
+            final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
+            final ImmutableList<RollElement> rollElements = toRollElements(explodingDice(1, sidesOfDie, numberSupplier));
+            if (right.getRandomElementsInRoll().size() > 0) {
+                randomElements.addAll(right.getRandomElementsInRoll());
+            }
+            final ImmutableList<String> randomSelectedFrom = IntStream.range(1, sidesOfDie + 1).mapToObj(String::valueOf).collect(ImmutableList.toImmutableList());
+
+            randomElements.add(rollElements.stream()
+                    .map(r -> new RandomElement(r.getValue(), randomSelectedFrom))
+                    .collect(ImmutableList.toImmutableList()));
+
             return new Roll(getRightUnaryExpression(getPrimaryName(), operands),
                     rollElements,
-                    ImmutableList.of(rollElements),
+                    randomElements.build(),
                     ImmutableList.of(right));
         }
 
-        Roll left = operands.get(0);
-        Roll right = operands.get(1);
-        int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
+        final Roll left = operands.get(0);
+        final Roll right = operands.get(1);
+        if (left.getRandomElementsInRoll().size() > 0) {
+            randomElements.addAll(left.getRandomElementsInRoll());
+        }
+        if (right.getRandomElementsInRoll().size() > 0) {
+            randomElements.addAll(right.getRandomElementsInRoll());
+        }
+        final int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
         if (Math.abs(numberOfDice) > maxNumberOfDice) {
             throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
         }
-        int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
-        ImmutableList<RollElement> rollElements = toRollElements(explodingDice(numberOfDice, sidesOfDie, numberSupplier));
+        final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
+        final ImmutableList<RollElement> rollElements = toRollElements(explodingDice(numberOfDice, sidesOfDie, numberSupplier));
+        final ImmutableList<String> randomSelectedFrom = IntStream.range(1, sidesOfDie + 1).mapToObj(String::valueOf).collect(ImmutableList.toImmutableList());
+
+        randomElements.add(rollElements.stream()
+                .map(r -> new RandomElement(r.getValue(), randomSelectedFrom))
+                .collect(ImmutableList.toImmutableList()));
         return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
                 rollElements,
-                ImmutableList.of(rollElements),
+                randomElements.build(),
                 ImmutableList.of(left, right));
     }
 }

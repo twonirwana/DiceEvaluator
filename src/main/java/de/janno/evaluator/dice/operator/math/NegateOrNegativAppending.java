@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.Operator;
+import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import de.janno.evaluator.dice.operator.OperatorOrder;
@@ -46,7 +47,7 @@ public final class NegateOrNegativAppending extends RollOperator {
 
         return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
                 res,
-                ImmutableList.<ImmutableList<RollElement>>builder()
+                ImmutableList.<ImmutableList<RandomElement>>builder()
                         .addAll(left.getRandomElementsInRoll())
                         .addAll(right.getRandomElementsInRoll())
                         .build(),

@@ -1,5 +1,6 @@
 package de.janno.evaluator.dice;
 
+import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
@@ -210,6 +211,7 @@ public class DiceEvaluatorTest {
 
         List<Roll> res = underTest.evaluate("ifG(1d6,5,'>5',4,'>4','false')");
 
+
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
     }
 
@@ -299,8 +301,8 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("1d6 + 3d20 + 10");
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RollElement::getValue).toList()))
-                .containsExactlyInAnyOrder(List.of("3"), List.of("2", "1", "4"));
+                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+                .containsExactly(List.of("3"), List.of("2", "1", "4"));
     }
 
     @Test
@@ -309,8 +311,8 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("ifE(1d20,1,1d20)");
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RollElement::getValue).toList()))
-                .containsExactlyInAnyOrder(List.of("1"), List.of("2"));
+                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+                .containsExactly(List.of("1"), List.of("2"));
     }
 
     @Test
@@ -319,8 +321,8 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("ifE(1d20,1,1d20)");
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RollElement::getValue).toList()))
-                .containsExactlyInAnyOrder(List.of("3"));
+                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+                .containsExactly(List.of("3"));
     }
 
     @Test
@@ -329,8 +331,68 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("ifE(1d20,1,1d20, 1d20)");
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RollElement::getValue).toList()))
-                .containsExactlyInAnyOrder(List.of("3"), List.of("4"));
+                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+                .containsExactly(List.of("3"), List.of("4"));
+    }
+
+    @Test
+    void getRandomElements_regularDice() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
+        List<Roll> res = underTest.evaluate("(2d4=)d6");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+                .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RandomElement::getRandomSelectedFrom).toList()))
+                .containsExactly(List.of(ImmutableList.of("1", "2", "3", "4"), ImmutableList.of("1", "2", "3", "4")),
+                        List.of(ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6")));
+    }
+
+    @Test
+    void getRandomElements_customDice() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
+        List<Roll> res = underTest.evaluate("(2d4=)d[a/b/c/d/e/f]");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+                .containsExactly(List.of("1", "2"), List.of("d", "d", "e"));
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RandomElement::getRandomSelectedFrom).toList()))
+                .containsExactly(List.of(ImmutableList.of("1", "2", "3", "4"), ImmutableList.of("1", "2", "3", "4")),
+                        List.of(ImmutableList.of("a", "b", "c", "d", "e", "f"), ImmutableList.of("a", "b", "c", "d", "e", "f"), ImmutableList.of("a", "b", "c", "d", "e", "f")));
+    }
+
+    @Test
+    void getRandomElements_explodingDice() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
+        List<Roll> res = underTest.evaluate("(2d!4=)d!6");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+                .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RandomElement::getRandomSelectedFrom).toList()))
+                .containsExactly(List.of(ImmutableList.of("1", "2", "3", "4"), ImmutableList.of("1", "2", "3", "4")),
+                        List.of(ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6")));
+    }
+
+    @Test
+    void getRandomElements_explodingAddDice() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
+        List<Roll> res = underTest.evaluate("(2d!!4=)d!!6");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+                .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+                .map(r -> r.stream().map(RandomElement::getRandomSelectedFrom).toList()))
+                .containsExactly(List.of(ImmutableList.of("1", "2", "3", "4"), ImmutableList.of("1", "2", "3", "4")),
+                        List.of(ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6")));
     }
 
     @Test
