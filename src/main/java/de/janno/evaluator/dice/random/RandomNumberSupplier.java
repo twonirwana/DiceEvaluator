@@ -3,11 +3,13 @@ package de.janno.evaluator.dice.random;
 import com.google.common.annotations.VisibleForTesting;
 import de.janno.evaluator.ExpressionException;
 
+import java.util.random.RandomGenerator;
+
 /**
  * Provides random numbers
  */
 public class RandomNumberSupplier implements NumberSupplier {
-    private final ThreadLocalSfc64Random randomSource;
+    private final RandomGenerator randomSource;
 
     public RandomNumberSupplier() {
         randomSource = new ThreadLocalSfc64Random();
@@ -15,7 +17,7 @@ public class RandomNumberSupplier implements NumberSupplier {
 
     @VisibleForTesting
     public RandomNumberSupplier(long seed) {
-        randomSource = new ThreadLocalSfc64Random(seed);
+        randomSource = new Sfc64Random(seed);
     }
 
     public int get(int minExcl, int maxIncl) throws ExpressionException {

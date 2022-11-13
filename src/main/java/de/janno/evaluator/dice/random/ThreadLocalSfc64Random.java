@@ -1,6 +1,5 @@
 package de.janno.evaluator.dice.random;
 
-import com.google.common.annotations.VisibleForTesting;
 import lombok.NonNull;
 
 import java.util.random.RandomGenerator;
@@ -12,18 +11,8 @@ import java.util.random.RandomGenerator;
 public class ThreadLocalSfc64Random implements RandomGenerator {
     private static final ThreadLocal<Sfc64Random> localRandom = new ThreadLocal<>();
 
-    private final Long seed;
-
     public ThreadLocalSfc64Random() {
         // Might as well create the random generator, as this thread will use it at some point.
-        seed = null;
-        getLocalRandom();
-    }
-
-    @VisibleForTesting
-    ThreadLocalSfc64Random(long seed) {
-        // Might as well create the random generator, as this thread will use it at some point.
-        this.seed = seed;
         getLocalRandom();
     }
 
@@ -37,12 +26,7 @@ public class ThreadLocalSfc64Random implements RandomGenerator {
         final Sfc64Random currentLocalRandom = localRandom.get();
 
         if (currentLocalRandom == null) {
-            final Sfc64Random newLocalRandom;
-            if (seed == null) {
-                newLocalRandom = new Sfc64Random();
-            } else {
-                newLocalRandom = new Sfc64Random(seed);
-            }
+            final Sfc64Random newLocalRandom = new Sfc64Random();
             localRandom.set(newLocalRandom);
             return newLocalRandom;
         }

@@ -1,7 +1,10 @@
 package de.janno.evaluator.dice.random;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import java.util.*;
 
+@VisibleForTesting
 public class GivenNumberSupplier implements NumberSupplier {
 
     final private Deque<Integer> results;
