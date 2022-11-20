@@ -209,7 +209,7 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator((a, b) -> 6, 1000);
 
-        List<Roll> res = underTest.evaluate("ifG(1d6,5,'>5',4,'>4','false')");
+        List<Roll> res = underTest.evaluate("ifE(d!!10,-d!!10,%1)");
 
 
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
@@ -295,45 +295,29 @@ public class DiceEvaluatorTest {
                 .hasMessage("/ by zero");
     }
 
-    @Test
-    void getRandomElements() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
-        List<Roll> res = underTest.evaluate("1d6 + 3d20 + 10");
+    private static Stream<Arguments> generateRandomDiceData() {
+        return Stream.of(
+                Arguments.of("ifE(1d20,1d20,1d20)", List.of(1, 1, 2), List.of(List.of("1"), List.of("1"), List.of("2"))),
+                Arguments.of("ifE(1d20,1d20,1d20)", List.of(3, 2), List.of(List.of("3"), List.of("2"))),
+                Arguments.of("ifE(1d20,1d20,1d20,1d20)", List.of(3, 4, 2, 4), List.of(List.of("3"), List.of("4"), List.of("4"))),
+                Arguments.of("ifE(1d20,1,2)", List.of(1, 1, 2), List.of(List.of("1"))),
+                Arguments.of("ifE(1d20,2,3)", List.of(3, 2), List.of(List.of("3"))),
+                Arguments.of("ifE(1d20,4,1d20,4)", List.of(3, 4, 2, 4), List.of(List.of("3"))),
+                Arguments.of("ifE(3,4,1d20,4)", List.of(3, 4, 2, 4), List.of()),
+                Arguments.of("1d6 + 3d20 + 10", List.of(3, 2, 1, 4), List.of(List.of("3"), List.of("2", "1", "4")))
+        );
+    }
+    @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
+    @MethodSource("generateRandomDiceData")
+    void getRandomElements(String expression, List<Integer> diceThrows, List<List<String>> expectedRandomElements) throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceThrows), 1000);
+        List<Roll> res = underTest.evaluate(expression);
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
                 .map(r -> r.stream().map(RandomElement::getValue).toList()))
-                .containsExactly(List.of("3"), List.of("2", "1", "4"));
+                .containsExactlyElementsOf(expectedRandomElements);
     }
 
-    @Test
-    void getRandomElementsIfE_true() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000);
-        List<Roll> res = underTest.evaluate("ifE(1d20,1,1d20)");
-
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getValue).toList()))
-                .containsExactly(List.of("1"), List.of("2"));
-    }
-
-    @Test
-    void getRandomElementsIfE_false() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3), 1000);
-        List<Roll> res = underTest.evaluate("ifE(1d20,1,1d20)");
-
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getValue).toList()))
-                .containsExactly(List.of("3"));
-    }
-
-    @Test
-    void getRandomElementsIfE_else() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 4), 1000);
-        List<Roll> res = underTest.evaluate("ifE(1d20,1,1d20, 1d20)");
-
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getValue).toList()))
-                .containsExactly(List.of("3"), List.of("4"));
-    }
 
     @Test
     void getRandomElements_regularDice() throws ExpressionException {

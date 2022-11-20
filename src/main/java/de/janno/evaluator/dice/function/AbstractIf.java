@@ -19,17 +19,19 @@ public abstract class AbstractIf extends RollFunction {
         Roll input = arguments.get(0);
 
         int counter = 1;
+        ImmutableList.Builder<ImmutableList<RandomElement>> randomElements = ImmutableList.builder();
+        randomElements.addAll(input.getRandomElementsInRoll());
         while (counter < arguments.size() - 1) {
             Roll compareTo = arguments.get(counter);
             Roll trueResult = arguments.get(counter + 1);
-
+            if (!compareTo.getRandomElementsInRoll().isEmpty()) {
+                randomElements.addAll(compareTo.getRandomElementsInRoll());
+            }
             if (compare(input, counter, compareTo, counter + 1)) {
+                randomElements.addAll(trueResult.getRandomElementsInRoll());
                 return new Roll(getExpression(getPrimaryName(), arguments),
                         trueResult.getElements(),
-                        ImmutableList.<ImmutableList<RandomElement>>builder()
-                                .addAll(input.getRandomElementsInRoll())
-                                .addAll(trueResult.getRandomElementsInRoll())
-                                .build(),
+                        randomElements.build(),
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(trueResult.getChildrenRolls())
@@ -39,20 +41,17 @@ public abstract class AbstractIf extends RollFunction {
         }
 
         final Roll result;
-        final ImmutableList<ImmutableList<RandomElement>> randomElementsInRoll;
-        if (counter == arguments.size()) {
-            result = arguments.get(0);
-            randomElementsInRoll = input.getRandomElementsInRoll();
-        } else {
+        //there is a last element in the arguments, which is the default result
+        if (counter != arguments.size())  {
             result = arguments.get(arguments.size() - 1);
-            randomElementsInRoll = ImmutableList.<ImmutableList<RandomElement>>builder()
-                    .addAll(input.getRandomElementsInRoll())
-                    .addAll(result.getRandomElementsInRoll())
-                    .build();
+            randomElements.addAll(result.getRandomElementsInRoll());
+        } else {
+            //if there is no default result, the result is the input
+            result = input;
         }
         return new Roll(getExpression(getPrimaryName(), arguments),
                 result.getElements(),
-                randomElementsInRoll,
+                randomElements.build(),
                 ImmutableList.<Roll>builder()
                         .addAll(input.getChildrenRolls())
                         .addAll(result.getChildrenRolls())
