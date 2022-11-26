@@ -2,19 +2,38 @@ package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 @Value
-@RequiredArgsConstructor
 public class RandomElement implements Comparable<RandomElement> {
     @NonNull
     String value;
 
-    @NonNull
+    @Nullable
     ImmutableList<String> randomSelectedFrom;
+
+    @Nullable
+    Integer minInc;
+
+    @Nullable
+    Integer maxInc;
+
+    public RandomElement(@NonNull String value, ImmutableList<String> randomSelectedFrom) {
+        this.value = value;
+        this.randomSelectedFrom = randomSelectedFrom;
+        this.minInc = null;
+        this.maxInc = null;
+    }
+
+    public RandomElement(@NonNull String value, int minInc, int maxInc) {
+        this.value = value;
+        this.minInc = minInc;
+        this.maxInc = maxInc;
+        this.randomSelectedFrom = null;
+    }
 
     private static boolean isInteger(String value) {
         try {
@@ -22,6 +41,14 @@ public class RandomElement implements Comparable<RandomElement> {
             return true;
         } catch (NumberFormatException e) {
             return false;
+        }
+    }
+
+    public String toString() {
+        if (randomSelectedFrom != null) {
+            return "%s∈%s".formatted(value, randomSelectedFrom);
+        } else {
+            return "%s∈[%d...%d]".formatted(value, minInc, maxInc);
         }
     }
 

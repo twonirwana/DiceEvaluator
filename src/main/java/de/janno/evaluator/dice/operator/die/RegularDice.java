@@ -12,7 +12,6 @@ import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static de.janno.evaluator.dice.DiceHelper.*;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -56,17 +55,19 @@ public final class RegularDice extends RollOperator {
         if (right.getRandomElementsInRoll().size() > 0) {
             randomElements.addAll(right.getRandomElementsInRoll());
         }
-        if (Math.abs(numberOfDice) > maxNumberOfDice) {
+        if (numberOfDice > maxNumberOfDice) {
             throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
+        }
+        if (numberOfDice < 0) {
+            throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
         }
         final ImmutableList<RollElement> rollElements;
         if (right.asInteger().isPresent()) {
             int sidesOfDie = right.asInteger().get();
             rollElements = toRollElements(rollDice(numberOfDice, sidesOfDie, numberSupplier));
-            final ImmutableList<String> randomSelectedFrom = IntStream.range(1, sidesOfDie + 1).mapToObj(String::valueOf).collect(ImmutableList.toImmutableList());
 
             randomElements.add(rollElements.stream()
-                    .map(r -> new RandomElement(r.getValue(), randomSelectedFrom))
+                    .map(r -> new RandomElement(r.getValue(), 1, sidesOfDie))
                     .collect(ImmutableList.toImmutableList()));
         } else {
             ImmutableList.Builder<RollElement> builder = ImmutableList.builder();
