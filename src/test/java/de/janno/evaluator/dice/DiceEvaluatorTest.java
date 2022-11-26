@@ -1,6 +1,5 @@
 package de.janno.evaluator.dice;
 
-import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
@@ -10,6 +9,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -201,7 +203,22 @@ public class DiceEvaluatorTest {
                 Arguments.of("'3''5'", "There need to be an operator or a separator between two values"),
                 Arguments.of("1d-1", "Not enough values, [d, D] needs 2 but there where only [Roll(expression=1, elements=[1], randomElementsInRoll=[], childrenRolls=[])]"),
                 Arguments.of("d-1", "Not enough values, [d, D] needs 1 but there where only []"),
+                Arguments.of("d!1", "The number of sides of a die must be greater then 1 but was 1"),
+                Arguments.of("d!!1", "The number of sides of a die must be greater then 1 but was 1"),
                 Arguments.of("d'-1'", "Sides of dice to roll must be positive")
+        );
+    }
+
+    private static Stream<Arguments> generateRandomDiceData() {
+        return Stream.of(
+                Arguments.of("ifE(1d20,1d20,1d20)", List.of(1, 1, 2), List.of(List.of("1"), List.of("1"), List.of("2"))),
+                Arguments.of("ifE(1d20,1d20,1d20)", List.of(3, 2), List.of(List.of("3"), List.of("2"))),
+                Arguments.of("ifE(1d20,1d20,1d20,1d20)", List.of(3, 4, 2, 4), List.of(List.of("3"), List.of("4"), List.of("4"))),
+                Arguments.of("ifE(1d20,1,2)", List.of(1, 1, 2), List.of(List.of("1"))),
+                Arguments.of("ifE(1d20,2,3)", List.of(3, 2), List.of(List.of("3"))),
+                Arguments.of("ifE(1d20,4,1d20,4)", List.of(3, 4, 2, 4), List.of(List.of("3"))),
+                Arguments.of("ifE(3,4,1d20,4)", List.of(3, 4, 2, 4), List.of()),
+                Arguments.of("1d6 + 3d20 + 10", List.of(3, 2, 1, 4), List.of(List.of("3"), List.of("2", "1", "4")))
         );
     }
 
@@ -213,6 +230,60 @@ public class DiceEvaluatorTest {
 
 
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
+    }
+
+    @Test
+    void testRegularDieHeap() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+
+        List<Roll> res = underTest.evaluate("1000d" + (Integer.MAX_VALUE - 1));
+
+        assertThat(res.get(0).getElements()).hasSize(1000);
+    }
+
+    @Test
+    void testCustomDieHeap() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+
+        List<Roll> res = underTest.evaluate("1000d[" + IntStream.range(0, 1000).mapToObj(i -> "1").collect(Collectors.joining("/")) + "]");
+
+        assertThat(res.get(0).getElements()).hasSize(1000);
+    }
+
+    @Test
+    void testExplodingDieMaxHeap() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+
+        List<Roll> res = underTest.evaluate("1000d!" + (Integer.MAX_VALUE - 1));
+
+        assertThat(res.get(0).getElements()).hasSize(1000);
+    }
+
+    @Test
+    void testExplodingDieTwoHeap() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+
+        List<Roll> res = underTest.evaluate("1000d!2");
+
+        assertThat(res.get(0).getElements()).hasSizeGreaterThan(1000);
+    }
+
+    @Test
+    void testExplodingAddDieMaxHeap() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+
+        List<Roll> res = underTest.evaluate("1000d!!" + (Integer.MAX_VALUE - 1));
+
+        assertThat(res.get(0).getElements()).hasSize(1000);
+    }
+
+    @Test
+    void testExplodingAddDieTwoHeap() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+
+        List<Roll> res = underTest.evaluate("1000d!!2");
+
+        assertThat(res.get(0).getElements()).hasSize(1000);
     }
 
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
@@ -232,7 +303,6 @@ public class DiceEvaluatorTest {
 
         assertThat(values(res)).containsExactly("1", "3", "12", "20");
     }
-
 
     @Test
     void sortDesc() throws ExpressionException {
@@ -295,18 +365,6 @@ public class DiceEvaluatorTest {
                 .hasMessage("/ by zero");
     }
 
-    private static Stream<Arguments> generateRandomDiceData() {
-        return Stream.of(
-                Arguments.of("ifE(1d20,1d20,1d20)", List.of(1, 1, 2), List.of(List.of("1"), List.of("1"), List.of("2"))),
-                Arguments.of("ifE(1d20,1d20,1d20)", List.of(3, 2), List.of(List.of("3"), List.of("2"))),
-                Arguments.of("ifE(1d20,1d20,1d20,1d20)", List.of(3, 4, 2, 4), List.of(List.of("3"), List.of("4"), List.of("4"))),
-                Arguments.of("ifE(1d20,1,2)", List.of(1, 1, 2), List.of(List.of("1"))),
-                Arguments.of("ifE(1d20,2,3)", List.of(3, 2), List.of(List.of("3"))),
-                Arguments.of("ifE(1d20,4,1d20,4)", List.of(3, 4, 2, 4), List.of(List.of("3"))),
-                Arguments.of("ifE(3,4,1d20,4)", List.of(3, 4, 2, 4), List.of()),
-                Arguments.of("1d6 + 3d20 + 10", List.of(3, 2, 1, 4), List.of(List.of("3"), List.of("2", "1", "4")))
-        );
-    }
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
     @MethodSource("generateRandomDiceData")
     void getRandomElements(String expression, List<Integer> diceThrows, List<List<String>> expectedRandomElements) throws ExpressionException {
@@ -329,9 +387,8 @@ public class DiceEvaluatorTest {
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getRandomSelectedFrom).toList()))
-                .containsExactly(List.of(ImmutableList.of("1", "2", "3", "4"), ImmutableList.of("1", "2", "3", "4")),
-                        List.of(ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6")));
+                .map(r -> r.stream().map(RandomElement::getMaxInc).toList()))
+                .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
 
     @Test
@@ -343,10 +400,8 @@ public class DiceEvaluatorTest {
                 .map(r -> r.stream().map(RandomElement::getValue).toList()))
                 .containsExactly(List.of("1", "2"), List.of("d", "d", "e"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getRandomSelectedFrom).toList()))
-                .containsExactly(List.of(ImmutableList.of("1", "2", "3", "4"), ImmutableList.of("1", "2", "3", "4")),
-                        List.of(ImmutableList.of("a", "b", "c", "d", "e", "f"), ImmutableList.of("a", "b", "c", "d", "e", "f"), ImmutableList.of("a", "b", "c", "d", "e", "f")));
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream().map(Objects::toString)))
+                .containsExactly("[1∈[1...4], 2∈[1...4]]", "[d∈[a, b, c, d, e, f], d∈[a, b, c, d, e, f], e∈[a, b, c, d, e, f]]");
     }
 
     @Test
@@ -359,9 +414,8 @@ public class DiceEvaluatorTest {
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getRandomSelectedFrom).toList()))
-                .containsExactly(List.of(ImmutableList.of("1", "2", "3", "4"), ImmutableList.of("1", "2", "3", "4")),
-                        List.of(ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6")));
+                .map(r -> r.stream().map(RandomElement::getMaxInc).toList()))
+                .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
 
     @Test
@@ -374,9 +428,8 @@ public class DiceEvaluatorTest {
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getRandomSelectedFrom).toList()))
-                .containsExactly(List.of(ImmutableList.of("1", "2", "3", "4"), ImmutableList.of("1", "2", "3", "4")),
-                        List.of(ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6"), ImmutableList.of("1", "2", "3", "4", "5", "6")));
+                .map(r -> r.stream().map(RandomElement::getMaxInc).toList()))
+                .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
 
     @Test
