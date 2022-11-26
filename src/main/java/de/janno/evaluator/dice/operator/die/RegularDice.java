@@ -55,8 +55,11 @@ public final class RegularDice extends RollOperator {
         if (right.getRandomElementsInRoll().size() > 0) {
             randomElements.addAll(right.getRandomElementsInRoll());
         }
-        if (Math.abs(numberOfDice) > maxNumberOfDice) {
+        if (numberOfDice > maxNumberOfDice) {
             throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
+        }
+        if (numberOfDice < 0) {
+            throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
         }
         final ImmutableList<RollElement> rollElements;
         if (right.asInteger().isPresent()) {

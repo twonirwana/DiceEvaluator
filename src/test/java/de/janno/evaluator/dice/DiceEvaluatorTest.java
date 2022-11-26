@@ -205,6 +205,14 @@ public class DiceEvaluatorTest {
                 Arguments.of("d-1", "Not enough values, [d, D] needs 1 but there where only []"),
                 Arguments.of("d!1", "The number of sides of a die must be greater then 1 but was 1"),
                 Arguments.of("d!!1", "The number of sides of a die must be greater then 1 but was 1"),
+                Arguments.of("1d!1", "The number of sides of a die must be greater then 1 but was 1"),
+                Arguments.of("1d!!1", "The number of sides of a die must be greater then 1 but was 1"),
+                Arguments.of("1001d2", "The number of dice must be less or equal then 1000 but was 1001"),
+                Arguments.of("1001d!2", "The number of dice must be less or equal then 1000 but was 1001"),
+                Arguments.of("1001d!!2", "The number of dice must be less or equal then 1000 but was 1001"),
+                Arguments.of("(-6)d2", "The number of dice can not be negativ but was -6"),
+                Arguments.of("(-6)d!2", "The number of dice can not be negativ but was -6"),
+                Arguments.of("(-6)d!!2", "The number of dice can not be negativ but was -6"),
                 Arguments.of("d'-1'", "Sides of dice to roll must be positive")
         );
     }
@@ -228,7 +236,7 @@ public class DiceEvaluatorTest {
 
         List<Roll> res = underTest.evaluate("ifE(d!!10,-d!!10,%1)");
 
-
+        System.out.println(res);
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
     }
 
