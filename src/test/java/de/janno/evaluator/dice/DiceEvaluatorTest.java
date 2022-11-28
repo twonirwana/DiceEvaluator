@@ -1,6 +1,5 @@
 package de.janno.evaluator.dice;
 
-import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
 import org.junit.jupiter.api.Test;
@@ -395,7 +394,7 @@ public class DiceEvaluatorTest {
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getMaxInc).toList()))
+                .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
 
@@ -422,7 +421,7 @@ public class DiceEvaluatorTest {
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getMaxInc).toList()))
+                .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
 
@@ -436,7 +435,7 @@ public class DiceEvaluatorTest {
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getMaxInc).toList()))
+                .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
 

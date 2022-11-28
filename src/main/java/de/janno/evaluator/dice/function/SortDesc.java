@@ -1,7 +1,8 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Function;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import lombok.NonNull;
@@ -9,7 +10,7 @@ import lombok.NonNull;
 import java.util.Comparator;
 import java.util.List;
 
-public class SortDesc extends RollFunction {
+public class SortDesc extends Function {
 
     public SortDesc() {
         super("desc", 1, Integer.MAX_VALUE);

@@ -1,20 +1,21 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Function;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import lombok.NonNull;
 
 import java.util.List;
 
-public class Cancel extends RollFunction {
+public class Cancel extends Function {
     public Cancel() {
         super("cancel", 3);
     }
 
     @Override
-    protected @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
+    public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
         Roll input = arguments.get(0);
         Roll typeA = arguments.get(1);
         Roll typeB = arguments.get(2);

@@ -1,11 +1,10 @@
 package de.janno.evaluator.dice.operator.list;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
-import de.janno.evaluator.Operator;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Operator;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
-import de.janno.evaluator.dice.operator.RollOperator;
 import lombok.NonNull;
 
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
-public class Count extends RollOperator {
+public class Count extends Operator {
 
     public Count() {
         super(Set.of("c", "C"), Operator.Associativity.LEFT, getOderNumberOf(Count.class), null, null);

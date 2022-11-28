@@ -1,6 +1,7 @@
 package de.janno.evaluator.dice.operator;
 
 import com.google.common.collect.ImmutableList;
+import de.janno.evaluator.dice.Operator;
 import de.janno.evaluator.dice.operator.die.ExplodingAddDice;
 import de.janno.evaluator.dice.operator.die.ExplodingDice;
 import de.janno.evaluator.dice.operator.die.RegularDice;
@@ -13,8 +14,8 @@ import de.janno.evaluator.dice.operator.math.Appending;
 
 public final class OperatorOrder {
 
-    final static ImmutableList<Class<? extends RollOperator>> operatorOrderList =
-            ImmutableList.<Class<? extends RollOperator>>builder()
+    final static ImmutableList<Class<? extends Operator>> operatorOrderList =
+            ImmutableList.<Class<? extends Operator>>builder()
                     .add(Sum.class) //sum must be applied as last
                     .add(Multiply.class)
                     .add(Divide.class)
@@ -33,7 +34,7 @@ public final class OperatorOrder {
                     .add(RegularDice.class)
                     .build();
 
-    public static int getOderNumberOf(Class<? extends RollOperator> operatorDefinitionClass) {
+    public static int getOderNumberOf(Class<? extends Operator> operatorDefinitionClass) {
         return operatorOrderList.indexOf(operatorDefinitionClass);
     }
 }

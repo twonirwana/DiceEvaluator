@@ -1,5 +1,6 @@
-package de.janno.evaluator;
+package de.janno.evaluator.dice;
 
+import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 import org.junit.jupiter.api.Test;
 
@@ -9,37 +10,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TokenizerTest {
-    Operator<String> d = new Operator<>("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 1) {
+
+    Operator d = new Operator("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 1) {
 
         @Override
-        protected @NonNull String evaluate(@NonNull List<String> operands) {
-            return "dice";
+        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
+            return new Roll(operands.toString(), ImmutableList.of(new RollElement("dice", RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
         }
     };
-    Operator<String> plus = new Operator<>("+", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 2) {
+    Operator plus = new Operator("+", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 2) {
         @Override
-        protected @NonNull String evaluate(@NonNull List<String> operands) {
-            return "plus";
+        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
+            return new Roll(operands.toString(), ImmutableList.of(new RollElement("plus", RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
         }
     };
-    Operator<String> aRightLeft = new Operator<>("a", Operator.Associativity.RIGHT, 1, Operator.Associativity.LEFT, 1) {
+    Operator aRightLeft = new Operator("a", Operator.Associativity.RIGHT, 1, Operator.Associativity.LEFT, 1) {
         @Override
-        protected @NonNull String evaluate(@NonNull List<String> operands) {
-            return "a";
-        }
-    };
-
-    Operator<String> aLeft = new Operator<>("a", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 1) {
-        @Override
-        protected @NonNull String evaluate(@NonNull List<String> operands) {
-            return "a";
+        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
+            return new Roll(operands.toString(), ImmutableList.of(new RollElement("a", RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
         }
     };
 
-    Operator<String> aRight = new Operator<>("a", Operator.OperatorType.UNARY, Operator.Associativity.RIGHT, 1) {
+    Operator aLeft = new Operator("a", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 1) {
         @Override
-        protected @NonNull String evaluate(@NonNull List<String> operands) {
-            return "a";
+        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
+            return new Roll(operands.toString(), ImmutableList.of(new RollElement("a", RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
+
+        }
+    };
+
+    Operator aRight = new Operator("a", Operator.OperatorType.UNARY, Operator.Associativity.RIGHT, 1) {
+        @Override
+        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
+            return new Roll(operands.toString(), ImmutableList.of(new RollElement("a", RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
         }
     };
 
@@ -48,38 +51,38 @@ class TokenizerTest {
     void escapeTest1() throws ExpressionException {
 
 
-        Tokenizer<String> underTest = new Tokenizer<>(Parameters.<String>builder()
+        Tokenizer underTest = new Tokenizer(Parameters.builder()
                 .operator(d)
                 .operator(plus)
                 .escapeBracket(BracketPair.BRACKETS)
                 .build());
 
-        List<Token<String>> res = underTest.tokenize("1d5+6+[1d2]");
+        List<Token> res = underTest.tokenize("1d5+6+[1d2]");
         assertThat(res.stream().map(Token::toString)).containsExactly("'1'", "d", "'5'", "+", "'6'", "+", "'1d2'");
     }
 
     @Test
     void escapeTest2() throws ExpressionException {
 
-        Tokenizer<String> underTest = new Tokenizer<>(Parameters.<String>builder()
+        Tokenizer underTest = new Tokenizer(Parameters.builder()
                 .operator(d)
                 .operator(plus)
                 .escapeBracket(BracketPair.APOSTROPHE)
                 .build());
 
-        List<Token<String>> res = underTest.tokenize("a+'dd'+'dd'");
+        List<Token> res = underTest.tokenize("a+'dd'+'dd'");
         assertThat(res.stream().map(Token::toString)).containsExactly("'a'", "+", "'dd'", "+", "'dd'");
     }
 
     @Test
     void escapeTest3() throws ExpressionException {
-        Tokenizer<String> underTest = new Tokenizer<>(Parameters.<String>builder()
+        Tokenizer underTest = new Tokenizer(Parameters.builder()
                 .operator(d)
                 .operator(plus)
                 .escapeBracket(BracketPair.BRACKETS)
                 .build());
 
-        List<Token<String>> res = underTest.tokenize("[1d2]");
+        List<Token> res = underTest.tokenize("[1d2]");
 
         assertThat(res.stream().map(Token::toString)).containsExactly("'1d2'");
     }
@@ -87,33 +90,33 @@ class TokenizerTest {
     @Test
     void trim() throws ExpressionException {
 
-        Tokenizer<String> underTest = new Tokenizer<>(Parameters.<String>builder()
+        Tokenizer underTest = new Tokenizer(Parameters.builder()
                 .operator(d)
                 .operator(plus)
                 .escapeBracket(BracketPair.BRACKETS)
                 .build());
 
-        List<Token<String>> res = underTest.tokenize(" 1 d 6 + 3 ");
+        List<Token> res = underTest.tokenize(" 1 d 6 + 3 ");
 
         assertThat(res.stream().map(Token::toString)).containsExactly("'1'", "d", "'6'", "+", "'3'");
     }
 
     @Test
     void validate() {
-        Operator<String> d = new Operator<>("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 20) {
+        Operator d = new Operator("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 20) {
             @Override
-            protected @NonNull String evaluate(@NonNull List<String> operands) {
-                return "null";
+            public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
+                return new Roll(operands.toString(), ImmutableList.of(new RollElement("null", RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
             }
         };
-        Operator<String> d2 = new Operator<>("d", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 15) {
+        Operator d2 = new Operator("d", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 15) {
             @Override
-            protected @NonNull String evaluate(@NonNull List<String> operands) {
-                return "null";
+            public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
+                return new Roll(operands.toString(), ImmutableList.of(new RollElement("null", RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of());
             }
         };
 
-        assertThatThrownBy(() -> new Tokenizer<>(Parameters.<String>builder()
+        assertThatThrownBy(() -> new Tokenizer(Parameters.builder()
                 .operator(d)
                 .operator(d2)
                 .expressionBracket(BracketPair.PARENTHESES)
@@ -126,24 +129,24 @@ class TokenizerTest {
 
     @Test
     void escape() throws ExpressionException {
-        Tokenizer<String> underTest = new Tokenizer<>(Parameters.<String>builder()
+        Tokenizer underTest = new Tokenizer(Parameters.builder()
                 .operator(d)
                 .escapeBracket(BracketPair.BRACKETS)
                 .build());
 
-        List<Token<String>> res = underTest.tokenize("1d[head/ torso/ left arm/ right arm/ left leg/ right leg]");
+        List<Token> res = underTest.tokenize("1d[head/ torso/ left arm/ right arm/ left leg/ right leg]");
 
         assertThat(res.stream().map(Token::toString)).containsExactly("'1'", "d", "'head/ torso/ left arm/ right arm/ left leg/ right leg'");
     }
 
     @Test
     void operatorAssociativity_middle() throws ExpressionException {
-        Tokenizer<String> underTest = new Tokenizer<>(Parameters.<String>builder()
+        Tokenizer underTest = new Tokenizer(Parameters.builder()
                 .operator(aRightLeft)
                 .escapeBracket(BracketPair.BRACKETS)
                 .build());
 
-        List<Token<String>> res = underTest.tokenize("1a2");
+        List<Token> res = underTest.tokenize("1a2");
 
         assertThat(res.stream().map(Token::toString)).containsExactly("'1'", "a", "'2'");
     }
@@ -151,12 +154,12 @@ class TokenizerTest {
     @Test
     void operatorAssociativity_left() throws ExpressionException {
 
-        Tokenizer<String> underTest = new Tokenizer<>(Parameters.<String>builder()
+        Tokenizer underTest = new Tokenizer(Parameters.builder()
                 .operator(aLeft)
                 .escapeBracket(BracketPair.BRACKETS)
                 .build());
 
-        List<Token<String>> res = underTest.tokenize("1a");
+        List<Token> res = underTest.tokenize("1a");
 
         assertThat(res.stream().map(Token::toString)).containsExactly("'1'", "a");
     }
@@ -164,12 +167,12 @@ class TokenizerTest {
     @Test
     void operatorAssociativity_right() throws ExpressionException {
 
-        Tokenizer<String> underTest = new Tokenizer<>(Parameters.<String>builder()
+        Tokenizer underTest = new Tokenizer(Parameters.builder()
                 .operator(aRight)
                 .escapeBracket(BracketPair.BRACKETS)
                 .build());
 
-        List<Token<String>> res = underTest.tokenize("a2");
+        List<Token> res = underTest.tokenize("a2");
 
         assertThat(res.stream().map(Token::toString)).containsExactly("a", "'2'");
     }
@@ -177,7 +180,7 @@ class TokenizerTest {
     @Test
     void operatorAssociativity_invalid() {
 
-        Tokenizer<String> underTest = new Tokenizer<>(Parameters.<String>builder()
+        Tokenizer underTest = new Tokenizer(Parameters.builder()
                 .operator(aRight)
                 .escapeBracket(BracketPair.BRACKETS)
                 .build());

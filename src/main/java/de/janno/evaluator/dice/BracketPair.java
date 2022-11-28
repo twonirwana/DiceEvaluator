@@ -1,4 +1,4 @@
-package de.janno.evaluator;
+package de.janno.evaluator.dice;
 
 import lombok.Value;
 

@@ -1,14 +1,15 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Function;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import lombok.NonNull;
 
 import java.util.List;
 
-public class Min extends RollFunction {
+public class Min extends Function {
     public Min() {
         super("min", 1, Integer.MAX_VALUE);
     }

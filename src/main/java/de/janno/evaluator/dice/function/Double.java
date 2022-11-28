@@ -1,21 +1,22 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Function;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import lombok.NonNull;
 
 import java.util.List;
 
-public class Double extends RollFunction {
+public class Double extends Function {
 
     public Double() {
         super("double", 2);
     }
 
     @Override
-    protected @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
+    public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
         Roll input = arguments.get(0);
         Roll toDuplicate = arguments.get(1);
 

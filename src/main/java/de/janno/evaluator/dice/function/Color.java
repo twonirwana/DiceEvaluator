@@ -1,7 +1,8 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Function;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import lombok.NonNull;
@@ -10,13 +11,13 @@ import java.util.List;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
 
-public class Color extends RollFunction {
+public class Color extends Function {
     public Color() {
         super("color", 2);
     }
 
     @Override
-    protected @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
+    public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
         Roll p1 = arguments.get(0);
         Roll p2 = arguments.get(1);
         checkContainsSingleElement(getName(), p2, "second argument");

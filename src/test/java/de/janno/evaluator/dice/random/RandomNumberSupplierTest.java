@@ -1,6 +1,6 @@
 package de.janno.evaluator.dice.random;
 
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
