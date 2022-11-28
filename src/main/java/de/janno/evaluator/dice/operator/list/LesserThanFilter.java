@@ -1,12 +1,11 @@
 package de.janno.evaluator.dice.operator.list;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
-import de.janno.evaluator.Operator;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Operator;
 import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
-import de.janno.evaluator.dice.operator.RollOperator;
 import lombok.NonNull;
 
 import java.util.List;
@@ -15,7 +14,7 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyInteger;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
-public class LesserThanFilter extends RollOperator {
+public class LesserThanFilter extends Operator {
 
     public LesserThanFilter() {
         super("<", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(LesserThanFilter.class));

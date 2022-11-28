@@ -1,7 +1,7 @@
 package de.janno.evaluator.dice.random;
 
 import com.google.common.annotations.VisibleForTesting;
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
 
 import java.util.random.RandomGenerator;
 

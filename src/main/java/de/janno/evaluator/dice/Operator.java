@@ -1,4 +1,4 @@
-package de.janno.evaluator;
+package de.janno.evaluator.dice;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
@@ -11,7 +11,7 @@ import java.util.Set;
 
 @EqualsAndHashCode
 @ToString
-public abstract class Operator<T> {
+public abstract class Operator {
     @NonNull
     private final ImmutableSet<String> names;
     private final Integer unaryPrecedence;
@@ -82,7 +82,19 @@ public abstract class Operator<T> {
         return null;
     }
 
-    protected abstract @NonNull T evaluate(@NonNull List<T> operands) throws ExpressionException;
+    protected static String getBinaryOperatorExpression(String name, List<Roll> operands) {
+        return String.format("%s%s%s", operands.get(0).getExpression(), name, operands.get(1).getExpression());
+    }
+
+    protected static String getLeftUnaryExpression(String name, List<Roll> operands) {
+        return String.format("%s%s", operands.get(0).getExpression(), name);
+    }
+
+    protected static String getRightUnaryExpression(String name, List<Roll> operands) {
+        return String.format("%s%s", name, operands.get(0).getExpression());
+    }
+
+    public abstract @NonNull Roll evaluate(@NonNull List<Roll> operands) throws ExpressionException;
 
     public boolean supportUnaryOperation() {
         return unaryAssociativity != null;
@@ -136,7 +148,7 @@ public abstract class Operator<T> {
         UNARY(1),
         BINARY(2);
 
-        final int argumentCount;
+        public final int argumentCount;
 
         OperatorType(int argumentCount) {
             this.argumentCount = argumentCount;

@@ -1,4 +1,4 @@
-package de.janno.evaluator;
+package de.janno.evaluator.dice;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
@@ -9,6 +9,7 @@ import lombok.ToString;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A <a href="http://en.wikipedia.org/wiki/Function_(mathematics)">function</a>.
@@ -17,7 +18,7 @@ import java.util.Set;
 @Getter
 @EqualsAndHashCode
 @ToString
-public abstract class Function<T> {
+public abstract class Function {
     @NonNull
     private final ImmutableSet<String> names;
     private final int minArgumentCount;
@@ -61,6 +62,10 @@ public abstract class Function<T> {
         this.maxArgumentCount = maxArgumentCount;
     }
 
+    protected static String getExpression(String name, List<Roll> arguments) {
+        return "%s(%s)".formatted(name, arguments.stream().map(Roll::getExpression).collect(Collectors.joining(",")));
+    }
+
     public String getName() {
         if (names.size() == 1) {
             return names.iterator().next();
@@ -72,5 +77,5 @@ public abstract class Function<T> {
         return names.iterator().next();
     }
 
-    abstract protected @NonNull T evaluate(@NonNull List<T> arguments) throws ExpressionException;
+    public abstract @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException;
 }

@@ -1,6 +1,6 @@
 package de.janno.evaluator.dice.random;
 
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
 
 /**
  * Provides a number between minExcl and maxIncl.

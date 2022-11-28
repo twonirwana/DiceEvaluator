@@ -1,12 +1,11 @@
 package de.janno.evaluator.dice.operator.list;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
-import de.janno.evaluator.Operator;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Operator;
 import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
-import de.janno.evaluator.dice.operator.RollOperator;
 import lombok.NonNull;
 
 import java.util.Comparator;
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
-public class KeepHighest extends RollOperator {
+public class KeepHighest extends Operator {
 
     public KeepHighest() {
         super(Set.of("k", "K"), null, null, Operator.Associativity.LEFT, getOderNumberOf(KeepHighest.class));

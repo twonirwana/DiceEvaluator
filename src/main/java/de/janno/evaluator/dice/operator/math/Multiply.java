@@ -1,12 +1,11 @@
 package de.janno.evaluator.dice.operator.math;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
-import de.janno.evaluator.Operator;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Operator;
 import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
-import de.janno.evaluator.dice.operator.RollOperator;
 import lombok.NonNull;
 
 import java.util.List;
@@ -15,7 +14,7 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkAllElementsAreSameColor
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
-public final class Multiply extends RollOperator {
+public final class Multiply extends Operator {
     public Multiply() {
         super("*", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(Multiply.class));
     }

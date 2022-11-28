@@ -2,12 +2,11 @@ package de.janno.evaluator.dice.operator.die;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import de.janno.evaluator.ExpressionException;
-import de.janno.evaluator.Operator;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Operator;
 import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
-import de.janno.evaluator.dice.operator.RollOperator;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
@@ -17,7 +16,7 @@ import static de.janno.evaluator.dice.DiceHelper.*;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
-public final class RegularDice extends RollOperator {
+public final class RegularDice extends Operator {
     private final NumberSupplier numberSupplier;
     private final int maxNumberOfDice;
 

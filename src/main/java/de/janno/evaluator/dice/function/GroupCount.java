@@ -1,7 +1,7 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import lombok.NonNull;
@@ -12,13 +12,13 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class GroupCount extends RollFunction {
+public class GroupCount extends de.janno.evaluator.dice.Function {
     public GroupCount() {
         super("groupC", 1, Integer.MAX_VALUE);
     }
 
     @Override
-    protected @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
+    public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
         final ImmutableList<RollElement> res = arguments.stream()
                 .flatMap(result -> result.getElements().stream())
                 .collect(Collectors.groupingBy(Function.identity())).entrySet().stream()

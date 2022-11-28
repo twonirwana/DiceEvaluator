@@ -1,7 +1,6 @@
 package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 

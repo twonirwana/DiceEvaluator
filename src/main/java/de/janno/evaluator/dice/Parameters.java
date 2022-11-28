@@ -1,4 +1,4 @@
-package de.janno.evaluator;
+package de.janno.evaluator.dice;
 
 import lombok.Builder;
 import lombok.NonNull;
@@ -10,11 +10,11 @@ import java.util.List;
 
 @Value
 @Builder(toBuilder = true)
-public class Parameters<T> {
+public class Parameters {
     @Singular
-    List<Operator<T>> operators;
+    List<Operator> operators;
     @Singular
-    List<Function<T>> functions;
+    List<Function> functions;
     @Singular
     List<BracketPair> expressionBrackets;
     @Singular

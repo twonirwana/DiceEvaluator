@@ -1,21 +1,22 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.ExpressionException;
+import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.Function;
 import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import lombok.NonNull;
 
 import java.util.List;
 
-public abstract class AbstractIf extends RollFunction {
+public abstract class AbstractIf extends Function {
 
     public AbstractIf(@NonNull String name) {
         super(name, 3, Integer.MAX_VALUE);
     }
 
     @Override
-    protected @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
+    public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
         Roll input = arguments.get(0);
 
         int counter = 1;

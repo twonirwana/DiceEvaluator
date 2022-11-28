@@ -1,6 +1,5 @@
 package de.janno.evaluator.dice;
 
-import de.janno.evaluator.ExpressionException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

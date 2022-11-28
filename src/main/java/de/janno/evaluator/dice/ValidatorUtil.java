@@ -1,6 +1,5 @@
 package de.janno.evaluator.dice;
 
-import de.janno.evaluator.ExpressionException;
 import lombok.NonNull;
 
 import java.util.Arrays;

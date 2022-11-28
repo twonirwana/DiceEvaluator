@@ -2,17 +2,16 @@ package de.janno.evaluator.dice.operator.math;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import de.janno.evaluator.Operator;
+import de.janno.evaluator.dice.Operator;
 import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
 import de.janno.evaluator.dice.operator.OperatorOrder;
-import de.janno.evaluator.dice.operator.RollOperator;
 import lombok.NonNull;
 
 import java.util.List;
 
-public final class Appending extends RollOperator {
+public final class Appending extends Operator {
     public Appending() {
         super(ImmutableSet.of("+"), Operator.Associativity.RIGHT, Integer.MAX_VALUE, Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(Appending.class));
     }
