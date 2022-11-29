@@ -36,7 +36,7 @@ public abstract class AbstractIf extends Function {
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(trueResult.getChildrenRolls())
-                                .build());
+                                .build(), null);
             }
             counter += 2;
         }
@@ -56,7 +56,7 @@ public abstract class AbstractIf extends Function {
                 ImmutableList.<Roll>builder()
                         .addAll(input.getChildrenRolls())
                         .addAll(result.getChildrenRolls())
-                        .build());
+                        .build(), null);
     }
 
 

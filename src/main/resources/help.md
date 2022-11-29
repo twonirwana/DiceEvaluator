@@ -28,3 +28,5 @@
 | If Greater           | ifG()      | ifG(d6,3,Y,N)      |
 | If Lesser            | ifL()      | ifL(d6,3,Y,N)      |
 | Group Count          | groupC()   | groupC(20d6)       |
+| Concatenate          | concat()   | concat('Att:',d20) |
+| Value                | val()      | val($1,10d10)      |

@@ -30,7 +30,7 @@ public class Max extends Function {
                 arguments.stream()
                         .flatMap(r -> r.getRandomElementsInRoll().stream())
                         .collect(ImmutableList.toImmutableList()),
-                ImmutableList.copyOf(arguments)
+                ImmutableList.copyOf(arguments), null
         );
     }
 }

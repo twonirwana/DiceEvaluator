@@ -40,7 +40,7 @@ public class Sum extends Operator {
         return new Roll(getLeftUnaryExpression(getPrimaryName(), operands),
                 res,
                 left.getRandomElementsInRoll(),
-                ImmutableList.of(left)
+                ImmutableList.of(left), null
         );
     }
 }
