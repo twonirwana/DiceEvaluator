@@ -40,6 +40,6 @@ public class KeepLowest extends Operator {
                         .addAll(left.getRandomElementsInRoll())
                         .addAll(right.getRandomElementsInRoll())
                         .build(),
-                ImmutableList.of(left, right));
+                ImmutableList.of(left, right), null);
     }
 }

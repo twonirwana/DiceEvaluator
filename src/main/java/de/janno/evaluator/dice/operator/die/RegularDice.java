@@ -84,6 +84,6 @@ public final class RegularDice extends Operator {
         return new Roll(expression,
                 rollElements,
                 randomElements.build(),
-                childrenRolls);
+                childrenRolls, null);
     }
 }

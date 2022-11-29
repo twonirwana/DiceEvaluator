@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class DiceEvaluatorTest {
     private static Stream<Arguments> generateData() {
         return Stream.of(
-                Arguments.of("", null, List.of()),
                 Arguments.of("1d6", List.of(3), List.of(3)),
                 Arguments.of("1d6 ", List.of(3), List.of(3)),
                 Arguments.of(" 1d6", List.of(3), List.of(3)),
@@ -99,7 +98,24 @@ public class DiceEvaluatorTest {
                 Arguments.of("1d+6", List.of(2), List.of(2)),
                 Arguments.of("+6+6", List.of(), List.of(6, 6)),
                 Arguments.of("+6*6", List.of(), List.of(36)),
-                Arguments.of("+6*+6", List.of(), List.of(36))
+                Arguments.of("+6*+6", List.of(), List.of(36)),
+                Arguments.of("+6*-6", List.of(), List.of(-36)),
+                Arguments.of("val($1, 3d6) $1", List.of(1, 2, 3), List.of(1, 2, 3)),
+                Arguments.of("val($1, 3d6) $1 + $1", List.of(1, 2, 3), List.of(1, 2, 3, 1, 2, 3)),
+                Arguments.of("val($1, 3d6) $1, $1", List.of(1, 2, 3), List.of(1, 2, 3, 1, 2, 3)),
+                Arguments.of("val($1, 3d6) $1= , $1c", List.of(1, 2, 3), List.of(6, 3)),
+                Arguments.of("val($1, 3d6) $1= , ($1>2)c", List.of(1, 2, 3), List.of(6, 1)),
+                Arguments.of("val($1, val($2, 3d6) 7) $1 , $2", List.of(1, 2, 3), List.of(7, 1, 2, 3)),
+                Arguments.of("val($1, 3d6) val($2, 7) $1 , $2", List.of(1, 2, 3), List.of(1, 2, 3, 7)),
+                Arguments.of("val($1, $2) val($2, $1) $1 , $2", List.of(1, 2, 3), List.of()),
+                Arguments.of("val($1, $1) $1", List.of(1, 2, 3), List.of()),
+                Arguments.of("val($1, 1d6) 2d6", List.of(1, 2, 3), List.of(2, 3)),
+                Arguments.of("val($1,6d6), $1=, ($1>4)c", List.of(1, 2, 3, 4, 5, 6), List.of(21, 2)),
+                Arguments.of("val($1, 2d6) val($1, 1d6) $1", List.of(1, 2, 3), List.of(1, 2)), //the $1 in the second val is replaced by the first
+                Arguments.of("val(2, 'abc'),d6", List.of(2), List.of(2)), //the replacement happens only in the formular, not in results
+
+                Arguments.of("", null, List.of())
+
         );
     }
 
@@ -157,6 +173,16 @@ public class DiceEvaluatorTest {
                 Arguments.of("[b/2/a]k2", List.of(), List.of("b", "a")),
                 Arguments.of("[b/2/a]l2", List.of(), List.of("2", "a")),
                 Arguments.of("3.5+2.5", List.of(), List.of("3.5", "2.5")),
+                Arguments.of("concat('Attack: ', 3d6) ", List.of(1, 2, 3), List.of("Attack: 1, 2, 3")),
+                Arguments.of("concat('Attack: ', 1d20, ' Damage: ', 2d10+5=) ", List.of(1, 2, 3), List.of("Attack: 1 Damage: 10")),
+                Arguments.of("val(1, ('a'+'b'+'c')) 3d1", List.of(1, 2, 3), List.of("a", "b", "c")),
+
+                //Exalted 3e
+                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3,2,3,1,5,9,6,6,6,6,6), List.of("0")),
+                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3,2,3,3,5,9,6,6,6,6,6), List.of("1")),
+                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3,2,1,3,5,9,10,6,6,6,6), List.of("2")),
+                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3,2,1,3,5,5,5,6,6,6,6), List.of("Botch")),
+
                 Arguments.of("1d0", List.of(), List.of())
         );
     }
@@ -200,7 +226,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'"),
                 Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[3, 1]'"),
                 Arguments.of("'3''5'", "There need to be an operator or a separator between two values"),
-                Arguments.of("1d-1", "Not enough values, [d, D] needs 2 but there where only [Roll(expression=1, elements=[1], randomElementsInRoll=[], childrenRolls=[])]"),
+                Arguments.of("1d-1", "Not enough values, [d, D] needs 2 but there where only [[1]]"),
                 Arguments.of("d-1", "Not enough values, [d, D] needs 1 but there where only []"),
                 Arguments.of("d!1", "The number of sides of a die must be greater then 1 but was 1"),
                 Arguments.of("d!!1", "The number of sides of a die must be greater then 1 but was 1"),
@@ -229,15 +255,37 @@ public class DiceEvaluatorTest {
         );
     }
 
+    private static Stream<Arguments> resultSizeDate() {
+        return Stream.of(
+                Arguments.of("val(2, 'abc'),d6", 1),
+                Arguments.of("1d6,d6", 2),
+                Arguments.of("d6", 1),
+                Arguments.of("1d6", 1),
+                Arguments.of("", 1) //a roll result but it is empty
+        );
+    }
+
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator((a, b) -> 6, 1000);
+        //DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,4,5,6,7,8,9,10), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3,2,3,1,5,9,6,6,6,6,6), 1000);
 
-        List<Roll> res = underTest.evaluate("ifE(d!!10,-d!!10,%1)");
-
+        List<Roll> res = underTest.evaluate("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))");
+        System.out.println(res.size());
         System.out.println(res);
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
     }
+
+    @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
+    @MethodSource("resultSizeDate")
+    void resultSize(String expression, int size) throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+
+        List<Roll> res = underTest.evaluate(expression);
+
+        assertThat(res).hasSize(size);
+    }
+
 
     @Test
     void testRegularDieHeap() throws ExpressionException {

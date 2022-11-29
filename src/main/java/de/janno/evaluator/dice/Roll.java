@@ -19,6 +19,8 @@ public class Roll {
     @NonNull
     ImmutableList<Roll> childrenRolls;
 
+    String constantName;
+
     public Optional<Integer> asInteger() {
         if (elements.size() == 1) {
             return elements.get(0).asInteger();

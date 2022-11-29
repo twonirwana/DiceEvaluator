@@ -26,7 +26,7 @@ public class SortAsc extends Function {
                 arguments.stream()
                         .flatMap(r -> r.getRandomElementsInRoll().stream())
                         .collect(ImmutableList.toImmutableList()),
-                ImmutableList.copyOf(arguments)
+                ImmutableList.copyOf(arguments), null
         );
     }
 }

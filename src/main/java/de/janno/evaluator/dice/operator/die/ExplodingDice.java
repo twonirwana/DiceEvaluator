@@ -48,7 +48,7 @@ public final class ExplodingDice extends Operator {
             return new Roll(getRightUnaryExpression(getPrimaryName(), operands),
                     rollElements,
                     randomElements.build(),
-                    ImmutableList.of(right));
+                    ImmutableList.of(right), null);
         }
 
         final Roll left = operands.get(0);
@@ -78,6 +78,6 @@ public final class ExplodingDice extends Operator {
         return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
                 rollElements,
                 randomElements.build(),
-                ImmutableList.of(left, right));
+                ImmutableList.of(left, right), null);
     }
 }

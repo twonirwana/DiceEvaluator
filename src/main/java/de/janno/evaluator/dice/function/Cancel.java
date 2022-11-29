@@ -45,7 +45,7 @@ public class Cancel extends Function {
                         .addAll(input.getChildrenRolls())
                         .addAll(typeA.getChildrenRolls())
                         .addAll(typeB.getChildrenRolls())
-                        .build());
+                        .build(), null);
     }
 
     private List<RollElement> getChancel(List<RollElement> bigger, List<RollElement> smaller) {

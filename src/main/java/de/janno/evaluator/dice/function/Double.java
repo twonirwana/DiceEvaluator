@@ -36,6 +36,6 @@ public class Double extends Function {
                 ImmutableList.<Roll>builder()
                         .addAll(input.getChildrenRolls())
                         .addAll(toDuplicate.getChildrenRolls())
-                        .build());
+                        .build(), null);
     }
 }

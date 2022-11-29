@@ -31,7 +31,7 @@ public final class NegateOrNegativAppending extends Operator {
             return new Roll(getRightUnaryExpression(getPrimaryName(), operands),
                     negated,
                     right.getRandomElementsInRoll(),
-                    ImmutableList.of(right));
+                    ImmutableList.of(right), null);
         }
 
         Roll left = operands.get(0);
@@ -50,7 +50,7 @@ public final class NegateOrNegativAppending extends Operator {
                         .addAll(left.getRandomElementsInRoll())
                         .addAll(right.getRandomElementsInRoll())
                         .build(),
-                ImmutableList.of(left, right)
+                ImmutableList.of(left, right), null
         );
     }
 

@@ -27,6 +27,6 @@ public class Color extends Function {
                         .map(r -> new RollElement(r.getValue(), color))
                         .collect(ImmutableList.toImmutableList()),
                 p1.getRandomElementsInRoll(),
-                p1.getChildrenRolls());
+                p1.getChildrenRolls(), null);
     }
 }
