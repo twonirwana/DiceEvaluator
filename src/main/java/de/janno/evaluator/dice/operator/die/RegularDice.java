@@ -2,11 +2,7 @@ package de.janno.evaluator.dice.operator.die;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import de.janno.evaluator.dice.ExpressionException;
-import de.janno.evaluator.dice.Operator;
-import de.janno.evaluator.dice.RandomElement;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.RollElement;
+import de.janno.evaluator.dice.*;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
@@ -33,7 +29,7 @@ public final class RegularDice extends Operator {
         final Roll right;
         final ImmutableList<Roll> childrenRolls;
         final String expression;
-        ImmutableList.Builder<ImmutableList<RandomElement>> randomElements = ImmutableList.builder();
+        UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
         if (operands.size() == 1) {
             right = operands.get(0);
             numberOfDice = 1;
@@ -45,15 +41,13 @@ public final class RegularDice extends Operator {
             childrenRolls = ImmutableList.of(left, right);
             numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
             expression = getBinaryOperatorExpression(getPrimaryName(), operands);
-            if (left.getRandomElementsInRoll().size() > 0) {
-                randomElements.addAll(left.getRandomElementsInRoll());
-            }
+            randomElements.add(left.getRandomElementsInRoll());
+
         } else {
             throw new IllegalStateException("More then two operands for " + getName());
         }
-        if (right.getRandomElementsInRoll().size() > 0) {
-            randomElements.addAll(right.getRandomElementsInRoll());
-        }
+        randomElements.add(right.getRandomElementsInRoll());
+
         if (numberOfDice > maxNumberOfDice) {
             throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
         }
@@ -65,8 +59,8 @@ public final class RegularDice extends Operator {
             int sidesOfDie = right.asInteger().get();
             rollElements = toRollElements(rollDice(numberOfDice, sidesOfDie, numberSupplier));
 
-            randomElements.add(rollElements.stream()
-                    .map(r -> new RandomElement(r.getValue(), 1, sidesOfDie))
+            randomElements.addAsRandomElements(rollElements.stream()
+                    .map(r -> new RandomElement(r, 1, sidesOfDie))
                     .collect(ImmutableList.toImmutableList()));
         } else {
             ImmutableList.Builder<RollElement> builder = ImmutableList.builder();
@@ -74,8 +68,8 @@ public final class RegularDice extends Operator {
                 builder.add(pickOneOf(right.getElements(), numberSupplier));
             }
             rollElements = builder.build();
-            randomElements.add(rollElements.stream()
-                    .map(r -> new RandomElement(r.getValue(), right.getElements().stream()
+            randomElements.addAsRandomElements(rollElements.stream()
+                    .map(r -> new RandomElement(r, right.getElements().stream()
                             .map(RollElement::getValue)
                             .collect(ImmutableList.toImmutableList())))
                     .collect(ImmutableList.toImmutableList()));

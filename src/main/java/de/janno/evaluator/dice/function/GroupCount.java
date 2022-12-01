@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.ExpressionException;
 import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollElement;
+import de.janno.evaluator.dice.UniqueRandomElements;
 import lombok.NonNull;
 
 import java.util.Comparator;
@@ -29,9 +30,7 @@ public class GroupCount extends de.janno.evaluator.dice.Function {
 
         return new Roll(getExpression(getPrimaryName(), arguments),
                 res,
-                arguments.stream()
-                        .flatMap(r -> r.getRandomElementsInRoll().stream())
-                        .collect(ImmutableList.toImmutableList()),
+                UniqueRandomElements.from(arguments),
                 ImmutableList.copyOf(arguments), null);
     }
 

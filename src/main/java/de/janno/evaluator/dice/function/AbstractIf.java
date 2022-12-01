@@ -3,8 +3,8 @@ package de.janno.evaluator.dice.function;
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.ExpressionException;
 import de.janno.evaluator.dice.Function;
-import de.janno.evaluator.dice.RandomElement;
 import de.janno.evaluator.dice.Roll;
+import de.janno.evaluator.dice.UniqueRandomElements;
 import lombok.NonNull;
 
 import java.util.List;
@@ -20,16 +20,14 @@ public abstract class AbstractIf extends Function {
         Roll input = arguments.get(0);
 
         int counter = 1;
-        ImmutableList.Builder<ImmutableList<RandomElement>> randomElements = ImmutableList.builder();
-        randomElements.addAll(input.getRandomElementsInRoll());
+        UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
+        randomElements.add(input.getRandomElementsInRoll());
         while (counter < arguments.size() - 1) {
             Roll compareTo = arguments.get(counter);
             Roll trueResult = arguments.get(counter + 1);
-            if (!compareTo.getRandomElementsInRoll().isEmpty()) {
-                randomElements.addAll(compareTo.getRandomElementsInRoll());
-            }
+            randomElements.add(compareTo.getRandomElementsInRoll());
             if (compare(input, counter, compareTo, counter + 1)) {
-                randomElements.addAll(trueResult.getRandomElementsInRoll());
+                randomElements.add(trueResult.getRandomElementsInRoll());
                 return new Roll(getExpression(getPrimaryName(), arguments),
                         trueResult.getElements(),
                         randomElements.build(),
@@ -43,9 +41,9 @@ public abstract class AbstractIf extends Function {
 
         final Roll result;
         //there is a last element in the arguments, which is the default result
-        if (counter != arguments.size())  {
+        if (counter != arguments.size()) {
             result = arguments.get(arguments.size() - 1);
-            randomElements.addAll(result.getRandomElementsInRoll());
+            randomElements.add(result.getRandomElementsInRoll());
         } else {
             //if there is no default result, the result is the input
             result = input;

@@ -1,10 +1,7 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.dice.ExpressionException;
-import de.janno.evaluator.dice.Function;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.RollElement;
+import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
@@ -23,9 +20,7 @@ public class SortAsc extends Function {
                 .collect(ImmutableList.toImmutableList());
         return new Roll(getExpression(getPrimaryName(), arguments),
                 res,
-                arguments.stream()
-                        .flatMap(r -> r.getRandomElementsInRoll().stream())
-                        .collect(ImmutableList.toImmutableList()),
+                UniqueRandomElements.from(arguments),
                 ImmutableList.copyOf(arguments), null
         );
     }

@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -178,10 +177,10 @@ public class DiceEvaluatorTest {
                 Arguments.of("val(1, ('a'+'b'+'c')) 3d1", List.of(1, 2, 3), List.of("a", "b", "c")),
 
                 //Exalted 3e
-                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3,2,3,1,5,9,6,6,6,6,6), List.of("0")),
-                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3,2,3,3,5,9,6,6,6,6,6), List.of("1")),
-                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3,2,1,3,5,9,10,6,6,6,6), List.of("2")),
-                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3,2,1,3,5,5,5,6,6,6,6), List.of("Botch")),
+                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), List.of("0")),
+                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3, 2, 3, 3, 5, 9, 6, 6, 6, 6, 6), List.of("1")),
+                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3, 2, 1, 3, 5, 9, 10, 6, 6, 6, 6), List.of("2")),
+                Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3, 2, 1, 3, 5, 5, 5, 6, 6, 6, 6), List.of("Botch")),
 
                 Arguments.of("1d0", List.of(), List.of())
         );
@@ -268,7 +267,7 @@ public class DiceEvaluatorTest {
     @Test
     void debug() throws ExpressionException {
         //DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,4,5,6,7,8,9,10), 1000);
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3,2,3,1,5,9,6,6,6,6,6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), 1000);
 
         List<Roll> res = underTest.evaluate("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))");
         System.out.println(res.size());
@@ -426,8 +425,10 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceThrows), 1000);
         List<Roll> res = underTest.evaluate(expression);
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue).toList()))
                 .containsExactlyElementsOf(expectedRandomElements);
     }
 
@@ -437,12 +438,15 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
         List<Roll> res = underTest.evaluate("(2d4=)d6");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)
+                        .toList()))
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
 
@@ -451,12 +455,15 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
         List<Roll> res = underTest.evaluate("(2d4=)d[a/b/c/d/e/f]");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)
+                        .toList()))
                 .containsExactly(List.of("1", "2"), List.of("d", "d", "e"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream().map(Objects::toString)))
-                .containsExactly("[1∈[1...4], 2∈[1...4]]", "[d∈[a, b, c, d, e, f], d∈[a, b, c, d, e, f], e∈[a, b, c, d, e, f]]");
+        assertThat(res.stream().map(r -> r.getRandomElementsInRoll().toString()))
+                .containsExactly("[1∈[1...4], 2∈[1...4]], [d∈[a, b, c, d, e, f], d∈[a, b, c, d, e, f], e∈[a, b, c, d, e, f]]");
     }
 
     @Test
@@ -464,12 +471,14 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
         List<Roll> res = underTest.evaluate("(2d!4=)d!6");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue).toList()))
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
 
@@ -478,12 +487,15 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
         List<Roll> res = underTest.evaluate("(2d!!4=)d!!6");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getValue).toList()))
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)
+                        .toList()))
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
 

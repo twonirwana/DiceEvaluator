@@ -1,10 +1,7 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.dice.ExpressionException;
-import de.janno.evaluator.dice.Function;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.RollElement;
+import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
@@ -26,7 +23,7 @@ public class Color extends Function {
                 p1.getElements().stream()
                         .map(r -> new RollElement(r.getValue(), color))
                         .collect(ImmutableList.toImmutableList()),
-                p1.getRandomElementsInRoll(),
+                UniqueRandomElements.from(arguments),
                 p1.getChildrenRolls(), null);
     }
 }

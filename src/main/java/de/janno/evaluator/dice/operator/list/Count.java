@@ -1,10 +1,7 @@
 package de.janno.evaluator.dice.operator.list;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.dice.ExpressionException;
-import de.janno.evaluator.dice.Operator;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.RollElement;
+import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
@@ -35,7 +32,7 @@ public class Count extends Operator {
         }
         return new Roll(getLeftUnaryExpression(getPrimaryName(), operands),
                 res,
-                left.getRandomElementsInRoll(),
+                UniqueRandomElements.from(operands),
                 ImmutableList.of(left), null
         );
     }

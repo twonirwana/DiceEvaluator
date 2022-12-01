@@ -1,10 +1,7 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.dice.ExpressionException;
-import de.janno.evaluator.dice.Function;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.RollElement;
+import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
@@ -40,7 +37,7 @@ public class Cancel extends Function {
         }
         return new Roll(getExpression(getPrimaryName(), arguments),
                 resultBuilder.build(),
-                input.getRandomElementsInRoll(),
+                UniqueRandomElements.from(arguments),
                 ImmutableList.<Roll>builder()
                         .addAll(input.getChildrenRolls())
                         .addAll(typeA.getChildrenRolls())

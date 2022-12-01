@@ -1,11 +1,7 @@
 package de.janno.evaluator.dice.operator.math;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.dice.ExpressionException;
-import de.janno.evaluator.dice.Operator;
-import de.janno.evaluator.dice.RandomElement;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.RollElement;
+import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
@@ -30,10 +26,7 @@ public final class Multiply extends Operator {
 
         return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
                 res,
-                ImmutableList.<ImmutableList<RandomElement>>builder()
-                        .addAll(left.getRandomElementsInRoll())
-                        .addAll(right.getRandomElementsInRoll())
-                        .build(),
+                UniqueRandomElements.from(operands),
                 ImmutableList.of(left, right), null
         );
     }

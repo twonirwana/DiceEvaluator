@@ -2,10 +2,7 @@ package de.janno.evaluator.dice.operator.math;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import de.janno.evaluator.dice.Operator;
-import de.janno.evaluator.dice.RandomElement;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.RollElement;
+import de.janno.evaluator.dice.*;
 import de.janno.evaluator.dice.operator.OperatorOrder;
 import lombok.NonNull;
 
@@ -30,10 +27,7 @@ public final class Appending extends Operator {
                 .build();
         return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
                 res,
-                ImmutableList.<ImmutableList<RandomElement>>builder()
-                        .addAll(left.getRandomElementsInRoll())
-                        .addAll(right.getRandomElementsInRoll())
-                        .build(),
+                UniqueRandomElements.from(operands),
                 ImmutableList.of(left, right), null
         );
     }
