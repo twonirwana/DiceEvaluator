@@ -219,11 +219,11 @@ public class DiceEvaluatorTest {
                 Arguments.of("2147483647*2=", "integer overflow"),
                 Arguments.of("1/0", "/ by zero"),
                 Arguments.of("color(3d6,[a/b])", "'color' requires as second argument a single element but was '[a, b]'"),
-                Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as 1 argument a single element but was '[2, 3]'"),
-                Arguments.of("ifL(1d6,2d6,'three','not three')", "'ifL' requires as 2 argument a single element but was '[3, 1]'"),
-                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'"),
-                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'"),
-                Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[3, 1]'"),
+                Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as 1 argument a single element but was '[2, 3]'. Try to sum the numbers together like (2d6=)"),
+                Arguments.of("ifL(1d6,2d6,'three','not three')", "'ifL' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
+                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
+                Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
+                Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
                 Arguments.of("'3''5'", "There need to be an operator or a separator between two values"),
                 Arguments.of("1d-1", "Not enough values, [d, D] needs 2 but there where only [[1]]"),
                 Arguments.of("d-1", "Not enough values, [d, D] needs 1 but there where only []"),
@@ -408,7 +408,7 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000);
         assertThatThrownBy(() -> underTest.evaluate("2d6 / 3"))
                 .isInstanceOf(ExpressionException.class)
-                .hasMessage("'/' requires as left input a single integer but was '[4, 1]'");
+                .hasMessage("'/' requires as left input a single integer but was '[4, 1]'. Try to sum the numbers together like (2d6=)");
     }
 
     @Test

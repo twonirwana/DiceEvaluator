@@ -15,7 +15,7 @@ public class RollElement implements Comparable<RollElement> {
     @NonNull
     String color;
 
-    private static boolean isInteger(String value) {
+    public boolean isInteger() {
         try {
             Integer.parseInt(value);
             return true;
@@ -25,7 +25,7 @@ public class RollElement implements Comparable<RollElement> {
     }
 
     public Optional<Integer> asInteger() {
-        if (isInteger(value)) {
+        if (isInteger()) {
             return Optional.of(Integer.parseInt(value));
         }
         return Optional.empty();
