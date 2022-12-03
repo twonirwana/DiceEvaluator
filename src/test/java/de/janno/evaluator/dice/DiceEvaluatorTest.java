@@ -467,6 +467,22 @@ public class DiceEvaluatorTest {
     }
 
     @Test
+    void getRandomElements_value() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 10, 10), 1000);
+        List<Roll> res = underTest.evaluate("val($1,d100), ifG($1, 95, (d100 + $1=), ifL($1, 6, ($1 - d100=)))");
+
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("-5");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .flatMap(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)))
+                .containsExactly("5", "10");
+
+    }
+
+    @Test
     void getRandomElements_explodingDice() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
         List<Roll> res = underTest.evaluate("(2d!4=)d!6");
