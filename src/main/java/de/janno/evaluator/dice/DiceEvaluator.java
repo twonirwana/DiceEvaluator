@@ -113,9 +113,9 @@ public class DiceEvaluator {
             return new Roll(list.toString(), list.stream()
                     .map(String::trim)
                     .map(s -> new RollElement(s, RollElement.NO_COLOR))
-                    .collect(ImmutableList.toImmutableList()), ImmutableList.of(), ImmutableList.of(), null);
+                    .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of(), null);
         }
-        return new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), null);
+        return new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), null);
     }
 
     private void processTokenToValues(Deque<Roll> values, Token token, Map<String, Roll> constants) throws ExpressionException {
@@ -177,7 +177,7 @@ public class DiceEvaluator {
     public List<Roll> evaluate(String expression) throws ExpressionException {
         expression = expression.trim();
         if (Strings.isNullOrEmpty(expression)) {
-            return ImmutableList.of(new Roll("", ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null));
+            return ImmutableList.of(new Roll("", ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of(), null));
         }
 
         final List<Token> tokens = tokenizer.tokenize(expression);

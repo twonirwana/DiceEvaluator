@@ -8,9 +8,14 @@ import java.util.stream.Collectors;
 
 public final class ValidatorUtil {
     public static ExpressionException throwNotIntegerExpression(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) {
-        return new ExpressionException(String.format("'%s' requires as %s input a single integer but was '%s'", inputName, location, roll.getElements().stream()
+        return new ExpressionException(String.format("'%s' requires as %s input a single integer but was '%s'%s", inputName, location, roll.getElements().stream()
                 .map(RollElement::getValue)
-                .toList()));
+                .toList(), getSumHelp(roll)));
+    }
+
+    private static String getSumHelp(@NonNull Roll roll) {
+        boolean numberList = roll.getElements().stream().allMatch(RollElement::isInteger);
+        return numberList ? ". Try to sum the numbers together like (%s=)".formatted(roll.getExpression()) : "";
     }
 
     public static void checkContainsOnlyInteger(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) throws ExpressionException {
@@ -22,8 +27,10 @@ public final class ValidatorUtil {
 
     public static void checkContainsSingleElement(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) throws ExpressionException {
         if (roll.getElements().size() != 1) {
-            throw new ExpressionException(String.format("'%s' requires as %s a single element but was '%s'", inputName, location, roll.getElements().stream()
-                    .map(RollElement::getValue).toList()));
+            throw new ExpressionException(String.format("'%s' requires as %s a single element but was '%s'%s", inputName, location, roll.getElements().stream()
+                            .map(RollElement::getValue).toList(),
+                    getSumHelp(roll)
+            ));
         }
     }
 

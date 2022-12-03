@@ -99,6 +99,9 @@ The number of dice is limited to 1000 and every number approve 2147483647 will b
 * brackets into the roll expression
 * intersection operator
 * equal filter
+* ifIn function
+* rerollUnit function
+* value Random Elements only once in result
 * empty element/list in expression
 * concatenate operator additional to the function
 * AddIf/AddIfLower/AddIfHigher?

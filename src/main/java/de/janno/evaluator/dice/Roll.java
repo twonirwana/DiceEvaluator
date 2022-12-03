@@ -15,7 +15,8 @@ public class Roll {
     @NonNull
     ImmutableList<RollElement> elements;
     @NonNull
-    ImmutableList<ImmutableList<RandomElement>> randomElementsInRoll;
+    //all random elements that were involved in this roll, this can be more than the elements, because it includes also filtered elements
+    UniqueRandomElements randomElementsInRoll;
     @NonNull
     ImmutableList<Roll> childrenRolls;
 
@@ -37,8 +38,8 @@ public class Roll {
     }
 
     public String getRandomElementsString() {
-        return randomElementsInRoll.stream()
-                .map(l -> l.stream().map(RandomElement::getValue).toList().toString())
+        return randomElementsInRoll.getRandomElements().stream()
+                .map(l -> l.getRandomElements().stream().map(RandomElement::getRollElement).map(RollElement::getValue).toList().toString())
                 .collect(Collectors.joining(" "));
     }
 }
