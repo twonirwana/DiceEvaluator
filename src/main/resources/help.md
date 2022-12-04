@@ -11,9 +11,11 @@
 | Negative Appending   | -          | 3d6-2d12 or -2d6   |
 | Divide               | /          | 12/6               |
 | Multiply             | *          | 12*d6              |
+| Equal Filter         | ==         | 3d6==3             |
 | Greater Then Filter  | >          | 3d6>3              |
 | Lesser Then Filter   | <          | 3d6<3              |
 | Greater Equal Filter | >=         | 3d6>=3             |
+| Lesser Equal Filter  | <=         | 3d6<=3             |
 | Lesser Equal Filter  | <=         | 3d6<=3             |
 | Count                | c          | 3d6<3c             |
 | Multiple Rolls       | ,          | 1d6,2d10           |
@@ -23,10 +25,11 @@
 | Max                  | max()      | max(3d4, 8)        |
 | Color                | color()    | color(3d4, 'red')  |
 | Chancel              | chancel()  | chancel(8d10,10,1) |
-| Double               | double()   | double(8d10, 10)   |
+| Replace              | replace()  | replace(6d10,1,2)  |
 | If Equal             | ifE()      | ifE(d6,6,Y,N)      |
 | If Greater           | ifG()      | ifG(d6,3,Y,N)      |
 | If Lesser            | ifL()      | ifL(d6,3,Y,N)      |
+| If In                | ifIn()     | ifIn(d6,[1/2],8)   |
 | Group Count          | groupC()   | groupC(20d6)       |
 | Concatenate          | concat()   | concat('Att:',d20) |
 | Value                | val()      | val($1,10d10)      |
