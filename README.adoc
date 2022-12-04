@@ -99,9 +99,8 @@ The number of dice is limited to 1000 and every number approve 2147483647 will b
 == TODO
 
 * brackets into the roll expression
+* Roll -> RollSupplier, so the same expression can be called more then once
 * intersection operator
-* equal filter
-* replace function
 * empty element/list in expression
 * concatenate operator additional to the function
 * AddIf/AddIfLower/AddIfHigher?
