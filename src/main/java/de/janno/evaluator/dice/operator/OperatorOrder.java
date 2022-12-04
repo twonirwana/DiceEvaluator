@@ -24,6 +24,7 @@ public final class OperatorOrder {
                     .add(LesserThanFilter.class)
                     .add(GreaterEqualThanFilter.class)
                     .add(LesserEqualThanFilter.class)
+                    .add(EqualFilter.class)
                     .add(KeepHighest.class)
                     .add(KeepLowest.class)
                     //dice should be first

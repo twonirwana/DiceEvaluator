@@ -5,38 +5,36 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.stream.Stream;
 
-/**
- * Deprecated in favor of the mightier 'replace' function.
- */
-@Deprecated
-public class Double extends Function {
-
-    public Double() {
-        super("double", 2);
+public class Replace extends Function {
+    public Replace() {
+        super("replace", 3);
     }
 
     @Override
     public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
         Roll input = arguments.get(0);
-        Roll toDuplicate = arguments.get(1);
+        Roll find = arguments.get(1);
+        Roll replace = arguments.get(2);
 
         ImmutableList<RollElement> rollElements = input.getElements().stream()
                 .flatMap(r -> {
-                    if (toDuplicate.getElements().contains(r)) {
-                        return ImmutableList.of(r, r).stream();
-                    } else {
-                        return ImmutableList.of(r).stream();
+                    if (find.getElements().contains(r)) {
+                        return replace.getElements().stream();
                     }
+                    return Stream.of(r);
                 })
                 .collect(ImmutableList.toImmutableList());
+
 
         return new Roll(getExpression(getPrimaryName(), arguments),
                 rollElements,
                 UniqueRandomElements.from(arguments),
                 ImmutableList.<Roll>builder()
                         .addAll(input.getChildrenRolls())
-                        .addAll(toDuplicate.getChildrenRolls())
+                        .addAll(find.getChildrenRolls())
+                        .addAll(replace.getChildrenRolls())
                         .build(), null);
     }
 }
