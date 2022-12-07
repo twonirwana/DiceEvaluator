@@ -25,6 +25,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static de.janno.evaluator.dice.EvaluationUtils.rollAllSupplier;
+
 public class DiceEvaluator {
 
     private static final int DEFAULT_MAX_NUMBER_OF_DICE = 1000;
@@ -93,9 +95,9 @@ public class DiceEvaluator {
         }
     }
 
-    private static List<Roll> reverse(Collection<Roll> collection) {
-        List<Roll> result = new ArrayList<>(collection.size());
-        for (Roll t : collection) {
+    private static List<RollSupplier> reverse(Collection<RollSupplier> collection) {
+        List<RollSupplier> result = new ArrayList<>(collection.size());
+        for (RollSupplier t : collection) {
             result.add(0, t);
         }
         return result;
@@ -108,24 +110,24 @@ public class DiceEvaluator {
                 (currentToken.getOperatorPrecedence().orElseThrow() < stackToken.getOperatorPrecedence().orElseThrow()));
     }
 
-    protected @NonNull Roll toValue(@NonNull String literal) {
+    protected @NonNull RollSupplier toValue(@NonNull String literal) {
         Matcher matcher = LIST_REGEX.matcher(literal);
         if (matcher.find()) {
             //Todo is this needed: ('Head'+'Tail') is the same as [Head,Tail] but needs escaping
             List<String> list = Arrays.asList(matcher.group(1).split("/"));
-            return new Roll(list.toString(), list.stream()
+            return () -> new Roll(list.toString(), list.stream()
                     .map(String::trim)
                     .map(s -> new RollElement(s, RollElement.NO_COLOR))
-                    .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of(), null);
+                    .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of());
         }
-        return new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), null);
+        return () -> new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
     }
 
-    private void processTokenToValues(Deque<Roll> values, Token token, Map<String, Roll> constants) throws ExpressionException {
+    private void processTokenToValues(Deque<RollSupplier> values, Token token, Map<String, Roll> constants) throws ExpressionException {
         if (token.getLiteral().isPresent()) { // If the token is a literal, a constant, or a variable name
             String literal = token.getLiteral().get();
             if (constants.containsKey(literal)) {
-                values.push(constants.get(literal));
+                values.push(() -> constants.get(literal));
             } else {
                 values.push(toValue(literal));
             }
@@ -133,8 +135,7 @@ public class DiceEvaluator {
             Operator operator = token.getOperator().get();
             int argumentCount = token.getOperatorType().orElseThrow().argumentCount;
             if (values.size() < argumentCount) {
-                throw new ExpressionException("Not enough values, %s needs %d but there where only %s".formatted(operator.getNames(), argumentCount, values.stream()
-                        .map(r -> r.getElements().stream().map(RollElement::toString).collect(Collectors.toList())).collect(Collectors.toList())));
+                throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getNames(), argumentCount));
             }
             values.push(operator.evaluate(getArguments(values, argumentCount)));
         } else {
@@ -142,21 +143,22 @@ public class DiceEvaluator {
         }
     }
 
-    private void doFunction(Deque<Roll> values, Function function, int argumentCount, Map<String, Roll> constantMap) throws ExpressionException {
+    private void doFunction(Deque<RollSupplier> values, Function function, int argumentCount, Map<String, Roll> constantMap) throws ExpressionException {
         if (function.getMinArgumentCount() > argumentCount || function.getMaxArgumentCount() < argumentCount || values.size() < argumentCount) {
             throw new ExpressionException("Invalid argument count for %s".formatted(function.getName()));
         }
-        final Roll res = function.evaluate(getArguments(values, argumentCount));
-        if (res.getConstantName() != null) {
-            constantMap.put(res.getConstantName(), res);
+        final RollSupplier res = function.evaluate(getArguments(values, argumentCount));
+        if (res.isConstant()) {
+            //todo will be set at parsing but must be set at roll time
+            constantMap.putAll(res.getConstant());
         } else {
             values.push(res);
         }
     }
 
-    private List<Roll> getArguments(Deque<Roll> values, int argumentCount) {
+    private List<RollSupplier> getArguments(Deque<RollSupplier> values, int argumentCount) {
         // The arguments are in reverse order on the values stack
-        List<Roll> result = new ArrayList<>(argumentCount);
+        List<RollSupplier> result = new ArrayList<>(argumentCount);
         for (int i = 0; i < argumentCount; i++) {
             result.add(0, values.pop());
         }
@@ -178,13 +180,17 @@ public class DiceEvaluator {
      * @throws ExpressionException if the expression is not correct.
      */
     public List<Roll> evaluate(String expression) throws ExpressionException {
+        return rollAllSupplier(buildRollSupplier(expression));
+    }
+
+    public List<RollSupplier> buildRollSupplier(String expression) throws ExpressionException {
         expression = expression.trim();
         if (Strings.isNullOrEmpty(expression)) {
-            return ImmutableList.of(new Roll("", ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of(), null));
+            return ImmutableList.of(() -> new Roll("", ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of()));
         }
 
         final List<Token> tokens = tokenizer.tokenize(expression);
-        final Deque<Roll> values = new ArrayDeque<>(tokens.size()); // values stack
+        final Deque<RollSupplier> values = new ArrayDeque<>(tokens.size()); // values stack
         final Deque<Token> stack = new ArrayDeque<>(tokens.size()); // operators, function and brackets stack
         final Deque<Integer> previousValuesSize = new ArrayDeque<>(tokens.size());
         final Map<String, Roll> constants = new HashMap<>();
@@ -302,7 +308,6 @@ public class DiceEvaluator {
             }
             processTokenToValues(values, stackToken, constants);
         }
-
         return reverse(values);
     }
 }

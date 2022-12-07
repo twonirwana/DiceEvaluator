@@ -6,7 +6,8 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static de.janno.evaluator.dice.ValidatorUtil.*;
+import static de.janno.evaluator.dice.EvaluationUtils.rollAllSupplier;
+import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class EqualFilter extends Operator {
@@ -16,18 +17,21 @@ public class EqualFilter extends Operator {
     }
 
     @Override
-    public @NonNull Roll evaluate(@NonNull List<Roll> operands) throws ExpressionException {
-        Roll left = operands.get(0);
-        Roll right = operands.get(1);
-        checkContainsSingleElement(getName(), right, "right");
+    public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) throws ExpressionException {
+        return () -> {
+            List<Roll> rolls = rollAllSupplier(operands);
 
-        ImmutableList<RollElement> diceResult = left.getElements().stream()
-                .filter(i -> right.getElements().get(0).equals(i))
-                .collect(ImmutableList.toImmutableList());
-        return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
-                diceResult,
-                UniqueRandomElements.from(operands),
-                ImmutableList.of(left, right), null
-        );
+            Roll left = rolls.get(0);
+            Roll right = rolls.get(1);
+            checkContainsSingleElement(getName(), right, "right");
+
+            ImmutableList<RollElement> diceResult = left.getElements().stream()
+                    .filter(i -> right.getElements().get(0).equals(i))
+                    .collect(ImmutableList.toImmutableList());
+            return new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
+                    diceResult,
+                    UniqueRandomElements.from(rolls),
+                    ImmutableList.of(left, right));
+        };
     }
 }

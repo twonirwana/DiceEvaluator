@@ -236,8 +236,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
                 Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
                 Arguments.of("'3''5'", "There need to be an operator or a separator between two values"),
-                Arguments.of("1d-1", "Not enough values, [d, D] needs 2 but there where only [[1]]"),
-                Arguments.of("d-1", "Not enough values, [d, D] needs 1 but there where only []"),
+                Arguments.of("1d-1", "Not enough values, [d, D] needs 2"),
+                Arguments.of("d-1", "Not enough values, [d, D] needs 1"),
                 Arguments.of("d!1", "The number of sides of a die must be greater then 1 but was 1"),
                 Arguments.of("d!!1", "The number of sides of a die must be greater then 1 but was 1"),
                 Arguments.of("1d!1", "The number of sides of a die must be greater then 1 but was 1"),
@@ -619,6 +619,26 @@ public class DiceEvaluatorTest {
         assertThatThrownBy(() -> underTest.evaluate(input))
                 .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
                 .hasMessage(expectedMessage);
+    }
+
+    @Test
+    void rollTwice_1d6() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2), 1000);
+
+        RollSupplier res = underTest.buildRollSupplier("1d6").get(0);
+
+        assertThat(res.roll().getElements().toString()).isEqualTo("[1]");
+        assertThat(res.roll().getElements().toString()).isEqualTo("[2]");
+    }
+
+    @Test
+    void rollTwice_value() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,2,3,4), 1000);
+
+        RollSupplier res = underTest.buildRollSupplier("val($1, 3d6) ($1=) + (($1>2)c)").get(0);
+
+        assertThat(res.roll().getElements().toString()).isEqualTo("[6, 1]");
+        assertThat(res.roll().getElements().toString()).isEqualTo("[9, 2]");
     }
 
     @Test

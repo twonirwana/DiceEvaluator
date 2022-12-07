@@ -1,12 +1,11 @@
 package de.janno.evaluator.dice.function;
 
-import de.janno.evaluator.dice.ExpressionException;
-import de.janno.evaluator.dice.Function;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.UniqueRandomElements;
+import com.google.common.collect.ImmutableMap;
+import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Map;
 
 public class Value extends Function {
     public Value() {
@@ -14,11 +13,27 @@ public class Value extends Function {
     }
 
     @Override
-    public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
-        return new Roll(getExpression(getPrimaryName(), arguments),
-                arguments.get(1).getElements(),
-                UniqueRandomElements.from(arguments),
-                arguments.get(1).getChildrenRolls(),
-                arguments.get(0).getElements().get(0).getValue());
+    public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
+        return new RollSupplier() {
+
+            @Override
+            public Roll roll() throws ExpressionException {
+                throw new IllegalStateException("provides only a constant");
+            }
+
+            @Override
+            public boolean isConstant() {
+                return true;
+            }
+
+            @Override
+            public Map<String, Roll> getConstant() throws ExpressionException {
+                List<Roll> rolls = EvaluationUtils.rollAllSupplier(arguments);
+                return ImmutableMap.of(rolls.get(0).getElements().get(0).getValue(), new Roll(getExpression(Value.this.getPrimaryName(), rolls),
+                        rolls.get(1).getElements(),
+                        UniqueRandomElements.from(rolls),
+                        rolls.get(1).getChildrenRolls()));
+            }
+        };
     }
 }

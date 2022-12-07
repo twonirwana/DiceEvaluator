@@ -14,35 +14,35 @@ class TokenizerTest {
     Operator d = new Operator("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 1) {
 
         @Override
-        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
-            return new Roll(operands.toString(), ImmutableList.of(new RollElement("dice", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), null);
+        public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) {
+            return () -> new Roll(operands.toString(), ImmutableList.of(new RollElement("dice", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
         }
     };
     Operator plus = new Operator("+", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 2) {
         @Override
-        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
-            return new Roll(operands.toString(), ImmutableList.of(new RollElement("plus", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), null);
+        public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) {
+            return () -> new Roll(operands.toString(), ImmutableList.of(new RollElement("plus", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
         }
     };
     Operator aRightLeft = new Operator("a", Operator.Associativity.RIGHT, 1, Operator.Associativity.LEFT, 1) {
         @Override
-        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
-            return new Roll(operands.toString(), ImmutableList.of(new RollElement("a", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), null);
+        public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) {
+            return () -> new Roll(operands.toString(), ImmutableList.of(new RollElement("a", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
         }
     };
 
     Operator aLeft = new Operator("a", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 1) {
         @Override
-        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
-            return new Roll(operands.toString(), ImmutableList.of(new RollElement("a", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), null);
+        public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) {
+            return () -> new Roll(operands.toString(), ImmutableList.of(new RollElement("a", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
 
         }
     };
 
     Operator aRight = new Operator("a", Operator.OperatorType.UNARY, Operator.Associativity.RIGHT, 1) {
         @Override
-        public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
-            return new Roll(operands.toString(), ImmutableList.of(new RollElement("a", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), null);
+        public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) {
+            return () -> new Roll(operands.toString(), ImmutableList.of(new RollElement("a", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
         }
     };
 
@@ -105,14 +105,14 @@ class TokenizerTest {
     void validate() {
         Operator d = new Operator("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 20) {
             @Override
-            public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
-                return new Roll(operands.toString(), ImmutableList.of(new RollElement("null", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), null);
+            public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) {
+                return () -> new Roll(operands.toString(), ImmutableList.of(new RollElement("null", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
             }
         };
         Operator d2 = new Operator("d", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 15) {
             @Override
-            public @NonNull Roll evaluate(@NonNull List<Roll> operands) {
-                return new Roll(operands.toString(), ImmutableList.of(new RollElement("null", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), null);
+            public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) {
+                return () -> new Roll(operands.toString(), ImmutableList.of(new RollElement("null", RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
             }
         };
 

@@ -1,13 +1,12 @@
 package de.janno.evaluator.dice.function;
 
 import com.google.common.collect.ImmutableList;
-import de.janno.evaluator.dice.ExpressionException;
-import de.janno.evaluator.dice.Function;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.UniqueRandomElements;
+import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+
+import static de.janno.evaluator.dice.EvaluationUtils.rollAllSupplier;
 
 public abstract class AbstractIf extends Function {
 
@@ -16,45 +15,48 @@ public abstract class AbstractIf extends Function {
     }
 
     @Override
-    public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
-        Roll input = arguments.get(0);
+    public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
+        return () -> {
+            List<Roll> rolls = rollAllSupplier(arguments);
+            Roll input = rolls.get(0);
 
-        int counter = 1;
-        UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
-        randomElements.add(input.getRandomElementsInRoll());
-        while (counter < arguments.size() - 1) {
-            Roll compareTo = arguments.get(counter);
-            Roll trueResult = arguments.get(counter + 1);
-            randomElements.add(compareTo.getRandomElementsInRoll());
-            if (compare(input, counter, compareTo, counter + 1)) {
-                randomElements.add(trueResult.getRandomElementsInRoll());
-                return new Roll(getExpression(getPrimaryName(), arguments),
-                        trueResult.getElements(),
-                        randomElements.build(),
-                        ImmutableList.<Roll>builder()
-                                .addAll(input.getChildrenRolls())
-                                .addAll(trueResult.getChildrenRolls())
-                                .build(), null);
+            int counter = 1;
+            UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
+            randomElements.add(input.getRandomElementsInRoll());
+            while (counter < rolls.size() - 1) {
+                Roll compareTo = rolls.get(counter);
+                Roll trueResult = rolls.get(counter + 1);
+                randomElements.add(compareTo.getRandomElementsInRoll());
+                if (compare(input, counter, compareTo, counter + 1)) {
+                    randomElements.add(trueResult.getRandomElementsInRoll());
+                    return new Roll(getExpression(getPrimaryName(), rolls),
+                            trueResult.getElements(),
+                            randomElements.build(),
+                            ImmutableList.<Roll>builder()
+                                    .addAll(input.getChildrenRolls())
+                                    .addAll(trueResult.getChildrenRolls())
+                                    .build());
+                }
+                counter += 2;
             }
-            counter += 2;
-        }
 
-        final Roll result;
-        //there is a last element in the arguments, which is the default result
-        if (counter != arguments.size()) {
-            result = arguments.get(arguments.size() - 1);
-            randomElements.add(result.getRandomElementsInRoll());
-        } else {
-            //if there is no default result, the result is the input
-            result = input;
-        }
-        return new Roll(getExpression(getPrimaryName(), arguments),
-                result.getElements(),
-                randomElements.build(),
-                ImmutableList.<Roll>builder()
-                        .addAll(input.getChildrenRolls())
-                        .addAll(result.getChildrenRolls())
-                        .build(), null);
+            final Roll result;
+            //there is a last element in the arguments, which is the default result
+            if (counter != rolls.size()) {
+                result = rolls.get(rolls.size() - 1);
+                randomElements.add(result.getRandomElementsInRoll());
+            } else {
+                //if there is no default result, the result is the input
+                result = input;
+            }
+            return new Roll(getExpression(getPrimaryName(), rolls),
+                    result.getElements(),
+                    randomElements.build(),
+                    ImmutableList.<Roll>builder()
+                            .addAll(input.getChildrenRolls())
+                            .addAll(result.getChildrenRolls())
+                            .build());
+        };
     }
 
 
