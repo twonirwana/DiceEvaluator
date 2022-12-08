@@ -21,8 +21,8 @@ public class KeepHighest extends Operator {
 
     @Override
     public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) throws ExpressionException {
-        return () -> {
-            List<Roll> rolls = rollAllSupplier(operands);
+        return constants -> {
+            List<Roll> rolls = rollAllSupplier(operands, constants);
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
             final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));

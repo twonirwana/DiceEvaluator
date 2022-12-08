@@ -18,8 +18,8 @@ public final class NegateOrNegativAppending extends Operator {
 
     @Override
     public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) throws ExpressionException {
-        return () -> {
-            List<Roll> rolls = rollAllSupplier(operands);
+        return constants -> {
+            List<Roll> rolls = rollAllSupplier(operands, constants);
             if (rolls.size() == 1) {
                 Roll right = rolls.get(0);
                 checkContainsOnlyInteger(getName(), right, "right");

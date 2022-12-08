@@ -20,8 +20,8 @@ public class Double extends Function {
 
     @Override
     public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
-        return () -> {
-            List<Roll> rolls = rollAllSupplier(arguments);
+        return constants -> {
+            List<Roll> rolls = rollAllSupplier(arguments, constants);
             Roll input = rolls.get(0);
             Roll toDuplicate = rolls.get(1);
 

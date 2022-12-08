@@ -17,8 +17,8 @@ public final class Appending extends Operator {
 
     @Override
     public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) {
-        return () -> {
-            List<Roll> rolls = rollAllSupplier(operands);
+        return constants -> {
+            List<Roll> rolls = rollAllSupplier(operands, constants);
             if (rolls.size() == 1) {
                 return rolls.get(0);
             }

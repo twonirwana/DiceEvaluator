@@ -19,8 +19,8 @@ public class GroupCount extends de.janno.evaluator.dice.Function {
 
     @Override
     public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
-        return () -> {
-            List<Roll> rolls = rollAllSupplier(arguments);
+        return constants -> {
+            List<Roll> rolls = rollAllSupplier(arguments, constants);
             final ImmutableList<RollElement> res = rolls.stream()
                     .flatMap(result -> result.getElements().stream())
                     .collect(Collectors.groupingBy(Function.identity())).entrySet().stream()

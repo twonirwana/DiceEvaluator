@@ -15,8 +15,8 @@ public class Max extends Function {
 
     @Override
     public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
-        return () -> {
-            List<Roll> rolls = rollAllSupplier(arguments);
+        return constants -> {
+            List<Roll> rolls = rollAllSupplier(arguments, constants);
             final RollElement max = rolls.stream()
                     .flatMap(result -> result.getElements().stream())
                     .max(RollElement::compareTo).orElseThrow();

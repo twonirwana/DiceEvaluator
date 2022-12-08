@@ -115,22 +115,23 @@ public class DiceEvaluator {
         if (matcher.find()) {
             //Todo is this needed: ('Head'+'Tail') is the same as [Head,Tail] but needs escaping
             List<String> list = Arrays.asList(matcher.group(1).split("/"));
-            return () -> new Roll(list.toString(), list.stream()
+            return constants -> new Roll(list.toString(), list.stream()
                     .map(String::trim)
                     .map(s -> new RollElement(s, RollElement.NO_COLOR))
                     .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of());
         }
-        return () -> new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
+        return constants -> {
+            if (constants.containsKey(literal)) {
+                return constants.get(literal);
+            }
+            return new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
+        };
     }
 
-    private void processTokenToValues(Deque<RollSupplier> values, Token token, Map<String, Roll> constants) throws ExpressionException {
+    private void processTokenToValues(Deque<RollSupplier> values, Token token) throws ExpressionException {
         if (token.getLiteral().isPresent()) { // If the token is a literal, a constant, or a variable name
             String literal = token.getLiteral().get();
-            if (constants.containsKey(literal)) {
-                values.push(() -> constants.get(literal));
-            } else {
-                values.push(toValue(literal));
-            }
+            values.push(toValue(literal));
         } else if (token.getOperator().isPresent()) { // If the token is an operator
             Operator operator = token.getOperator().get();
             int argumentCount = token.getOperatorType().orElseThrow().argumentCount;
@@ -143,17 +144,12 @@ public class DiceEvaluator {
         }
     }
 
-    private void doFunction(Deque<RollSupplier> values, Function function, int argumentCount, Map<String, Roll> constantMap) throws ExpressionException {
+    private void doFunction(Deque<RollSupplier> values, Function function, int argumentCount) throws ExpressionException {
         if (function.getMinArgumentCount() > argumentCount || function.getMaxArgumentCount() < argumentCount || values.size() < argumentCount) {
             throw new ExpressionException("Invalid argument count for %s".formatted(function.getName()));
         }
         final RollSupplier res = function.evaluate(getArguments(values, argumentCount));
-        if (res.isConstant()) {
-            //todo will be set at parsing but must be set at roll time
-            constantMap.putAll(res.getConstant());
-        } else {
-            values.push(res);
-        }
+        values.push(res);
     }
 
     private List<RollSupplier> getArguments(Deque<RollSupplier> values, int argumentCount) {
@@ -180,20 +176,19 @@ public class DiceEvaluator {
      * @throws ExpressionException if the expression is not correct.
      */
     public List<Roll> evaluate(String expression) throws ExpressionException {
-        return rollAllSupplier(buildRollSupplier(expression));
+        return rollAllSupplier(buildRollSupplier(expression), new HashMap<>());
     }
 
     public List<RollSupplier> buildRollSupplier(String expression) throws ExpressionException {
         expression = expression.trim();
         if (Strings.isNullOrEmpty(expression)) {
-            return ImmutableList.of(() -> new Roll("", ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of()));
+            return ImmutableList.of(constants -> new Roll("", ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of()));
         }
 
         final List<Token> tokens = tokenizer.tokenize(expression);
         final Deque<RollSupplier> values = new ArrayDeque<>(tokens.size()); // values stack
         final Deque<Token> stack = new ArrayDeque<>(tokens.size()); // operators, function and brackets stack
         final Deque<Integer> previousValuesSize = new ArrayDeque<>(tokens.size());
-        final Map<String, Roll> constants = new HashMap<>();
         Optional<Token> previous = Optional.empty();
         for (Token token : tokens) {
 
@@ -237,7 +232,7 @@ public class DiceEvaluator {
                             throw new ExpressionException("Invalid parenthesis match %s%s".formatted(stackToken.getBrackets().get().getOpen(), brackets.getClose()));
                         }
                     } else {
-                        processTokenToValues(values, stackToken, constants);
+                        processTokenToValues(values, stackToken);
                     }
                 }
                 if (!openBracketFound) {
@@ -249,7 +244,7 @@ public class DiceEvaluator {
                     // If the token at the top of the stack is a function token, pop it
                     // onto the output queue.
                     int argumentCount = values.size() - previousValuesSize.pop();
-                    doFunction(values, stack.pop().getFunction().orElseThrow(), argumentCount, constants);
+                    doFunction(values, stack.pop().getFunction().orElseThrow(), argumentCount);
                 }
             } else if (token.isSeparator()) {
                 if (previous.isEmpty()) {
@@ -266,7 +261,7 @@ public class DiceEvaluator {
                     } else {
                         // Until the token at the top of the stack is a left parenthesis,
                         // pop operators off the stack onto the output queue.
-                        processTokenToValues(values, stack.pop(), constants);
+                        processTokenToValues(values, stack.pop());
                     }
                 }
                 if (openBracketOnStackReached) {
@@ -288,7 +283,7 @@ public class DiceEvaluator {
                     // The differing operator priority decides pop / push
                     // If 2 operators have equal priority then associativity decides.
                     // Pop o2 off the stack, onto the output queue;
-                    processTokenToValues(values, stack.pop(), constants);
+                    processTokenToValues(values, stack.pop());
                 }
                 stack.push(token);
             } else {
@@ -296,7 +291,7 @@ public class DiceEvaluator {
                 if (previous.flatMap(Token::getLiteral).isPresent()) {
                     throw new ExpressionException("There need to be an operator or a separator between two values");
                 }
-                processTokenToValues(values, token, constants);
+                processTokenToValues(values, token);
             }
             previous = Optional.of(token);
         }
@@ -306,7 +301,7 @@ public class DiceEvaluator {
             if (stackToken.isOpenBracket() || stackToken.isCloseBracket()) {
                 throw new ExpressionException("Parentheses mismatched");
             }
-            processTokenToValues(values, stackToken, constants);
+            processTokenToValues(values, stackToken);
         }
         return reverse(values);
     }

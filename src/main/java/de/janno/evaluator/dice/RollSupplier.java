@@ -1,18 +1,11 @@
 package de.janno.evaluator.dice;
 
+import lombok.NonNull;
+
 import java.util.Map;
 
 @FunctionalInterface
 public interface RollSupplier {
-    Roll roll() throws ExpressionException;
+    @NonNull Roll roll(@NonNull Map<String, Roll> constantMap) throws ExpressionException;
 
-
-
-    default Map<String, Roll> getConstant() throws ExpressionException {
-        return null;
-    }
-
-    default boolean isConstant(){
-        return false;
-    }
 }

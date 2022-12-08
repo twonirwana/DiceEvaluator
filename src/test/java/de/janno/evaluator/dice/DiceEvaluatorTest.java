@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -106,7 +107,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("val($1, 3d6) $1, $1", List.of(1, 2, 3), List.of(1, 2, 3, 1, 2, 3)),
                 Arguments.of("val($1, 3d6) $1= , $1c", List.of(1, 2, 3), List.of(6, 3)),
                 Arguments.of("val($1, 3d6) $1= , ($1>2)c", List.of(1, 2, 3), List.of(6, 1)),
-                Arguments.of("val($1, val($2, 3d6) 7) $1 , $2", List.of(1, 2, 3), List.of(7, 1, 2, 3)),
+                Arguments.of("val($1, val($2, 3d6) + 7) $1 , $2", List.of(1, 2, 3), List.of(7, 1, 2, 3)),
                 Arguments.of("val($1, 3d6) val($2, 7) $1 , $2", List.of(1, 2, 3), List.of(1, 2, 3, 7)),
                 Arguments.of("val($1, $2) val($2, $1) $1 , $2", List.of(1, 2, 3), List.of()),
                 Arguments.of("val($1, $1) $1", List.of(1, 2, 3), List.of()),
@@ -267,7 +268,7 @@ public class DiceEvaluatorTest {
 
     private static Stream<Arguments> resultSizeDate() {
         return Stream.of(
-                Arguments.of("val(2, 'abc'),d6", 1),
+                Arguments.of("val(2, 'abc'),d6", 2),
                 Arguments.of("1d6,d6", 2),
                 Arguments.of("d6", 1),
                 Arguments.of("1d6", 1),
@@ -280,7 +281,7 @@ public class DiceEvaluatorTest {
         //DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,4,5,6,7,8,9,10), 1000);
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))");
+        List<Roll> res = underTest.evaluate("val($1, 1d6) $1");
         System.out.println(res.size());
         System.out.println(res);
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
@@ -482,8 +483,8 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 10, 10), 1000);
         List<Roll> res = underTest.evaluate("val($1,d100), ifG($1, 95, (d100 + $1=), ifL($1, 6, ($1 - d100=)))");
 
-        assertThat(res).hasSize(1);
-        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("-5");
+        assertThat(res).hasSize(2);
+        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("-5");
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
                 .flatMap(r -> r.getRandomElements().stream()
@@ -627,18 +628,19 @@ public class DiceEvaluatorTest {
 
         RollSupplier res = underTest.buildRollSupplier("1d6").get(0);
 
-        assertThat(res.roll().getElements().toString()).isEqualTo("[1]");
-        assertThat(res.roll().getElements().toString()).isEqualTo("[2]");
+        assertThat(res.roll(new HashMap<>()).getElements().toString()).isEqualTo("[1]");
+        assertThat(res.roll(new HashMap<>()).getElements().toString()).isEqualTo("[2]");
     }
 
     @Test
     void rollTwice_value() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,2,3,4), 1000);
 
-        RollSupplier res = underTest.buildRollSupplier("val($1, 3d6) ($1=) + (($1>2)c)").get(0);
+        List<RollSupplier> res = underTest.buildRollSupplier("val($1, 3d6), (($1)=) + (($1>2)c)");
 
-        assertThat(res.roll().getElements().toString()).isEqualTo("[6, 1]");
-        assertThat(res.roll().getElements().toString()).isEqualTo("[9, 2]");
+
+        assertThat(EvaluationUtils.rollAllSupplier(res,new HashMap<>()).get(1).getElements().toString()).isEqualTo("[6, 1]");
+        assertThat(EvaluationUtils.rollAllSupplier(res,new HashMap<>()).get(1).getElements().toString()).isEqualTo("[9, 2]");
     }
 
     @Test

@@ -16,8 +16,8 @@ public class Color extends Function {
 
     @Override
     public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
-        return () -> {
-            List<Roll> rolls = rollAllSupplier(arguments);
+        return constants -> {
+            List<Roll> rolls = rollAllSupplier(arguments, constants);
             Roll p1 = rolls.get(0);
             Roll p2 = rolls.get(1);
             checkContainsSingleElement(getName(), p2, "second argument");

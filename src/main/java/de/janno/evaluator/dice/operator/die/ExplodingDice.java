@@ -26,8 +26,8 @@ public final class ExplodingDice extends Operator {
 
     @Override
     public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) throws ExpressionException {
-        return () -> {
-            List<Roll> rolls = rollAllSupplier(operands);
+        return constants -> {
+            List<Roll> rolls = rollAllSupplier(operands, constants);
             UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
             if (rolls.size() == 1) {
                 final Roll right = rolls.get(0);
