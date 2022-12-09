@@ -7,7 +7,7 @@ import lombok.NonNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static de.janno.evaluator.dice.EvaluationUtils.rollAllSupplier;
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 
 public class Concat extends Function {
     public Concat() {
@@ -15,9 +15,9 @@ public class Concat extends Function {
     }
 
     @Override
-    public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
         return constants -> {
-            List<Roll> rolls = rollAllSupplier(arguments, constants);
+            List<Roll> rolls = extendAllBuilder(arguments, constants);
             String joined = rolls.stream()
                     .map(Roll::getResultString)
                     .collect(Collectors.joining());

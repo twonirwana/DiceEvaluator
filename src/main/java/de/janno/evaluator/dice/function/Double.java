@@ -6,7 +6,7 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static de.janno.evaluator.dice.EvaluationUtils.rollAllSupplier;
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 
 /**
  * Deprecated in favor of the mightier 'replace' function.
@@ -19,9 +19,9 @@ public class Double extends Function {
     }
 
     @Override
-    public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
         return constants -> {
-            List<Roll> rolls = rollAllSupplier(arguments, constants);
+            List<Roll> rolls = extendAllBuilder(arguments, constants);
             Roll input = rolls.get(0);
             Roll toDuplicate = rolls.get(1);
 

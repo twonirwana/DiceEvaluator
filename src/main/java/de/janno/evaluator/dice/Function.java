@@ -77,5 +77,5 @@ public abstract class Function {
         return names.iterator().next();
     }
 
-    public abstract @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException;
+    public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException;
 }

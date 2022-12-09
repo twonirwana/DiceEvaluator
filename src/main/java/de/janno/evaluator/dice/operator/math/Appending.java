@@ -8,7 +8,7 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static de.janno.evaluator.dice.EvaluationUtils.rollAllSupplier;
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 
 public final class Appending extends Operator {
     public Appending() {
@@ -16,9 +16,9 @@ public final class Appending extends Operator {
     }
 
     @Override
-    public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) {
         return constants -> {
-            List<Roll> rolls = rollAllSupplier(operands, constants);
+            List<Roll> rolls = extendAllBuilder(operands, constants);
             if (rolls.size() == 1) {
                 return rolls.get(0);
             }

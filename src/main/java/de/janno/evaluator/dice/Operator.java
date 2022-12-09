@@ -94,7 +94,7 @@ public abstract class Operator {
         return String.format("%s%s", name, operands.get(0).getExpression());
     }
 
-    public abstract @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) throws ExpressionException;
+    public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException;
 
     public boolean supportUnaryOperation() {
         return unaryAssociativity != null;

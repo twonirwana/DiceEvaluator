@@ -1,0 +1,21 @@
+package de.janno.evaluator.dice;
+
+import com.google.common.collect.ImmutableList;
+import lombok.NonNull;
+
+import java.util.List;
+import java.util.Map;
+
+@FunctionalInterface
+public interface RollBuilder {
+    static List<Roll> extendAllBuilder(List<RollBuilder> rollBuilders, Map<String, Roll> constantMap) throws ExpressionException {
+        ImmutableList.Builder<Roll> builder = ImmutableList.builder();
+        for (RollBuilder rs : rollBuilders) {
+            Roll r = rs.extendRoll(constantMap);
+            builder.add(r);
+        }
+        return builder.build();
+    }
+
+    @NonNull Roll extendRoll(@NonNull Map<String, Roll> constantMap) throws ExpressionException;
+}

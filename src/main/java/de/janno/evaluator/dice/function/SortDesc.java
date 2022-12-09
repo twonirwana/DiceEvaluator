@@ -7,7 +7,7 @@ import lombok.NonNull;
 import java.util.Comparator;
 import java.util.List;
 
-import static de.janno.evaluator.dice.EvaluationUtils.rollAllSupplier;
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 
 public class SortDesc extends Function {
 
@@ -16,9 +16,9 @@ public class SortDesc extends Function {
     }
 
     @Override
-    public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
         return constants -> {
-            List<Roll> rolls = rollAllSupplier(arguments, constants);
+            List<Roll> rolls = extendAllBuilder(arguments, constants);
             final ImmutableList<RollElement> res = rolls.stream()
                     .flatMap(result -> result.getElements().stream())
                     .sorted(Comparator.reverseOrder())

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.janno.evaluator.dice.EvaluationUtils.rollAllSupplier;
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Count extends Operator {
@@ -18,9 +18,9 @@ public class Count extends Operator {
     }
 
     @Override
-    public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> operands) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
         return constants -> {
-            List<Roll> rolls = rollAllSupplier(operands, constants);
+            List<Roll> rolls = extendAllBuilder(operands, constants);
             Roll left = rolls.get(0);
 
             //count of each color separate

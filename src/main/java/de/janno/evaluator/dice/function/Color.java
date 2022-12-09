@@ -6,7 +6,7 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static de.janno.evaluator.dice.EvaluationUtils.rollAllSupplier;
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
 
 public class Color extends Function {
@@ -15,9 +15,9 @@ public class Color extends Function {
     }
 
     @Override
-    public @NonNull RollSupplier evaluate(@NonNull List<RollSupplier> arguments) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
         return constants -> {
-            List<Roll> rolls = rollAllSupplier(arguments, constants);
+            List<Roll> rolls = extendAllBuilder(arguments, constants);
             Roll p1 = rolls.get(0);
             Roll p2 = rolls.get(1);
             checkContainsSingleElement(getName(), p2, "second argument");
