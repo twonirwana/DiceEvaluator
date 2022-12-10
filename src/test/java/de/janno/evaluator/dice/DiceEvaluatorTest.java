@@ -258,6 +258,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("(-6)d!2", "The number of dice can not be negativ but was -6"),
                 Arguments.of("(-6)d!!2", "The number of dice can not be negativ but was -6"),
                 Arguments.of("d'-1'", "Sides of dice to roll must be positive"),
+                Arguments.of("val($1,1) val($1,1) val($1,1) $1", "The value name '1' was defined more than once."),
                 Arguments.of("11x(1d6)","The number of repeat must between 1-10 but was 11"),
                 Arguments.of("0x(1d6)","The number of repeat must between 1-10 but was 0"),
                 Arguments.of("3d6x(1d6)","'[X, x]' requires as left input a single integer but was '[2, 3, 1]'. Try to sum the numbers together like (3d6=)"),
