@@ -19,6 +19,7 @@
 | Lesser Equal Filter  | <=         | 3d6<=3             |
 | Count                | c          | 3d6<3c             |
 | Multiple Rolls       | ,          | 1d6,2d10           |
+| Repeat               | x          | 3x2d6              |
 | Sort asc             | asc()      | asc(10d10)         |
 | Sort desc            | desc()     | desc(10d10)        |
 | Min                  | min()      | min(3d4, 8)        |
@@ -33,3 +34,4 @@
 | Group Count          | groupC()   | groupC(20d6)       |
 | Concatenate          | concat()   | concat('Att:',d20) |
 | Value                | val()      | val($1,10d10)      |
+| RerollOn             | rerollOn() | rerollOn(3d10,1)   |

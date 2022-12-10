@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class Replace extends Function {
     public Replace() {
@@ -18,6 +19,8 @@ public class Replace extends Function {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(arguments, constants);
+            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+
             Roll input = rolls.get(0);
             Roll find = rolls.get(1);
             Roll replace = rolls.get(2);
@@ -32,14 +35,14 @@ public class Replace extends Function {
                     .collect(ImmutableList.toImmutableList());
 
 
-            return new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
                     rollElements,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.<Roll>builder()
                             .addAll(input.getChildrenRolls())
                             .addAll(find.getChildrenRolls())
                             .addAll(replace.getChildrenRolls())
-                            .build());
+                            .build()));
         };
     }
 }

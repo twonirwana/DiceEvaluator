@@ -112,7 +112,7 @@ public abstract class Operator {
         if (names.size() == 1) {
             return names.iterator().next();
         }
-        return names.toString();
+        return names.stream().sorted().toList().toString();
     }
 
     public @NonNull String getPrimaryName() {

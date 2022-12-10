@@ -7,6 +7,7 @@ import lombok.NonNull;
 import java.util.List;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class Min extends Function {
     public Min() {
@@ -17,6 +18,8 @@ public class Min extends Function {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(arguments, constants);
+            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+
             final RollElement min = rolls.stream()
                     .flatMap(result -> result.getElements().stream())
                     .min(RollElement::compareTo).orElseThrow();
@@ -25,10 +28,10 @@ public class Min extends Function {
                     .flatMap(result -> result.getElements().stream())
                     .filter(resultElement -> resultElement.compareTo(min) == 0)
                     .collect(ImmutableList.toImmutableList());
-            return new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.copyOf(rolls));
+                    ImmutableList.copyOf(rolls)));
         };
     }
 }

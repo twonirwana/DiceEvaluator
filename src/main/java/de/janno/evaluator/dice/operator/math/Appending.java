@@ -9,6 +9,7 @@ import lombok.NonNull;
 import java.util.List;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public final class Appending extends Operator {
     public Appending() {
@@ -18,9 +19,12 @@ public final class Appending extends Operator {
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) {
         return constants -> {
+
             List<Roll> rolls = extendAllBuilder(operands, constants);
+            checkRollSize(getName(), rolls, 1,2);
+
             if (rolls.size() == 1) {
-                return rolls.get(0);
+                return ImmutableList.of(rolls.get(0));
             }
 
             Roll left = rolls.get(0);
@@ -29,10 +33,10 @@ public final class Appending extends Operator {
                     .addAll(left.getElements())
                     .addAll(right.getElements())
                     .build();
-            return new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right));
+                    ImmutableList.of(left, right)));
         };
     }
 }

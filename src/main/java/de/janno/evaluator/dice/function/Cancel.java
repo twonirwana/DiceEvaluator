@@ -7,6 +7,7 @@ import lombok.NonNull;
 import java.util.List;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class Cancel extends Function {
     public Cancel() {
@@ -17,7 +18,7 @@ public class Cancel extends Function {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(arguments, constants);
-
+            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
             Roll input = rolls.get(0);
             Roll typeA = rolls.get(1);
             Roll typeB = rolls.get(2);
@@ -40,14 +41,14 @@ public class Cancel extends Function {
             } else if (typeAMatch.size() < typeBMatch.size()) {
                 resultBuilder.addAll(getChancel(typeBMatch, typeAMatch));
             }
-            return new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
                     resultBuilder.build(),
                     UniqueRandomElements.from(rolls),
                     ImmutableList.<Roll>builder()
                             .addAll(input.getChildrenRolls())
                             .addAll(typeA.getChildrenRolls())
                             .addAll(typeB.getChildrenRolls())
-                            .build());
+                            .build()));
         };
     }
 

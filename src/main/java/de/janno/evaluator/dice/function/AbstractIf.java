@@ -7,6 +7,7 @@ import lombok.NonNull;
 import java.util.List;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public abstract class AbstractIf extends Function {
 
@@ -18,6 +19,7 @@ public abstract class AbstractIf extends Function {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(arguments, constants);
+            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
             Roll input = rolls.get(0);
 
             int counter = 1;
@@ -29,13 +31,13 @@ public abstract class AbstractIf extends Function {
                 randomElements.add(compareTo.getRandomElementsInRoll());
                 if (compare(input, counter, compareTo, counter + 1)) {
                     randomElements.add(trueResult.getRandomElementsInRoll());
-                    return new Roll(getExpression(getPrimaryName(), rolls),
+                    return  ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
                             trueResult.getElements(),
                             randomElements.build(),
                             ImmutableList.<Roll>builder()
                                     .addAll(input.getChildrenRolls())
                                     .addAll(trueResult.getChildrenRolls())
-                                    .build());
+                                    .build()));
                 }
                 counter += 2;
             }
@@ -49,13 +51,13 @@ public abstract class AbstractIf extends Function {
                 //if there is no default result, the result is the input
                 result = input;
             }
-            return new Roll(getExpression(getPrimaryName(), rolls),
+            return  ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
                     result.getElements(),
                     randomElements.build(),
                     ImmutableList.<Roll>builder()
                             .addAll(input.getChildrenRolls())
                             .addAll(result.getChildrenRolls())
-                            .build());
+                            .build()));
         };
     }
 

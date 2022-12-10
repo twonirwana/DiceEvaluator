@@ -49,6 +49,7 @@ public class DiceEvaluator {
                         .add(new ExplodingAddDice(numberSupplier, maxNumberOfDice))
                         .add(new Appending())
                         .add(new Sum())
+                        .add(new Repeat())
                         .add(new NegateOrNegativAppending())
                         .add(new Divide())
                         .add(new Multiply())
@@ -77,6 +78,7 @@ public class DiceEvaluator {
                         .add(new Replace())
                         .add(new IfLesser())
                         .add(new GroupCount())
+                        .add(new RerollOn())
                         .build())
                 .separator(",")
                 .build();
@@ -113,10 +115,8 @@ public class DiceEvaluator {
             Map<String, Roll> constantMap = new HashMap<>();
             ImmutableList.Builder<Roll> builder = ImmutableList.builder();
             for (RollBuilder rs : rollBuilders) {
-                Roll r = rs.extendRoll(constantMap);
-                if (!r.getElements().isEmpty()) {
-                    builder.add(r);
-                }
+                List<Roll> r = rs.extendRoll(constantMap);
+                builder.addAll(r);
             }
             return builder.build();
         };
@@ -127,16 +127,16 @@ public class DiceEvaluator {
         if (matcher.find()) {
             //Todo is this needed: ('Head'+'Tail') is the same as [Head,Tail] but needs escaping
             List<String> list = Arrays.asList(matcher.group(1).split("/"));
-            return constants -> new Roll(list.toString(), list.stream()
+            return constants -> ImmutableList.of(new Roll(list.toString(), list.stream()
                     .map(String::trim)
                     .map(s -> new RollElement(s, RollElement.NO_COLOR))
-                    .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of());
+                    .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of()));
         }
         return constants -> {
             if (constants.containsKey(literal)) {
-                return constants.get(literal);
+                return ImmutableList.of(constants.get(literal));
             }
-            return new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of());
+            return ImmutableList.of(new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of()));
         };
     }
 

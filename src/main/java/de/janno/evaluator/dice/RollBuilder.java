@@ -11,11 +11,11 @@ public interface RollBuilder {
     static List<Roll> extendAllBuilder(List<RollBuilder> rollBuilders, Map<String, Roll> constantMap) throws ExpressionException {
         ImmutableList.Builder<Roll> builder = ImmutableList.builder();
         for (RollBuilder rs : rollBuilders) {
-            Roll r = rs.extendRoll(constantMap);
-            builder.add(r);
+            List<Roll> r = rs.extendRoll(constantMap);
+            builder.addAll(r);
         }
         return builder.build();
     }
 
-    @NonNull Roll extendRoll(@NonNull Map<String, Roll> constantMap) throws ExpressionException;
+    @NonNull List<Roll> extendRoll(@NonNull Map<String, Roll> constantMap) throws ExpressionException;
 }

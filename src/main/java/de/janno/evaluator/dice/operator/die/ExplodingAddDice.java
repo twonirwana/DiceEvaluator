@@ -11,6 +11,7 @@ import java.util.List;
 import static de.janno.evaluator.dice.DiceHelper.explodingAddDice;
 import static de.janno.evaluator.dice.DiceHelper.toRollElements;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
@@ -28,6 +29,7 @@ public final class ExplodingAddDice extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
+            checkRollSize(getName(), rolls, 1,2);
 
             UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
             if (rolls.size() == 1) {
@@ -41,10 +43,10 @@ public final class ExplodingAddDice extends Operator {
                 randomElements.addAsRandomElements(rollElements.stream()
                         .map(r -> new RandomElement(r, 1, sidesOfDie))
                         .collect(ImmutableList.toImmutableList()));
-                return new Roll(getRightUnaryExpression(getPrimaryName(), rolls),
+                return ImmutableList.of(new Roll(getRightUnaryExpression(getPrimaryName(), rolls),
                         rollElements,
                         randomElements.build(),
-                        ImmutableList.of(right));
+                        ImmutableList.of(right)));
             }
 
             final Roll left = rolls.get(0);
@@ -68,10 +70,10 @@ public final class ExplodingAddDice extends Operator {
             randomElements.addAsRandomElements(rollElements.stream()
                     .map(r -> new RandomElement(r, 1, sidesOfDie))
                     .collect(ImmutableList.toImmutableList()));
-            return new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
                     rollElements,
                     randomElements.build(),
-                    ImmutableList.of(left, right));
+                    ImmutableList.of(left, right)));
         };
     }
 }

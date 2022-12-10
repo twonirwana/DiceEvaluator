@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyInteger;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Sum extends Operator {
@@ -29,6 +30,8 @@ public class Sum extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
+            checkRollSize(getName(), rolls, 1,1);
+
             Roll left = rolls.get(0);
             checkContainsOnlyInteger(getName(), left, "left");
 
@@ -37,10 +40,10 @@ public class Sum extends Operator {
                     .map(e -> new RollElement(String.valueOf(sumExact(e.getValue())), e.getKey()))
                     .collect(ImmutableList.toImmutableList());
 
-            return new Roll(getLeftUnaryExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getLeftUnaryExpression(getPrimaryName(), rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left));
+                    ImmutableList.of(left)));
         };
     }
 }

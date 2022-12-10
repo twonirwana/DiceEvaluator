@@ -20,10 +20,6 @@ public class Roll {
     @NonNull
     ImmutableList<Roll> childrenRolls;
 
-    public static Roll empty() {
-        return new Roll("", ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of());
-    }
-
     public Optional<Integer> asInteger() {
         if (elements.size() == 1) {
             return elements.get(0).asInteger();

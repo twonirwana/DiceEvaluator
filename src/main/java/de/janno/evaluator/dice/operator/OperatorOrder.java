@@ -16,6 +16,7 @@ public final class OperatorOrder {
 
     final static ImmutableList<Class<? extends Operator>> operatorOrderList =
             ImmutableList.<Class<? extends Operator>>builder()
+                    .add(Repeat.class)
                     .add(Sum.class) //sum must be applied as last
                     .add(Multiply.class)
                     .add(Divide.class)
