@@ -19,6 +19,9 @@
 | Lesser Equal Filter  | <=         | 3d6<=3             |
 | Count                | c          | 3d6<3c             |
 | Multiple Rolls       | ,          | 1d6,2d10           |
+| Repeat               | x          | 3x2d6              |
+| Reroll               | rr         | 3d10 rr 1          |
+| Brackets             | ()         | (2d4=)d6           |
 | Sort asc             | asc()      | asc(10d10)         |
 | Sort desc            | desc()     | desc(10d10)        |
 | Min                  | min()      | min(3d4, 8)        |

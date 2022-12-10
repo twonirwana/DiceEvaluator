@@ -1,12 +1,13 @@
 package de.janno.evaluator.dice.function;
 
-import de.janno.evaluator.dice.ExpressionException;
-import de.janno.evaluator.dice.Function;
-import de.janno.evaluator.dice.Roll;
-import de.janno.evaluator.dice.UniqueRandomElements;
+import com.google.common.collect.ImmutableList;
+import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class Value extends Function {
     public Value() {
@@ -14,11 +15,21 @@ public class Value extends Function {
     }
 
     @Override
-    public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
-        return new Roll(getExpression(getPrimaryName(), arguments),
-                arguments.get(1).getElements(),
-                UniqueRandomElements.from(arguments),
-                arguments.get(1).getChildrenRolls(),
-                arguments.get(0).getElements().get(0).getValue());
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
+        return constants -> {
+            List<Roll> rolls = extendAllBuilder(arguments, constants);
+            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+
+            String valName = rolls.get(0).getElements().get(0).getValue();
+            if (constants.containsKey(valName)) {
+                throw new ExpressionException("The value name '%s' was defined more than once.".formatted(valName));
+            }
+            constants.put(valName, new Roll(getExpression(Value.this.getPrimaryName(), rolls),
+                    rolls.get(1).getElements(),
+                    UniqueRandomElements.from(rolls),
+                    rolls.get(1).getChildrenRolls()));
+
+            return ImmutableList.of();
+        };
     }
 }

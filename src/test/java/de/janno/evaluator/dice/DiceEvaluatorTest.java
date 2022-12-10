@@ -106,7 +106,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("val($1, 3d6) $1, $1", List.of(1, 2, 3), List.of(1, 2, 3, 1, 2, 3)),
                 Arguments.of("val($1, 3d6) $1= , $1c", List.of(1, 2, 3), List.of(6, 3)),
                 Arguments.of("val($1, 3d6) $1= , ($1>2)c", List.of(1, 2, 3), List.of(6, 1)),
-                Arguments.of("val($1, val($2, 3d6) 7) $1 , $2", List.of(1, 2, 3), List.of(7, 1, 2, 3)),
+                Arguments.of("val($1, val($2, 3d6) + 7) $1 , $2", List.of(1, 2, 3), List.of(7, 1, 2, 3)),
                 Arguments.of("val($1, 3d6) val($2, 7) $1 , $2", List.of(1, 2, 3), List.of(1, 2, 3, 7)),
                 Arguments.of("val($1, $2) val($2, $1) $1 , $2", List.of(1, 2, 3), List.of()),
                 Arguments.of("val($1, $1) $1", List.of(1, 2, 3), List.of()),
@@ -133,7 +133,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("d[head]", List.of(1), List.of("head")),
                 Arguments.of("3d[head/ torso/ left arm/ right arm/ left leg/ right leg]", List.of(3, 2, 1), List.of("left arm", "torso", "head")),
                 Arguments.of("3d[head/ torso/ left arm/ right arm/ left leg/ right leg] + 2d6", List.of(3, 2, 1, 4, 5), List.of("left arm", "torso", "head", "4", "5")),
-                Arguments.of("1d6 + x + 1", List.of(3), List.of("3", "x", "1")),
+                Arguments.of("1d6 + a + 1", List.of(3), List.of("3", "a", "1")),
                 Arguments.of("1d6 + [x/y] + 1", List.of(3), List.of("3", "x", "y", "1")),
                 Arguments.of("1d6 + [1d6] + 1", List.of(3), List.of("3", "1d6", "1")),
                 Arguments.of("1d6 + [1D6] + 1", List.of(3), List.of("3", "1D6", "1")),
@@ -142,7 +142,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("d('head')", List.of(1), List.of("head")),
                 Arguments.of("3d('head'+'torso'+'left arm'+'right arm'+'left leg'+'right leg')", List.of(3, 2, 1), List.of("left arm", "torso", "head")),
                 Arguments.of("3d('head'+'torso'+'left arm'+'right arm'+'left leg'+'right leg') + 2d6", List.of(3, 2, 1, 4, 5), List.of("left arm", "torso", "head", "4", "5")),
-                Arguments.of("1d6 + (x+y) + 1", List.of(3), List.of("3", "x", "y", "1")),
+                Arguments.of("1d6 + (a+y) + 1", List.of(3), List.of("3", "a", "y", "1")),
                 Arguments.of("1d6 + '1d6' + 1", List.of(3), List.of("3", "1d6", "1")),
                 Arguments.of("1d6 + '1D6' + 1", List.of(3), List.of("3", "1D6", "1")),
                 Arguments.of("3d(10+20+30) + 2d6", List.of(3, 2, 1, 4, 5), List.of("30", "20", "10", "4", "5")),
@@ -184,6 +184,15 @@ public class DiceEvaluatorTest {
                 Arguments.of("concat('Attack: ', 3d6) ", List.of(1, 2, 3), List.of("Attack: 1, 2, 3")),
                 Arguments.of("concat('Attack: ', 1d20, ' Damage: ', 2d10+5=) ", List.of(1, 2, 3), List.of("Attack: 1 Damage: 10")),
                 Arguments.of("val(1, ('a'+'b'+'c')) 3d1", List.of(1, 2, 3), List.of("a", "b", "c")),
+
+                Arguments.of("3x1d6", List.of(1, 2, 3), List.of("1", "2", "3")),
+                Arguments.of("val($1,1d6) 3x$1", List.of(1, 2, 3), List.of("1", "1", "1")),
+                Arguments.of("3x(val($1,1d6)+$1)", List.of(1, 2, 3), List.of("1", "2", "3")),
+                Arguments.of("min(3x1d6)", List.of(1, 2, 3), List.of("1")),
+                Arguments.of("1d6 rr 1", List.of(1, 2), List.of("2")),
+                Arguments.of("1d6 rr 3", List.of(1, 2), List.of("1")),
+                Arguments.of("1d6rr1", List.of(1, 1), List.of("1")),
+                Arguments.of("2d6 rr [1/5]", List.of(3, 5, 3, 4), List.of("3", "4")),
 
                 //Exalted 3e
                 Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), List.of("0")),
@@ -236,8 +245,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
                 Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
                 Arguments.of("'3''5'", "There need to be an operator or a separator between two values"),
-                Arguments.of("1d-1", "Not enough values, [d, D] needs 2 but there where only [[1]]"),
-                Arguments.of("d-1", "Not enough values, [d, D] needs 1 but there where only []"),
+                Arguments.of("1d-1", "Not enough values, [d, D] needs 2"),
+                Arguments.of("d-1", "Not enough values, [d, D] needs 1"),
                 Arguments.of("d!1", "The number of sides of a die must be greater then 1 but was 1"),
                 Arguments.of("d!!1", "The number of sides of a die must be greater then 1 but was 1"),
                 Arguments.of("1d!1", "The number of sides of a die must be greater then 1 but was 1"),
@@ -248,7 +257,16 @@ public class DiceEvaluatorTest {
                 Arguments.of("(-6)d2", "The number of dice can not be negativ but was -6"),
                 Arguments.of("(-6)d!2", "The number of dice can not be negativ but was -6"),
                 Arguments.of("(-6)d!!2", "The number of dice can not be negativ but was -6"),
-                Arguments.of("d'-1'", "Sides of dice to roll must be positive")
+                Arguments.of("d'-1'", "Sides of dice to roll must be positive"),
+                Arguments.of("val($1,1) val($1,1) val($1,1) $1", "The value name '1' was defined more than once."),
+                Arguments.of("11x(1d6)", "The number of repeat must between 1-10 but was 11"),
+                Arguments.of("0x(1d6)", "The number of repeat must between 1-10 but was 0"),
+                Arguments.of("3d6x(1d6)", "'[X, x]' requires as left input a single integer but was '[2, 3, 1]'. Try to sum the numbers together like (3d6=)"),
+                Arguments.of("ax(1d6)", "'[X, x]' requires as left input a single integer but was '[a]'"),
+                Arguments.of("x(1d6)", "Operator [X, x] does not support unary operations"),
+                Arguments.of("(3d[a/b/c])=", "'=' requires as left input only integers but was '[b, c, a]'"),
+                Arguments.of("color(2,'red')*color(2,'black')", "'*' requires all elements to be the same color, the colors where '[red, black]'"),
+                Arguments.of("(3x2d6)=", "'=' requires as 1 inputs but was '[[2, 3], [1, 4], [1, 1]]'")
         );
     }
 
@@ -271,16 +289,17 @@ public class DiceEvaluatorTest {
                 Arguments.of("1d6,d6", 2),
                 Arguments.of("d6", 1),
                 Arguments.of("1d6", 1),
-                Arguments.of("", 1) //a roll result but it is empty
+                Arguments.of("3x1d6", 3),
+                Arguments.of("", 0)
         );
     }
 
     @Test
     void debug() throws ExpressionException {
         //DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,4,5,6,7,8,9,10), 1000);
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))");
+        List<Roll> res = underTest.evaluate("3x($1)");
         System.out.println(res.size());
         System.out.println(res);
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
@@ -480,7 +499,7 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements_value() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 10, 10), 1000);
-        List<Roll> res = underTest.evaluate("val($1,d100), ifG($1, 95, (d100 + $1=), ifL($1, 6, ($1 - d100=)))");
+        List<Roll> res = underTest.evaluate("val($1,d100) ifG($1, 95, (d100 + $1=), ifL($1, 6, ($1 - d100=)))");
 
         assertThat(res).hasSize(1);
         assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("-5");
@@ -490,6 +509,44 @@ public class DiceEvaluatorTest {
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)))
                 .containsExactly("5", "10");
+
+    }
+
+    @Test
+    void getRandomElements_Repeat() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000);
+        List<Roll> res = underTest.evaluate("5x1d6");
+
+        assertThat(res).hasSize(5);
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("1");
+        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("2");
+        assertThat(res.get(2).getElements().stream().map(RollElement::getValue)).containsExactly("3");
+        assertThat(res.get(3).getElements().stream().map(RollElement::getValue)).containsExactly("4");
+        assertThat(res.get(4).getElements().stream().map(RollElement::getValue)).containsExactly("5");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .flatMap(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)))
+                .containsExactly("1", "2", "3", "4", "5");
+
+    }
+
+    @Test
+    void getRandomElements_reroll() throws ExpressionException {
+        //roll 4d6, reroll 1s once, drop lowest, rolled three times
+
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000);
+        List<Roll> res = underTest.evaluate("3x4d6rr1k3");
+
+        assertThat(res).hasSize(3);
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("6", "3", "1");
+        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("6", "3", "3");
+        assertThat(res.get(2).getElements().stream().map(RollElement::getValue)).containsExactly("4", "4", "3");
+
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[2, 3, 1, 4] [1, 1, 6, 3]");
+        assertThat(res.get(1).getRandomElementsString()).isEqualTo("[2, 3, 6, 3]");
+        assertThat(res.get(2).getRandomElementsString()).isEqualTo("[3, 2, 4, 4]");
 
     }
 
@@ -619,6 +676,27 @@ public class DiceEvaluatorTest {
         assertThatThrownBy(() -> underTest.evaluate(input))
                 .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
                 .hasMessage(expectedMessage);
+    }
+
+    @Test
+    void rollTwice_1d6() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000);
+
+        Roller res = underTest.buildRollSupplier("1d6");
+
+        assertThat(res.roll().get(0).getElements().toString()).isEqualTo("[1]");
+        assertThat(res.roll().get(0).getElements().toString()).isEqualTo("[2]");
+    }
+
+    @Test
+    void rollTwice_value() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 2, 3, 4), 1000);
+
+        Roller res = underTest.buildRollSupplier("val($1, 3d6), (($1)=) + (($1>2)c)");
+
+
+        assertThat(res.roll().get(0).getElements().toString()).isEqualTo("[6, 1]");
+        assertThat(res.roll().get(0).getElements().toString()).isEqualTo("[9, 2]");
     }
 
     @Test

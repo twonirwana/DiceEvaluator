@@ -3,6 +3,7 @@ package de.janno.evaluator.dice;
 import lombok.NonNull;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,15 @@ public final class ValidatorUtil {
             throw new ExpressionException(String.format("'%s' requires as %s a single element but was '%s'%s", inputName, location, roll.getElements().stream()
                             .map(RollElement::getValue).toList(),
                     getSumHelp(roll)
+            ));
+        }
+    }
+
+    public static void checkRollSize(@NonNull String inputName, @NonNull List<Roll> rolls, int minInc, int maxInc) throws ExpressionException {
+        if (rolls.size() < minInc || rolls.size() > maxInc) {
+            String range = minInc == maxInc ? String.valueOf(minInc) : "%d-%d".formatted(maxInc, maxInc);
+            throw new ExpressionException(String.format("'%s' requires as %s inputs but was '%s'", inputName, range, rolls.stream()
+                    .map(Roll::getElements).toList()
             ));
         }
     }

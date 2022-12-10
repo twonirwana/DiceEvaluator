@@ -6,8 +6,8 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static de.janno.evaluator.dice.ValidatorUtil.checkAllElementsAreSameColor;
-import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.*;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public final class Divide extends Operator {
@@ -17,18 +17,22 @@ public final class Divide extends Operator {
     }
 
     @Override
-    public @NonNull Roll evaluate(@NonNull List<Roll> operands) throws ExpressionException {
-        Roll left = operands.get(0);
-        Roll right = operands.get(1);
-        checkAllElementsAreSameColor(getName(), left, right);
-        final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
-        final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+        return constants -> {
+            List<Roll> rolls = extendAllBuilder(operands, constants);
+            checkRollSize(getName(), rolls, 2,2);
 
-        final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(Math.divideExact(leftNumber, rightNumber)), left.getElements().get(0).getColor()));
-        return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
-                res,
-                UniqueRandomElements.from(operands),
-                ImmutableList.of(left, right), null
-        );
+            Roll left = rolls.get(0);
+            Roll right = rolls.get(1);
+            checkAllElementsAreSameColor(getName(), left, right);
+            final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
+            final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
+
+            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(Math.divideExact(leftNumber, rightNumber)), left.getElements().get(0).getColor()));
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
+                    res,
+                    UniqueRandomElements.from(rolls),
+                    ImmutableList.of(left, right)));
+        };
     }
 }

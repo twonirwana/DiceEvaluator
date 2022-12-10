@@ -6,6 +6,9 @@ import lombok.NonNull;
 
 import java.util.List;
 
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
+
 /**
  * Deprecated in favor of the mightier 'replace' function.
  */
@@ -17,26 +20,30 @@ public class Double extends Function {
     }
 
     @Override
-    public @NonNull Roll evaluate(@NonNull List<Roll> arguments) throws ExpressionException {
-        Roll input = arguments.get(0);
-        Roll toDuplicate = arguments.get(1);
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
+        return constants -> {
+            List<Roll> rolls = extendAllBuilder(arguments, constants);
+            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+            Roll input = rolls.get(0);
+            Roll toDuplicate = rolls.get(1);
 
-        ImmutableList<RollElement> rollElements = input.getElements().stream()
-                .flatMap(r -> {
-                    if (toDuplicate.getElements().contains(r)) {
-                        return ImmutableList.of(r, r).stream();
-                    } else {
-                        return ImmutableList.of(r).stream();
-                    }
-                })
-                .collect(ImmutableList.toImmutableList());
+            ImmutableList<RollElement> rollElements = input.getElements().stream()
+                    .flatMap(r -> {
+                        if (toDuplicate.getElements().contains(r)) {
+                            return ImmutableList.of(r, r).stream();
+                        } else {
+                            return ImmutableList.of(r).stream();
+                        }
+                    })
+                    .collect(ImmutableList.toImmutableList());
 
-        return new Roll(getExpression(getPrimaryName(), arguments),
-                rollElements,
-                UniqueRandomElements.from(arguments),
-                ImmutableList.<Roll>builder()
-                        .addAll(input.getChildrenRolls())
-                        .addAll(toDuplicate.getChildrenRolls())
-                        .build(), null);
+            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+                    rollElements,
+                    UniqueRandomElements.from(rolls),
+                    ImmutableList.<Roll>builder()
+                            .addAll(input.getChildrenRolls())
+                            .addAll(toDuplicate.getChildrenRolls())
+                            .build()));
+        };
     }
 }

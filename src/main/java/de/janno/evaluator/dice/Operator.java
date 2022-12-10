@@ -94,7 +94,7 @@ public abstract class Operator {
         return String.format("%s%s", name, operands.get(0).getExpression());
     }
 
-    public abstract @NonNull Roll evaluate(@NonNull List<Roll> operands) throws ExpressionException;
+    public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException;
 
     public boolean supportUnaryOperation() {
         return unaryAssociativity != null;
@@ -112,7 +112,7 @@ public abstract class Operator {
         if (names.size() == 1) {
             return names.iterator().next();
         }
-        return names.toString();
+        return names.stream().sorted().toList().toString();
     }
 
     public @NonNull String getPrimaryName() {

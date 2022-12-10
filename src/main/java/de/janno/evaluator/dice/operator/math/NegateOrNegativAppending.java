@@ -8,7 +8,9 @@ import lombok.NonNull;
 
 import java.util.List;
 
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyInteger;
+import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public final class NegateOrNegativAppending extends Operator {
     public NegateOrNegativAppending() {
@@ -16,34 +18,38 @@ public final class NegateOrNegativAppending extends Operator {
     }
 
     @Override
-    public @NonNull Roll evaluate(@NonNull List<Roll> operands) throws ExpressionException {
-        if (operands.size() == 1) {
-            Roll right = operands.get(0);
-            checkContainsOnlyInteger(getName(), right, "right");
-            ImmutableList<RollElement> negated = right.getElements().stream()
-                    .map(e -> new RollElement(String.valueOf(e.asInteger().orElseThrow() * -1), e.getColor()))
-                    .collect(ImmutableList.toImmutableList());
-            return new Roll(getRightUnaryExpression(getPrimaryName(), operands),
-                    negated,
-                    UniqueRandomElements.from(operands),
-                    ImmutableList.of(right), null);
-        }
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+        return constants -> {
+            List<Roll> rolls = extendAllBuilder(operands, constants);
+            checkRollSize(getName(), rolls, 1,2);
 
-        Roll left = operands.get(0);
-        Roll right = operands.get(1);
-        checkContainsOnlyInteger(getName(), right, "right");
-        final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()
-                .addAll(left.getElements())
-                .addAll(right.getElements().stream()
+            if (rolls.size() == 1) {
+                Roll right = rolls.get(0);
+                checkContainsOnlyInteger(getName(), right, "right");
+                ImmutableList<RollElement> negated = right.getElements().stream()
                         .map(e -> new RollElement(String.valueOf(e.asInteger().orElseThrow() * -1), e.getColor()))
-                        .toList()
-                ).build();
+                        .collect(ImmutableList.toImmutableList());
+                return ImmutableList.of(new Roll(getRightUnaryExpression(getPrimaryName(), rolls),
+                        negated,
+                        UniqueRandomElements.from(rolls),
+                        ImmutableList.of(right)));
+            }
 
-        return new Roll(getBinaryOperatorExpression(getPrimaryName(), operands),
-                res,
-                UniqueRandomElements.from(operands),
-                ImmutableList.of(left, right), null
-        );
+            Roll left = rolls.get(0);
+            Roll right = rolls.get(1);
+            checkContainsOnlyInteger(getName(), right, "right");
+            final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()
+                    .addAll(left.getElements())
+                    .addAll(right.getElements().stream()
+                            .map(e -> new RollElement(String.valueOf(e.asInteger().orElseThrow() * -1), e.getColor()))
+                            .toList()
+                    ).build();
+
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
+                    res,
+                    UniqueRandomElements.from(rolls),
+                    ImmutableList.of(left, right)));
+        };
     }
 
 
