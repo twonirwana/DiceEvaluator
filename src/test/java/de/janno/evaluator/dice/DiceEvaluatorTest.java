@@ -189,14 +189,10 @@ public class DiceEvaluatorTest {
                 Arguments.of("val($1,1d6) 3x$1", List.of(1, 2, 3), List.of("1", "1", "1")),
                 Arguments.of("3x(val($1,1d6)+$1)", List.of(1, 2, 3), List.of("1", "2", "3")),
                 Arguments.of("min(3x1d6)", List.of(1, 2, 3), List.of("1")),
-                Arguments.of("rerollOn(1d6, 1)", List.of(1, 2), List.of("2")),
-                Arguments.of("rerollOn(1d6, 1)", List.of(1, 1), List.of("1")),
-                Arguments.of("rerollOn(2d6, [1/5])", List.of(3, 5, 3, 4), List.of("3", "4")),
-
-                //roll 4d6, reroll 1s once, drop lowest, rolled six times
-                Arguments.of("6x(rerollOn(4d6, 1))k3", List.of(1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 1, 1, 1, 1, 1, 1, 1),
-                        List.of("6", "5", "2", "6", "5", "4", "6", "5", "2", "6", "5", "4", "6", "5", "1", "6", "6", "6")),
-
+                Arguments.of("1d6 rr 1", List.of(1, 2), List.of("2")),
+                Arguments.of("1d6 rr 3", List.of(1, 2), List.of("1")),
+                Arguments.of("1d6rr1", List.of(1, 1), List.of("1")),
+                Arguments.of("2d6 rr [1/5]", List.of(3, 5, 3, 4), List.of("3", "4")),
 
                 //Exalted 3e
                 Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), List.of("0")),
@@ -533,6 +529,24 @@ public class DiceEvaluatorTest {
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)))
                 .containsExactly("1", "2", "3", "4", "5");
+
+    }
+
+    @Test
+    void getRandomElements_reroll() throws ExpressionException {
+        //roll 4d6, reroll 1s once, drop lowest, rolled three times
+
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000);
+        List<Roll> res = underTest.evaluate("3x4d6rr1k3");
+
+        assertThat(res).hasSize(3);
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("6", "3", "1");
+        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("6", "3", "3");
+        assertThat(res.get(2).getElements().stream().map(RollElement::getValue)).containsExactly("4", "4", "3");
+
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[2, 3, 1, 4] [1, 1, 6, 3]");
+        assertThat(res.get(1).getRandomElementsString()).isEqualTo("[2, 3, 6, 3]");
+        assertThat(res.get(2).getRandomElementsString()).isEqualTo("[3, 2, 4, 4]");
 
     }
 

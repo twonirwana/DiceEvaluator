@@ -8,6 +8,7 @@ import de.janno.evaluator.dice.function.*;
 import de.janno.evaluator.dice.operator.die.ExplodingAddDice;
 import de.janno.evaluator.dice.operator.die.ExplodingDice;
 import de.janno.evaluator.dice.operator.die.RegularDice;
+import de.janno.evaluator.dice.operator.die.Reroll;
 import de.janno.evaluator.dice.operator.list.*;
 import de.janno.evaluator.dice.operator.math.Appending;
 import de.janno.evaluator.dice.operator.math.Divide;
@@ -61,6 +62,7 @@ public class DiceEvaluator {
                         .add(new LesserEqualThanFilter())
                         .add(new EqualFilter())
                         .add(new Count())
+                        .add(new Reroll())
                         .build())
                 .functions(ImmutableList.<Function>builder()
                         .add(new Color())
@@ -78,7 +80,6 @@ public class DiceEvaluator {
                         .add(new Replace())
                         .add(new IfLesser())
                         .add(new GroupCount())
-                        .add(new RerollOn())
                         .build())
                 .separator(",")
                 .build();
