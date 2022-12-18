@@ -11,6 +11,7 @@
 | Negative Appending   | -          | 3d6-2d12 or -2d6   |
 | Divide               | /          | 12/6               |
 | Multiply             | *          | 12*d6              |
+| Modulo               | mod        | d6 mod 2           |
 | Equal Filter         | ==         | 3d6==3             |
 | Greater Then Filter  | >          | 3d6>3              |
 | Lesser Then Filter   | <          | 3d6<3              |
