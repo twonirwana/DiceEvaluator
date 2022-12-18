@@ -16,6 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class DiceEvaluatorTest {
+    private static final String VAMPIRE_V5 = "val($r,3d10) val($h,3d10) val($s,($r+$h)>=6c) val($rt,$r==10c) val($ht,$h==10c) val($ho,$h==1c) val($2s,((($rt+$ht=))/2)*2) val($ts,($s+$2s=)) concat('successes: ', $ts, ifE($ts,0,ifG($ho,1,' bestial failure' , ''),''), ifE($rt mod 2, 1, ifE($ht mod 2, 1, ' messy critical', ''), ''))";
+
     private static Stream<Arguments> generateData() {
         return Stream.of(
                 Arguments.of("1d6", List.of(3), List.of(3)),
@@ -101,6 +103,13 @@ public class DiceEvaluatorTest {
                 Arguments.of("+6*6", List.of(), List.of(36)),
                 Arguments.of("+6*+6", List.of(), List.of(36)),
                 Arguments.of("+6*-6", List.of(), List.of(-36)),
+                Arguments.of("5 mod 2", List.of(), List.of(1)),
+                Arguments.of("5 mod 3", List.of(), List.of(2)),
+                Arguments.of("5 mod 1", List.of(), List.of(0)),
+                Arguments.of("5 mod 7", List.of(), List.of(5)),
+                Arguments.of("-5 mod 2", List.of(), List.of(-1)),
+                Arguments.of("5 mod -2", List.of(), List.of(1)),
+                Arguments.of("0 mod 4", List.of(), List.of(0)),
                 Arguments.of("val($1, 3d6) $1", List.of(1, 2, 3), List.of(1, 2, 3)),
                 Arguments.of("val($1, 3d6) $1 + $1", List.of(1, 2, 3), List.of(1, 2, 3, 1, 2, 3)),
                 Arguments.of("val($1, 3d6) $1, $1", List.of(1, 2, 3), List.of(1, 2, 3, 1, 2, 3)),
@@ -200,6 +209,15 @@ public class DiceEvaluatorTest {
                 Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3, 2, 1, 3, 5, 9, 10, 6, 6, 6, 6), List.of("2")),
                 Arguments.of("val($1, cancel(double(10d10,10),1,[7/8/9/10])), ifE(($1>=7)c,0,ifG(($1<=1)c,0,'Botch'))", List.of(3, 2, 1, 3, 5, 5, 5, 6, 6, 6, 6), List.of("Botch")),
 
+                //Vampire V5
+                Arguments.of(VAMPIRE_V5, List.of(1, 6, 7, 1, 6, 7), List.of("successes: 4")),
+                Arguments.of(VAMPIRE_V5, List.of(5, 10, 10, 5, 6, 7), List.of("successes: 6")),
+                Arguments.of(VAMPIRE_V5, List.of(5, 10, 10, 5, 10, 10), List.of("successes: 8")),
+                Arguments.of(VAMPIRE_V5, List.of(5, 4, 4, 5, 1, 1), List.of("successes: 0 bestial failure")),
+                Arguments.of(VAMPIRE_V5, List.of(5, 4, 10, 5, 1, 1), List.of("successes: 1")),
+                Arguments.of(VAMPIRE_V5, List.of(5, 4, 10, 5, 1, 10), List.of("successes: 4 messy critical")),
+
+
                 Arguments.of("1d0", List.of(), List.of())
         );
     }
@@ -258,6 +276,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("(-6)d!2", "The number of dice can not be negativ but was -6"),
                 Arguments.of("(-6)d!!2", "The number of dice can not be negativ but was -6"),
                 Arguments.of("d'-1'", "Sides of dice to roll must be positive"),
+                Arguments.of("5 mod 0", "/ by zero"),
                 Arguments.of("val($1,1) val($1,1) val($1,1) $1", "The value name '1' was defined more than once."),
                 Arguments.of("11x(1d6)", "The number of repeat must between 1-10 but was 11"),
                 Arguments.of("0x(1d6)", "The number of repeat must between 1-10 but was 0"),
@@ -299,7 +318,7 @@ public class DiceEvaluatorTest {
         //DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,4,5,6,7,8,9,10), 1000);
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("3x($1)");
+        List<Roll> res = underTest.evaluate("''");
         System.out.println(res.size());
         System.out.println(res);
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());

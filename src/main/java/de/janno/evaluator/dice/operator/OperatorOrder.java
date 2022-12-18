@@ -7,10 +7,7 @@ import de.janno.evaluator.dice.operator.die.ExplodingDice;
 import de.janno.evaluator.dice.operator.die.RegularDice;
 import de.janno.evaluator.dice.operator.die.Reroll;
 import de.janno.evaluator.dice.operator.list.*;
-import de.janno.evaluator.dice.operator.math.Divide;
-import de.janno.evaluator.dice.operator.math.Multiply;
-import de.janno.evaluator.dice.operator.math.NegateOrNegativAppending;
-import de.janno.evaluator.dice.operator.math.Appending;
+import de.janno.evaluator.dice.operator.math.*;
 
 
 public final class OperatorOrder {
@@ -19,6 +16,7 @@ public final class OperatorOrder {
             ImmutableList.<Class<? extends Operator>>builder()
                     .add(Repeat.class)
                     .add(Sum.class) //sum must be applied as last
+                    .add(Modulo.class)
                     .add(Multiply.class)
                     .add(Divide.class)
                     .add(Count.class) //count should be after all list filters
