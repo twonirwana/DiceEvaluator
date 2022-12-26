@@ -17,9 +17,11 @@ import java.util.stream.Stream;
 
 public class Tokenizer {
     private final ImmutableList<TokenBuilder> tokenBuilders;
-
+    private final String escapeCharacter;
 
     public Tokenizer(Parameters parameters) {
+        escapeCharacter = parameters.getEscapeBrackets().stream()
+                .map(BracketPair::toString).collect(Collectors.joining(" or "));
         ImmutableList.Builder<TokenBuilder> builder = ImmutableList.builder();
         Stream.concat(parameters.getExpressionBrackets().stream(), parameters.getFunctionBrackets().stream())
                 .distinct() //expression and function brackets are allowed to contain the same elements
@@ -31,6 +33,7 @@ public class Tokenizer {
         parameters.getOperators().forEach(operator -> operator.getNames().forEach(name -> builder.add(new TokenBuilder(escapeForRegex(name), s -> Token.of(operator)))));
         builder.add(new TokenBuilder(escapeForRegex(parameters.getSeparator()), s -> Token.functionArgSeparator()));
         parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1)))));
+        builder.add(new TokenBuilder("[0-9]+", Token::of));
         tokenBuilders = builder.build();
 
         List<String> duplicateRegex = tokenBuilders.stream().collect(Collectors.groupingBy(TokenBuilder::regex))
@@ -61,16 +64,15 @@ public class Tokenizer {
             if (currentMatch.isPresent()) {
                 Match match = currentMatch.get();
                 if (match.start() != 0) {
-                    String leftLiteral = current.substring(0, match.start()).trim();
-                    preTokens.add(Token.of(leftLiteral));
+                    throw new ExpressionException("No matching operator at the start of '%s', non-functional text need to be surrounded by %s".formatted(current, escapeCharacter));
                 }
                 Token token = match.token();
                 preTokens.add(token);
-                current = current.substring(match.start() + match.match().length()).trim();
+                current = current.substring(match.match().length()).trim();
             }
         } while (currentMatch.isPresent());
         if (!current.isEmpty()) {
-            preTokens.add(Token.of(current));
+            throw new ExpressionException("No matching operator for '%s', non-functional text need to be surrounded by %s".formatted(current, escapeCharacter));
         }
 
         return setOperatorType(preTokens);
@@ -178,7 +180,7 @@ public class Tokenizer {
 
     private record TokenBuilder(String regex, Function<String, Token> toToken) {
         Pattern pattern() {
-            return Pattern.compile(regex);
+            return Pattern.compile("^" + regex);
         }
     }
 }
