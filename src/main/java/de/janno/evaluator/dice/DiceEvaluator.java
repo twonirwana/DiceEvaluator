@@ -299,7 +299,6 @@ public class DiceEvaluator {
                 }
                 stack.push(token);
             } else {
-                //todo
                 // If the token is literal then add its value to the output queue.
                 if (previous.flatMap(Token::getLiteral).isPresent()) {
                     throw new ExpressionException("There need to be an operator or a separator between two values");
