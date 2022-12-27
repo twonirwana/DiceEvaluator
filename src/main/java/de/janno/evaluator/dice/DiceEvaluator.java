@@ -298,13 +298,14 @@ public class DiceEvaluator {
                     processTokenToValues(values, stack.pop());
                 }
                 stack.push(token);
-            } else {
-                //todo
+            } else if (token.getLiteral().isPresent()) {
                 // If the token is literal then add its value to the output queue.
                 if (previous.flatMap(Token::getLiteral).isPresent()) {
                     throw new ExpressionException("There need to be an operator or a separator between two values");
                 }
                 processTokenToValues(values, token);
+            } else {
+                throw new IllegalStateException("Unknown Token: %s".formatted(token));
             }
             previous = Optional.of(token);
         }
