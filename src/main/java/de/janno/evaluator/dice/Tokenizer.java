@@ -45,7 +45,7 @@ public class Tokenizer {
     }
 
     private static String buildEscapeBracketsRegex(BracketPair bracketPair) {
-        return String.format("%s.*?%s", escapeForRegex(bracketPair.getOpen()), escapeForRegex(bracketPair.getClose()));
+        return String.format("%s.+?%s", escapeForRegex(bracketPair.getOpen()), escapeForRegex(bracketPair.getClose()));
     }
 
     private static String escapeForRegex(String in) {

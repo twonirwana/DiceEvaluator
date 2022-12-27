@@ -10,7 +10,10 @@ import de.janno.evaluator.dice.operator.die.ExplodingDice;
 import de.janno.evaluator.dice.operator.die.RegularDice;
 import de.janno.evaluator.dice.operator.die.Reroll;
 import de.janno.evaluator.dice.operator.list.*;
-import de.janno.evaluator.dice.operator.math.*;
+import de.janno.evaluator.dice.operator.math.Appending;
+import de.janno.evaluator.dice.operator.math.Divide;
+import de.janno.evaluator.dice.operator.math.Multiply;
+import de.janno.evaluator.dice.operator.math.NegateOrNegativAppending;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
 import lombok.NonNull;
@@ -51,7 +54,6 @@ public class DiceEvaluator {
                         .add(new NegateOrNegativAppending())
                         .add(new Divide())
                         .add(new Multiply())
-                        .add(new Modulo())
                         .add(new KeepHighest())
                         .add(new KeepLowest())
                         .add(new GreaterThanFilter())
