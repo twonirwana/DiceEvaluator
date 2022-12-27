@@ -57,7 +57,7 @@ public class Tokenizer {
 
     public List<Token> tokenize(final String input) throws ExpressionException {
         List<Token> preTokens = new ArrayList<>();
-        String current = input;
+        String current = input.trim();
         Optional<Match> currentMatch;
         do {
             currentMatch = getBestMatch(current);
@@ -164,7 +164,7 @@ public class Tokenizer {
         Matcher matcher = tokenBuilder.pattern().matcher(input);
         if (matcher.find()) {
             if (matcher.start() != 0 || matcher.end() != 0) {
-                String matchGroup = matcher.group();
+                String matchGroup = matcher.group().trim();
                 return Optional.of(new Match(matcher.start(), matchGroup, tokenBuilder.toToken().apply(matchGroup)));
             }
         }
@@ -180,7 +180,7 @@ public class Tokenizer {
 
     private record TokenBuilder(String regex, Function<String, Token> toToken) {
         Pattern pattern() {
-            return Pattern.compile("^" + regex);
+            return Pattern.compile("^\\s*" + regex + "\\s*");
         }
     }
 }

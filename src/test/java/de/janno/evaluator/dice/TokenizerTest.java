@@ -70,7 +70,7 @@ class TokenizerTest {
                 .escapeBracket(BracketPair.APOSTROPHE)
                 .build());
 
-        List<Token> res = underTest.tokenize("a+'dd'+'dd'");
+        List<Token> res = underTest.tokenize("'a'+'dd'+'dd'");
         assertThat(res.stream().map(Token::toString)).containsExactly("'a'", "+", "'dd'", "+", "'dd'");
     }
 

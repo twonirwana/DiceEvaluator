@@ -194,7 +194,6 @@ public class DiceEvaluatorTest {
                 Arguments.of("concat('Attack: ', 1d20, ' Damage: ', 2d10+5=) ", List.of(1, 2, 3), List.of("Attack: 1 Damage: 10")),
                 Arguments.of("val(1, ('a'+'b'+'c')) 3d1", List.of(1, 2, 3), List.of("a", "b", "c")),
 
-                Arguments.of("1d6 1d6 1d6", List.of(1, 2, 3), List.of("1", "2", "3")),
                 Arguments.of("3x1d6", List.of(1, 2, 3), List.of("1", "2", "3")),
                 Arguments.of("val('$1',1d6) 3x'$1'", List.of(1, 2, 3), List.of("1", "1", "1")),
                 Arguments.of("3x(val('$1',1d6)+'$1')", List.of(1, 2, 3), List.of("1", "2", "3")),
