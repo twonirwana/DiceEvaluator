@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -33,7 +32,14 @@ public class Tokenizer {
         parameters.getOperators().forEach(operator -> operator.getNames().forEach(name -> builder.add(new TokenBuilder(escapeForRegex(name), s -> Token.of(operator)))));
         builder.add(new TokenBuilder(escapeForRegex(parameters.getSeparator()), s -> Token.separator()));
         parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1)))));
-        builder.add(new TokenBuilder("[0-9]+", Token::of));
+        builder.add(new TokenBuilder("[0-9]+", s -> {
+            try {
+                Integer.parseInt(s);
+                return Token.of(s);
+            } catch (Throwable t) {
+                throw new ExpressionException("The number '%s' was to big".formatted(s));
+            }
+        }));
         tokenBuilders = builder.build();
 
         List<String> duplicateRegex = tokenBuilders.stream().collect(Collectors.groupingBy(TokenBuilder::regex))
@@ -125,7 +131,7 @@ public class Tokenizer {
         return Operator.OperatorType.UNARY;
     }
 
-    private Optional<Match> getBestMatch(String input) {
+    private Optional<Match> getBestMatch(String input) throws ExpressionException {
         List<Match> allMatches = getAllMatches(input);
 
         int minStart = allMatches.stream()
@@ -152,15 +158,16 @@ public class Tokenizer {
     }
 
 
-    private List<Match> getAllMatches(String input) {
-        return tokenBuilders.stream()
-                .map(p -> getFirstMatch(input, p))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
+    private List<Match> getAllMatches(String input) throws ExpressionException {
+        ImmutableList.Builder<Match> matchBuilder = ImmutableList.builder();
+        for (Tokenizer.TokenBuilder tokenBuilder : tokenBuilders) {
+            Optional<Match> firstMatch = getFirstMatch(input, tokenBuilder);
+            firstMatch.ifPresent(matchBuilder::add);
+        }
+        return matchBuilder.build();
     }
 
-    private Optional<Match> getFirstMatch(String input, TokenBuilder tokenBuilder) {
+    private Optional<Match> getFirstMatch(String input, TokenBuilder tokenBuilder) throws ExpressionException {
         Matcher matcher = tokenBuilder.pattern().matcher(input);
         if (matcher.find()) {
             if (matcher.start() != 0 || matcher.end() != 0) {
@@ -171,14 +178,17 @@ public class Tokenizer {
         return Optional.empty();
     }
 
+    private interface ToToken {
+        Token apply(String in) throws ExpressionException;
+    }
+
     private record Match(int start, String match, Token token) {
         public int length() {
             return match.length();
         }
     }
 
-
-    private record TokenBuilder(String regex, Function<String, Token> toToken) {
+    private record TokenBuilder(String regex, ToToken toToken) {
         Pattern pattern() {
             return Pattern.compile("^\\s*" + regex + "\\s*");
         }

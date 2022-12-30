@@ -1,7 +1,7 @@
 | Name                 | Notation   | Example            |
 |----------------------|------------|--------------------|
 | Regular Dice         | d          | d6, 3d6            |
-| Custom Dice          | d[x/y/...] | 3d[Head/Tail]      |
+| Custom Dice          | d[x,y,...] | 3d[Head,Tail]     |
 | Exploding Dice       | d!         | 4d!6               |
 | Exploding Add Dice   | d!!        | 4d!!6              |
 | Keep Highest         | k          | 3d6k2              |
@@ -21,8 +21,10 @@
 | Count                | c          | 3d6<3c             |
 | Multiple Rolls       | ,          | 1d6,2d10           |
 | Repeat               | x          | 3x2d6              |
+| Repeat List          | xl         | 3xl2d6             |
 | Reroll               | rr         | 3d10 rr 1          |
 | Brackets             | ()         | (2d4=)d6           |
+| Text                 | ''         | 'Damage ' + d6     |
 | Sort asc             | asc()      | asc(10d10)         |
 | Sort desc            | desc()     | desc(10d10)        |
 | Min                  | min()      | min(3d4, 8)        |
@@ -33,7 +35,7 @@
 | If Equal             | ifE()      | ifE(d6,6,Y,N)      |
 | If Greater           | ifG()      | ifG(d6,3,Y,N)      |
 | If Lesser            | ifL()      | ifL(d6,3,Y,N)      |
-| If In                | ifIn()     | ifIn(d6,[1/2],8)   |
+| If In                | ifIn()     | ifIn(d6,[1,2],8)   |
 | Group Count          | groupC()   | groupC(20d6)       |
 | Concatenate          | concat()   | concat('Att:',d20) |
 | Value                | val()      | val($1,10d10)      |

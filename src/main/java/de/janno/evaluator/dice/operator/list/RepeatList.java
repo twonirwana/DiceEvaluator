@@ -15,6 +15,7 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 public class RepeatList extends Operator {
 
     public RepeatList() {
+        //todo better names
         super(Set.of("xl", "XL"), null, null, Associativity.LEFT, getOderNumberOf(RepeatList.class));
     }
 

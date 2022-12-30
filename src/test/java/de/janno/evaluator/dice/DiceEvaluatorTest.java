@@ -77,6 +77,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("max(11,11)", List.of(), List.of(11, 11)),
                 Arguments.of("min(11,11)", List.of(), List.of(11, 11)),
                 Arguments.of("[1/2/3]", List.of(), List.of(1, 2, 3)),
+                Arguments.of("[1,2,3]", List.of(), List.of(1, 2, 3)),
+                Arguments.of("[1,2/3]", List.of(), List.of(1, 2, 3)),
                 Arguments.of("d[1/2/3]", List.of(2), List.of(2)),
                 Arguments.of("2d[1/2/3]", List.of(2, 1), List.of(2, 1)),
                 Arguments.of("10d100", List.of(), List.of(100, 100, 100, 100, 100, 100, 100, 100, 100, 100)),
@@ -291,6 +293,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("x(1d6)", "Operator [X, x] does not support unary operations"),
                 Arguments.of("(3d[a/b/c])=", "'=' requires as left input only integers but was '[b, c, a]'"),
                 Arguments.of("color(2,'red')*color(2,'black')", "'*' requires all elements to be the same color, the colors where '[red, black]'"),
+                Arguments.of("1000d999999999999999999999999999999", "The number '999999999999999999999999999999' was to big"),
                 Arguments.of("(3x2d6)=", "'=' requires as 1 inputs but was '[[2, 3], [1, 4], [1, 1]]'")
         );
     }
@@ -321,10 +324,9 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        //DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,4,5,6,7,8,9,10), 1000);
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("1d6 1d6");
+        List<Roll> res = underTest.evaluate("[1,2,3]");
         System.out.println(res.size());
         System.out.println(res);
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
@@ -558,6 +560,22 @@ public class DiceEvaluatorTest {
     }
 
     @Test
+    void getRandomElements_ListRepeat() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000);
+        List<Roll> res = underTest.evaluate("5xl1d6");
+
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("1","2","3","4","5");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .flatMap(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)))
+                .containsExactly("1", "2", "3", "4", "5");
+
+    }
+
+    @Test
     void getRandomElements_reroll() throws ExpressionException {
         //roll 4d6, reroll 1s once, drop lowest, rolled three times
 
@@ -681,18 +699,6 @@ public class DiceEvaluatorTest {
                 .isInstanceOf(ExpressionException.class)
                 .hasMessage("The number of dice must be less or equal then 1000 but was 1001");
     }
-
-    @Test
-    void bigResult() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
-
-        List<Roll> res = underTest.evaluate("1000d999999999999999999999999999999");
-
-        assertThat(res).hasSize(1);
-        assertThat(res.get(0).getElements().size()).isEqualTo(1000);
-        assertThat(res.get(0).getElements().stream()).allMatch(r -> r.getValue().equals("999999999999999999999999999999"));
-    }
-
 
     @ParameterizedTest(name = "{index} {0} -> {1}")
     @MethodSource("generateErrorData")

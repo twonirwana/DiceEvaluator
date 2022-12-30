@@ -27,7 +27,9 @@ public class DiceEvaluator {
 
     private static final int DEFAULT_MAX_NUMBER_OF_DICE = 1000;
 
-    private static final Pattern LIST_REGEX = Pattern.compile("(.+(/.+)+)");
+    private static final String SEPARATOR = ",";
+    private static final String LEGACY_LIST_SEPARATOR = "/";
+    private static final Pattern LIST_REGEX = Pattern.compile("(.+([%s%s].+)+)".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR));
     private final Tokenizer tokenizer;
     private final Parameters parameters;
 
@@ -48,6 +50,7 @@ public class DiceEvaluator {
                         .add(new Appending())
                         .add(new Sum())
                         .add(new Repeat())
+                        .add(new RepeatList())
                         .add(new NegateOrNegativAppending())
                         .add(new Divide())
                         .add(new Multiply())
@@ -79,7 +82,7 @@ public class DiceEvaluator {
                         .add(new IfLesser())
                         .add(new GroupCount())
                         .build())
-                .separator(",")
+                .separator(SEPARATOR)
                 .build();
         tokenizer = new Tokenizer(parameters);
 
@@ -124,8 +127,7 @@ public class DiceEvaluator {
     protected @NonNull RollBuilder toValue(@NonNull String literal) {
         Matcher matcher = LIST_REGEX.matcher(literal);
         if (matcher.find()) {
-            //Todo is this needed: ('Head'+'Tail') is the same as [Head,Tail] but needs escaping
-            List<String> list = Arrays.asList(matcher.group(1).split("/"));
+            List<String> list = Arrays.asList(matcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
             return constants -> ImmutableList.of(new Roll(list.toString(), list.stream()
                     .map(String::trim)
                     .map(s -> new RollElement(s, RollElement.NO_COLOR))
