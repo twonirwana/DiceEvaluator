@@ -203,6 +203,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("1 1d6 3", List.of(2), List.of("1", "2", "3")),
                 Arguments.of("1d6 1d6 1d6", List.of(1, 2, 3), List.of("1", "2", "3")),
                 Arguments.of("3x1d6", List.of(1, 2, 3), List.of("1", "2", "3")),
+                Arguments.of("3r1d6", List.of(1, 2, 3), List.of("1", "2", "3")),
                 Arguments.of("val('$1',1d6) 3x'$1'", List.of(1, 2, 3), List.of("1", "1", "1")),
                 Arguments.of("3x(val('$1',1d6)+'$1')", List.of(1, 2, 3), List.of("1", "2", "3")),
                 Arguments.of("min(3x1d6)", List.of(1, 2, 3), List.of("1")),
@@ -562,7 +563,7 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements_ListRepeat() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000);
-        List<Roll> res = underTest.evaluate("5xl1d6");
+        List<Roll> res = underTest.evaluate("5r1d6");
 
         assertThat(res).hasSize(1);
         assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("1","2","3","4","5");

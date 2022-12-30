@@ -1,7 +1,7 @@
 | Name                 | Notation   | Example            |
 |----------------------|------------|--------------------|
 | Regular Dice         | d          | d6, 3d6            |
-| Custom Dice          | d[x,y,...] | 3d[Head,Tail]     |
+| Custom Dice          | d[x,y,...] | 3d[Head,Tail]      |
 | Exploding Dice       | d!         | 4d!6               |
 | Exploding Add Dice   | d!!        | 4d!!6              |
 | Keep Highest         | k          | 3d6k2              |
@@ -21,7 +21,7 @@
 | Count                | c          | 3d6<3c             |
 | Multiple Rolls       | ,          | 1d6,2d10           |
 | Repeat               | x          | 3x2d6              |
-| Repeat List          | xl         | 3xl2d6             |
+| Repeat List          | r          | 3r2d6              |
 | Reroll               | rr         | 3d10 rr 1          |
 | Brackets             | ()         | (2d4=)d6           |
 | Text                 | ''         | 'Damage ' + d6     |

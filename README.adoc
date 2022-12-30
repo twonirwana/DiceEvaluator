@@ -56,7 +56,7 @@ The number of dice is limited to 1000 and every number approve 2147483647 result
 |===
 |Name |Notation |Example |Description |Precedent |Associativity |Left parameter |Right parameter
 |Repeat |`<number>x<expression>` |`3x2d6` |Repeats the expression separately a number of times given in <number>. This should be used outside other expressions and will not work inside most expressions |0 |left |a single number between 1-10 | a expression
-|List Repeat |`<number>xl<expression>` |`3xl(2d6=)` |Repeats the expression a number of times given in <number> and combines the results in one list. |1 |left |a single number between 1-10 | a expression
+|List Repeat |`<number>r<expression>` |`3r(2d6=)` |Repeats the expression a number of times given in <number> and combines the results in one list. |1 |left |a single number between 1-10 | a expression
 |Sum |`<left> =` |`2d6=` |Sums the list of on the left side of the symbol |2 |left |a list |-
 |Modulo |`<left> mod <right>` |`d6 mod 2` | returns the remainder of the division |3 |left |a single number |a single non zero number
 |Multiply |`<left> * <right>` |`2 * 6` |Multiplies the right number with the left number |4 |left |a single number |a single number
