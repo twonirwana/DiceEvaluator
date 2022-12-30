@@ -246,6 +246,7 @@ public class DiceEvaluatorTest {
     private static Stream<Arguments> generateErrorData() {
         return Stream.of(
                 Arguments.of("=1", "Operator = has left associativity but the left value was: empty"),
+                Arguments.of("abc", "No matching operator for 'abc', non-functional text need to be surrounded by '' or []"),
                 Arguments.of("1-", "Operator - has right associativity but the right value was: empty"),
                 Arguments.of("1*", "Operator * does not support unary operations"),
                 Arguments.of("*1", "Operator * does not support unary operations"),
