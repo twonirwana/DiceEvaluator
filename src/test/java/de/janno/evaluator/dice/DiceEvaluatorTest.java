@@ -21,6 +21,7 @@ public class DiceEvaluatorTest {
     private static Stream<Arguments> generateData() {
         return Stream.of(
                 Arguments.of("1d6", List.of(3), List.of(3)),
+                Arguments.of("1 d 6", List.of(3), List.of(3)),
                 Arguments.of("1d6 ", List.of(3), List.of(3)),
                 Arguments.of(" 1d6", List.of(3), List.of(3)),
                 Arguments.of("1D6", List.of(3), List.of(3)),
@@ -194,6 +195,11 @@ public class DiceEvaluatorTest {
                 Arguments.of("concat('Attack: ', 1d20, ' Damage: ', 2d10+5=) ", List.of(1, 2, 3), List.of("Attack: 1 Damage: 10")),
                 Arguments.of("val(1, ('a'+'b'+'c')) 3d1", List.of(1, 2, 3), List.of("a", "b", "c")),
 
+                Arguments.of("1", List.of(), List.of("1")),
+                Arguments.of("1 2", List.of(), List.of("1", "2")),
+                Arguments.of("1 2 3", List.of(), List.of("1", "2", "3")),
+                Arguments.of("1 1d6 3", List.of(2), List.of("1", "2", "3")),
+                Arguments.of("1d6 1d6 1d6", List.of(1, 2, 3), List.of("1", "2", "3")),
                 Arguments.of("3x1d6", List.of(1, 2, 3), List.of("1", "2", "3")),
                 Arguments.of("val('$1',1d6) 3x'$1'", List.of(1, 2, 3), List.of("1", "1", "1")),
                 Arguments.of("3x(val('$1',1d6)+'$1')", List.of(1, 2, 3), List.of("1", "2", "3")),
@@ -263,7 +269,6 @@ public class DiceEvaluatorTest {
                 Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
                 Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
                 Arguments.of("ifG(1d6,6,'three',2d6,'not three')", "'ifG' requires as 4 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
-                Arguments.of("'3''5'", "There need to be an operator or a separator between two values"),
                 Arguments.of("1d-1", "Not enough values, [d, D] needs 2"),
                 Arguments.of("d-1", "Not enough values, [d, D] needs 1"),
                 Arguments.of("d!1", "The number of sides of a die must be greater then 1 but was 1"),
@@ -319,7 +324,7 @@ public class DiceEvaluatorTest {
         //DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,4,5,6,7,8,9,10), 1000);
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("''");
+        List<Roll> res = underTest.evaluate("1d6 1d6");
         System.out.println(res.size());
         System.out.println(res);
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());

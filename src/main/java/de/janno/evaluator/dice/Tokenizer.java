@@ -31,7 +31,7 @@ public class Tokenizer {
                 });
         parameters.getFunctions().forEach(function -> function.getNames().forEach(name -> builder.add(new TokenBuilder(escapeForRegex(name), s -> Token.of(function)))));
         parameters.getOperators().forEach(operator -> operator.getNames().forEach(name -> builder.add(new TokenBuilder(escapeForRegex(name), s -> Token.of(operator)))));
-        builder.add(new TokenBuilder(escapeForRegex(parameters.getSeparator()), s -> Token.functionArgSeparator()));
+        builder.add(new TokenBuilder(escapeForRegex(parameters.getSeparator()), s -> Token.separator()));
         parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1)))));
         builder.add(new TokenBuilder("[0-9]+", Token::of));
         tokenBuilders = builder.build();
