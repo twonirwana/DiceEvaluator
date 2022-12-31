@@ -69,9 +69,6 @@ public class Tokenizer {
             currentMatch = getBestMatch(current);
             if (currentMatch.isPresent()) {
                 Match match = currentMatch.get();
-                if (match.start() != 0) {
-                    throw new ExpressionException("No matching operator at the start of '%s', non-functional text need to be surrounded by %s".formatted(current, escapeCharacter));
-                }
                 Token token = match.token();
                 preTokens.add(token);
                 current = current.substring(match.match().length()).trim();
@@ -133,28 +130,21 @@ public class Tokenizer {
 
     private Optional<Match> getBestMatch(String input) throws ExpressionException {
         List<Match> allMatches = getAllMatches(input);
-
-        int minStart = allMatches.stream()
-                .mapToInt(Match::start)
-                .min().orElse(-1);
-        List<Match> minStartMatches = allMatches.stream()
-                .filter(m -> m.start() == minStart)
-                .toList();
-        int maxLength = minStartMatches.stream()
+        int maxLength = allMatches.stream()
                 .mapToInt(Match::length)
                 .max()
                 .orElse(0);
-        List<Match> minStartMaxLengthMatches = minStartMatches.stream()
+        List<Match> maxLengthMatches = allMatches.stream()
                 .filter(m -> m.length() == maxLength)
                 .toList();
-        if (minStartMaxLengthMatches.isEmpty()) {
+        if (maxLengthMatches.isEmpty()) {
             return Optional.empty();
         }
-        if (minStartMaxLengthMatches.size() > 1) {
-            throw new IllegalStateException("More then one operator matched the input %s: %s".formatted(input, minStartMaxLengthMatches.stream().map(Match::token).map(Token::toString).toList()));
+        if (maxLengthMatches.size() > 1) {
+            throw new IllegalStateException("More then one operator matched the input %s: %s".formatted(input, maxLengthMatches.stream().map(Match::token).map(Token::toString).toList()));
         }
 
-        return Optional.of(minStartMaxLengthMatches.get(0));
+        return Optional.of(maxLengthMatches.get(0));
     }
 
 
@@ -170,10 +160,8 @@ public class Tokenizer {
     private Optional<Match> getFirstMatch(String input, TokenBuilder tokenBuilder) throws ExpressionException {
         Matcher matcher = tokenBuilder.pattern().matcher(input);
         if (matcher.find()) {
-            if (matcher.start() != 0 || matcher.end() != 0) {
-                String matchGroup = matcher.group().trim();
-                return Optional.of(new Match(matcher.start(), matchGroup, tokenBuilder.toToken().apply(matchGroup)));
-            }
+            String matchGroup = matcher.group().trim();
+            return Optional.of(new Match(matcher.start(), matchGroup, tokenBuilder.toToken().apply(matchGroup)));
         }
         return Optional.empty();
     }
@@ -190,7 +178,7 @@ public class Tokenizer {
 
     private record TokenBuilder(String regex, ToToken toToken) {
         Pattern pattern() {
-            return Pattern.compile("^\\s*" + regex + "\\s*");
+            return Pattern.compile("^\\s*%s\\s*".formatted(regex));
         }
     }
 }
