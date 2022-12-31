@@ -24,7 +24,7 @@ public class Color extends Function {
             Roll p2 = rolls.get(1);
             checkContainsSingleElement(getName(), p2, "second argument");
             String color = p2.getElements().get(0).getValue();
-            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
                     p1.getElements().stream()
                             .map(r -> new RollElement(r.getValue(), color))
                             .collect(ImmutableList.toImmutableList()),

@@ -30,7 +30,7 @@ public class GreaterEqualThanFilter extends Operator {
             ImmutableList<RollElement> diceResult = left.getElements().stream()
                     .filter(i -> i.asInteger().isPresent() && i.asInteger().get() >= rightNumber)
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left, right)));

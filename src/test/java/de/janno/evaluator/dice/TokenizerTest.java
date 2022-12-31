@@ -123,7 +123,7 @@ class TokenizerTest {
                 .functionBracket(BracketPair.PARENTHESES)
                 .build()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("The following regex for tokenizing where used more then once: [\\Qd\\E]");
+                .hasMessage("The following regex for tokenizing where used more then once: [(?i)\\Qd\\E(?-i)]");
 
     }
 

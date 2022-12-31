@@ -5,7 +5,6 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -15,14 +14,14 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 public class Count extends Operator {
 
     public Count() {
-        super(Set.of("c", "C"), Operator.Associativity.LEFT, getOderNumberOf(Count.class), null, null);
+        super("c", Operator.Associativity.LEFT, getOderNumberOf(Count.class), null, null);
     }
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1,1);
+            checkRollSize(getName(), rolls, 1, 1);
 
             Roll left = rolls.get(0);
 
@@ -36,7 +35,7 @@ public class Count extends Operator {
                         .map(e -> new RollElement(String.valueOf(e.getValue().size()), e.getKey()))
                         .collect(ImmutableList.toImmutableList());
             }
-            return ImmutableList.of(new Roll(getLeftUnaryExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getLeftUnaryExpression(getName(), rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left)));

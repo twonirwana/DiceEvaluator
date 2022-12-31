@@ -35,7 +35,7 @@ public class Replace extends Function {
                     .collect(ImmutableList.toImmutableList());
 
 
-            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
                     rollElements,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.<Roll>builder()

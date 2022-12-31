@@ -25,12 +25,12 @@ public class Tokenizer {
         Stream.concat(parameters.getExpressionBrackets().stream(), parameters.getFunctionBrackets().stream())
                 .distinct() //expression and function brackets are allowed to contain the same elements
                 .forEach(c -> {
-                    builder.add(new TokenBuilder(escapeForRegex(c.getOpen()), s -> Token.openTokenOf(c)));
-                    builder.add(new TokenBuilder(escapeForRegex(c.getClose()), s -> Token.closeTokenOf(c)));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getOpen()), s -> Token.openTokenOf(c)));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getClose()), s -> Token.closeTokenOf(c)));
                 });
-        parameters.getFunctions().forEach(function -> function.getNames().forEach(name -> builder.add(new TokenBuilder(escapeForRegex(name), s -> Token.of(function)))));
-        parameters.getOperators().forEach(operator -> operator.getNames().forEach(name -> builder.add(new TokenBuilder(escapeForRegex(name), s -> Token.of(operator)))));
-        builder.add(new TokenBuilder(escapeForRegex(parameters.getSeparator()), s -> Token.separator()));
+        parameters.getFunctions().forEach(function -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(function.getName()), s -> Token.of(function))));
+        parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), s -> Token.of(operator))));
+        builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), s -> Token.separator()));
         parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1)))));
         builder.add(new TokenBuilder("[0-9]+", s -> {
             try {
@@ -54,11 +54,11 @@ public class Tokenizer {
     }
 
     private static String buildEscapeBracketsRegex(BracketPair bracketPair) {
-        return String.format("%s.*?%s", escapeForRegex(bracketPair.getOpen()), escapeForRegex(bracketPair.getClose()));
+        return String.format("%s.*?%s", escapeForRegexAndAddCaseInsensitivity(bracketPair.getOpen()), escapeForRegexAndAddCaseInsensitivity(bracketPair.getClose()));
     }
 
-    private static String escapeForRegex(String in) {
-        return "\\Q" + in + "\\E";
+    private static String escapeForRegexAndAddCaseInsensitivity(String in) {
+        return "(?i)\\Q%s\\E(?-i)".formatted(in);
     }
 
     public List<Token> tokenize(final String input) throws ExpressionException {

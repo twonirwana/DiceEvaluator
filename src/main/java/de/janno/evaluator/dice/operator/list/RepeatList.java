@@ -6,7 +6,6 @@ import lombok.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -15,7 +14,7 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 public class RepeatList extends Operator {
 
     public RepeatList() {
-        super(Set.of("r", "R"), null, null, Associativity.LEFT, getOderNumberOf(RepeatList.class));
+        super("r", null, null, Associativity.LEFT, getOderNumberOf(RepeatList.class));
     }
 
     @Override
@@ -38,7 +37,7 @@ public class RepeatList extends Operator {
             ImmutableList<Roll> rolls = builder.build();
 
 
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
                     rolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
                     UniqueRandomElements.from(rolls),
                     rolls));

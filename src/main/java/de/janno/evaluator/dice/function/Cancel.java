@@ -41,7 +41,7 @@ public class Cancel extends Function {
             } else if (typeAMatch.size() < typeBMatch.size()) {
                 resultBuilder.addAll(getChancel(typeBMatch, typeAMatch));
             }
-            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
                     resultBuilder.build(),
                     UniqueRandomElements.from(rolls),
                     ImmutableList.<Roll>builder()

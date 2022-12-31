@@ -40,7 +40,7 @@ public class Sum extends Operator {
                     .map(e -> new RollElement(String.valueOf(sumExact(e.getValue())), e.getKey()))
                     .collect(ImmutableList.toImmutableList());
 
-            return ImmutableList.of(new Roll(getLeftUnaryExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getLeftUnaryExpression(getName(), rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left)));

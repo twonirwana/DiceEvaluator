@@ -9,7 +9,6 @@ import lombok.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -18,7 +17,7 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 public class Repeat extends Operator {
 
     public Repeat() {
-        super(Set.of("x", "X"), null, null, Associativity.LEFT, getOderNumberOf(Repeat.class));
+        super("x", null, null, Associativity.LEFT, getOderNumberOf(Repeat.class));
     }
 
     @Override

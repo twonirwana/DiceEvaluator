@@ -51,6 +51,7 @@ For example `1d4+3d6` is the appending of roll of 1d4 and 3d6, but `(1d4+3=)d6)`
 The number of dice is limited to 1000 and every number approve 2147483647 result in an error.
 
 === Operators
+All operators are case insensitiv.
 
 [width="100%",cols="9%,8%,7%,48%,4%,8%,8%,8%",options="header",]
 |===
@@ -78,6 +79,7 @@ The number of dice is limited to 1000 and every number approve 2147483647 result
 |===
 
 === Functions
+All functions are case insensitiv.
 
 [width="100%",cols="6%,22%,14%,58%",options="header",]
 |===

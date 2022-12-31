@@ -150,7 +150,7 @@ public class DiceEvaluator {
             Operator operator = token.getOperator().get();
             int argumentCount = token.getOperatorType().orElseThrow().argumentCount;
             if (values.size() < argumentCount) {
-                throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getNames(), argumentCount));
+                throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getName(), argumentCount));
             }
             values.push(operator.evaluate(getArguments(values, argumentCount)));
         } else {

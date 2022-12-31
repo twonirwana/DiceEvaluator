@@ -23,7 +23,7 @@ public class Concat extends Function {
             String joined = rolls.stream()
                     .map(Roll::getResultString)
                     .collect(Collectors.joining());
-            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
                     ImmutableList.of(new RollElement(joined, RollElement.NO_COLOR)),
                     UniqueRandomElements.from(rolls),
                     ImmutableList.copyOf(rolls)));

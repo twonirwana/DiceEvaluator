@@ -26,7 +26,7 @@ public class SortDesc extends Function {
                     .flatMap(result -> result.getElements().stream())
                     .sorted(Comparator.reverseOrder())
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.copyOf(rolls)));
