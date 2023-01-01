@@ -80,7 +80,7 @@ publishing {
                 }
                 developers {
                     developer {
-                        id.set("2nirana")
+                        id.set("2nirwana")
                         name.set("Janno von Stülpnagel")
                         email.set("jvs@mailbox.org")
                     }
