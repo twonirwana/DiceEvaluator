@@ -1,7 +1,6 @@
 package de.janno.evaluator.dice.operator.die;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import de.janno.evaluator.dice.*;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
@@ -20,7 +19,7 @@ public final class ExplodingAddDice extends Operator {
     private final int maxNumberOfDice;
 
     public ExplodingAddDice(NumberSupplier numberSupplier, int maxNumberOfDice) {
-        super(ImmutableSet.of("d!!", "D!!"), Operator.Associativity.RIGHT, getOderNumberOf(ExplodingAddDice.class), Operator.Associativity.LEFT, getOderNumberOf(ExplodingAddDice.class));
+        super("d!!", Operator.Associativity.RIGHT, getOderNumberOf(ExplodingAddDice.class), Operator.Associativity.LEFT, getOderNumberOf(ExplodingAddDice.class));
         this.numberSupplier = numberSupplier;
         this.maxNumberOfDice = maxNumberOfDice;
     }
@@ -29,7 +28,7 @@ public final class ExplodingAddDice extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1,2);
+            checkRollSize(getName(), rolls, 1, 2);
 
             UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
             if (rolls.size() == 1) {
@@ -43,7 +42,7 @@ public final class ExplodingAddDice extends Operator {
                 randomElements.addAsRandomElements(rollElements.stream()
                         .map(r -> new RandomElement(r, 1, sidesOfDie))
                         .collect(ImmutableList.toImmutableList()));
-                return ImmutableList.of(new Roll(getRightUnaryExpression(getPrimaryName(), rolls),
+                return ImmutableList.of(new Roll(getRightUnaryExpression(getName(), rolls),
                         rollElements,
                         randomElements.build(),
                         ImmutableList.of(right)));
@@ -70,7 +69,7 @@ public final class ExplodingAddDice extends Operator {
             randomElements.addAsRandomElements(rollElements.stream()
                     .map(r -> new RandomElement(r, 1, sidesOfDie))
                     .collect(ImmutableList.toImmutableList()));
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
                     rollElements,
                     randomElements.build(),
                     ImmutableList.of(left, right)));

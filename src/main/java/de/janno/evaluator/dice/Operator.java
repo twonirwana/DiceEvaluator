@@ -1,19 +1,16 @@
 package de.janno.evaluator.dice;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.ToString;
 
 import java.util.List;
-import java.util.Set;
 
 @EqualsAndHashCode
 @ToString
 public abstract class Operator {
     @NonNull
-    private final ImmutableSet<String> names;
+    private final String name;
     private final Integer unaryPrecedence;
     private final Integer binaryPrecedence;
 
@@ -27,27 +24,17 @@ public abstract class Operator {
                 getBinaryPrecedence(operatorType, precedence));
     }
 
-    public Operator(@NonNull String name, Associativity unaryAssociativity, Integer unaryPrecedence, Associativity binaryAssociativity, Integer binaryPrecedence) {
-        this(ImmutableSet.of(name), unaryAssociativity, unaryPrecedence, binaryAssociativity, binaryPrecedence);
-    }
-
     /**
      * The <a href="http://en.wikipedia.org/wiki/Order_of_operations">precedence</a> is the priority of the operator.
      * An operator with a higher precedence will be executed before an operator with a lower precedence.
      * Example : In "1+3*4" * has a higher precedence than +, so the expression is interpreted as 1+(3*4).
      * An operator's <a href="http://en.wikipedia.org/wiki/Operator_associativity">associativity</a> define how operators of the same precedence are grouped.
      */
-    public Operator(@NonNull Set<String> names, Associativity unaryAssociativity, Integer unaryPrecedence, Associativity binaryAssociativity, Integer binaryPrecedence) {
+    public Operator(@NonNull String name, Associativity unaryAssociativity, Integer unaryPrecedence, Associativity binaryAssociativity, Integer binaryPrecedence) {
         if (unaryAssociativity == null && binaryAssociativity == null) {
-            throw new IllegalArgumentException("The operant %s need at least on associativity".formatted(names));
+            throw new IllegalArgumentException("The operant %s need at least on associativity".formatted(name));
         }
-        if (names.size() == 0) {
-            throw new IllegalArgumentException("Operator names can't be empty");
-        }
-        if (names.stream().anyMatch(Strings::isNullOrEmpty)) {
-            throw new IllegalArgumentException("Operator name can't be null or empty");
-        }
-        this.names = ImmutableSet.copyOf(names);
+        this.name = name;
         this.unaryAssociativity = unaryAssociativity;
         this.binaryAssociativity = binaryAssociativity;
         this.unaryPrecedence = unaryPrecedence;
@@ -104,19 +91,8 @@ public abstract class Operator {
         return binaryAssociativity != null;
     }
 
-    public @NonNull Set<String> getNames() {
-        return names;
-    }
-
     public @NonNull String getName() {
-        if (names.size() == 1) {
-            return names.iterator().next();
-        }
-        return names.stream().sorted().toList().toString();
-    }
-
-    public @NonNull String getPrimaryName() {
-        return names.iterator().next();
+        return name;
     }
 
     public Associativity getAssociativityForOperantType(OperatorType operatorType) {

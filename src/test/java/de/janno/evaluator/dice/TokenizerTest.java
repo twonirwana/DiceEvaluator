@@ -70,7 +70,7 @@ class TokenizerTest {
                 .escapeBracket(BracketPair.APOSTROPHE)
                 .build());
 
-        List<Token> res = underTest.tokenize("a+'dd'+'dd'");
+        List<Token> res = underTest.tokenize("'a'+'dd'+'dd'");
         assertThat(res.stream().map(Token::toString)).containsExactly("'a'", "+", "'dd'", "+", "'dd'");
     }
 
@@ -123,7 +123,7 @@ class TokenizerTest {
                 .functionBracket(BracketPair.PARENTHESES)
                 .build()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("The following regex for tokenizing where used more then once: [\\Qd\\E]");
+                .hasMessage("The following regex for tokenizing where used more then once: [(?i)\\Qd\\E(?-i)]");
 
     }
 

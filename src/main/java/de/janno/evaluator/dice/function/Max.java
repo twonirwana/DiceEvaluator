@@ -28,7 +28,7 @@ public class Max extends Function {
                     .flatMap(result -> result.getElements().stream())
                     .filter(resultElement -> resultElement.compareTo(max) == 0)
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.copyOf(rolls)));

@@ -55,7 +55,7 @@ public class Token {
         return new Token(Kind.CLOSE_BRACKET, null, null, null, null, bracketPair);
     }
 
-    public static Token functionArgSeparator() {
+    public static Token separator() {
         return new Token(Kind.SEPARATOR, null, null, null, null, null);
     }
 

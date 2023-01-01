@@ -30,7 +30,7 @@ public class GroupCount extends de.janno.evaluator.dice.Function {
                     .map(entry -> new RollElement("%dx%s".formatted(entry.getValue().size(), entry.getKey().getValue()), entry.getKey().getColor()))
                     .collect(ImmutableList.toImmutableList());
 
-            return ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.copyOf(rolls)));

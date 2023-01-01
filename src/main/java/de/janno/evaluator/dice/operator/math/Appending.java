@@ -1,7 +1,6 @@
 package de.janno.evaluator.dice.operator.math;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import de.janno.evaluator.dice.*;
 import de.janno.evaluator.dice.operator.OperatorOrder;
 import lombok.NonNull;
@@ -13,7 +12,7 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public final class Appending extends Operator {
     public Appending() {
-        super(ImmutableSet.of("+"), Operator.Associativity.RIGHT, Integer.MAX_VALUE, Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(Appending.class));
+        super("+", Operator.Associativity.RIGHT, Integer.MAX_VALUE, Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(Appending.class));
     }
 
     @Override
@@ -21,7 +20,7 @@ public final class Appending extends Operator {
         return constants -> {
 
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1,2);
+            checkRollSize(getName(), rolls, 1, 2);
 
             if (rolls.size() == 1) {
                 return ImmutableList.of(rolls.get(0));
@@ -33,7 +32,7 @@ public final class Appending extends Operator {
                     .addAll(left.getElements())
                     .addAll(right.getElements())
                     .build();
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getPrimaryName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left, right)));

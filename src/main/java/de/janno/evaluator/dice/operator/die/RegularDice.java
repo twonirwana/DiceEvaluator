@@ -1,7 +1,6 @@
 package de.janno.evaluator.dice.operator.die;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import de.janno.evaluator.dice.*;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
@@ -19,7 +18,7 @@ public final class RegularDice extends Operator {
     private final int maxNumberOfDice;
 
     public RegularDice(NumberSupplier numberSupplier, int maxNumberOfDice) {
-        super(ImmutableSet.of("d", "D"), Operator.Associativity.RIGHT, getOderNumberOf(RegularDice.class), Operator.Associativity.LEFT, getOderNumberOf(RegularDice.class));
+        super("d", Operator.Associativity.RIGHT, getOderNumberOf(RegularDice.class), Operator.Associativity.LEFT, getOderNumberOf(RegularDice.class));
         this.numberSupplier = numberSupplier;
         this.maxNumberOfDice = maxNumberOfDice;
     }
@@ -28,7 +27,7 @@ public final class RegularDice extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1,2);
+            checkRollSize(getName(), rolls, 1, 2);
 
             final int numberOfDice;
             final Roll right;
@@ -39,13 +38,13 @@ public final class RegularDice extends Operator {
                 right = rolls.get(0);
                 numberOfDice = 1;
                 childrenRolls = ImmutableList.of(right);
-                expression = getRightUnaryExpression(getPrimaryName(), rolls);
+                expression = getRightUnaryExpression(getName(), rolls);
             } else if (rolls.size() == 2) {
                 Roll left = rolls.get(0);
                 right = rolls.get(1);
                 childrenRolls = ImmutableList.of(left, right);
                 numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
-                expression = getBinaryOperatorExpression(getPrimaryName(), rolls);
+                expression = getBinaryOperatorExpression(getName(), rolls);
                 randomElements.add(left.getRandomElementsInRoll());
 
             } else {

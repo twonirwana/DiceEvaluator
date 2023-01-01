@@ -31,7 +31,7 @@ public abstract class AbstractIf extends Function {
                 randomElements.add(compareTo.getRandomElementsInRoll());
                 if (compare(input, counter, compareTo, counter + 1)) {
                     randomElements.add(trueResult.getRandomElementsInRoll());
-                    return  ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+                    return  ImmutableList.of(new Roll(getExpression(getName(), rolls),
                             trueResult.getElements(),
                             randomElements.build(),
                             ImmutableList.<Roll>builder()
@@ -51,7 +51,7 @@ public abstract class AbstractIf extends Function {
                 //if there is no default result, the result is the input
                 result = input;
             }
-            return  ImmutableList.of(new Roll(getExpression(getPrimaryName(), rolls),
+            return  ImmutableList.of(new Roll(getExpression(getName(), rolls),
                     result.getElements(),
                     randomElements.build(),
                     ImmutableList.<Roll>builder()

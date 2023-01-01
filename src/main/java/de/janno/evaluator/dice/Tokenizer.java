@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -17,20 +16,30 @@ import java.util.stream.Stream;
 
 public class Tokenizer {
     private final ImmutableList<TokenBuilder> tokenBuilders;
-
+    private final String escapeCharacter;
 
     public Tokenizer(Parameters parameters) {
+        escapeCharacter = parameters.getEscapeBrackets().stream()
+                .map(BracketPair::toString).collect(Collectors.joining(" or "));
         ImmutableList.Builder<TokenBuilder> builder = ImmutableList.builder();
         Stream.concat(parameters.getExpressionBrackets().stream(), parameters.getFunctionBrackets().stream())
                 .distinct() //expression and function brackets are allowed to contain the same elements
                 .forEach(c -> {
-                    builder.add(new TokenBuilder(escapeForRegex(c.getOpen()), s -> Token.openTokenOf(c)));
-                    builder.add(new TokenBuilder(escapeForRegex(c.getClose()), s -> Token.closeTokenOf(c)));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getOpen()), s -> Token.openTokenOf(c)));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getClose()), s -> Token.closeTokenOf(c)));
                 });
-        parameters.getFunctions().forEach(function -> function.getNames().forEach(name -> builder.add(new TokenBuilder(escapeForRegex(name), s -> Token.of(function)))));
-        parameters.getOperators().forEach(operator -> operator.getNames().forEach(name -> builder.add(new TokenBuilder(escapeForRegex(name), s -> Token.of(operator)))));
-        builder.add(new TokenBuilder(escapeForRegex(parameters.getSeparator()), s -> Token.functionArgSeparator()));
+        parameters.getFunctions().forEach(function -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(function.getName()), s -> Token.of(function))));
+        parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), s -> Token.of(operator))));
+        builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), s -> Token.separator()));
         parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1)))));
+        builder.add(new TokenBuilder("[0-9]+", s -> {
+            try {
+                Integer.parseInt(s);
+                return Token.of(s);
+            } catch (Throwable t) {
+                throw new ExpressionException("The number '%s' was to big".formatted(s));
+            }
+        }));
         tokenBuilders = builder.build();
 
         List<String> duplicateRegex = tokenBuilders.stream().collect(Collectors.groupingBy(TokenBuilder::regex))
@@ -45,32 +54,28 @@ public class Tokenizer {
     }
 
     private static String buildEscapeBracketsRegex(BracketPair bracketPair) {
-        return String.format("%s.+?%s", escapeForRegex(bracketPair.getOpen()), escapeForRegex(bracketPair.getClose()));
+        return String.format("%s.*?%s", escapeForRegexAndAddCaseInsensitivity(bracketPair.getOpen()), escapeForRegexAndAddCaseInsensitivity(bracketPair.getClose()));
     }
 
-    private static String escapeForRegex(String in) {
-        return "\\Q" + in + "\\E";
+    private static String escapeForRegexAndAddCaseInsensitivity(String in) {
+        return "(?i)\\Q%s\\E(?-i)".formatted(in);
     }
 
     public List<Token> tokenize(final String input) throws ExpressionException {
         List<Token> preTokens = new ArrayList<>();
-        String current = input;
+        String current = input.trim();
         Optional<Match> currentMatch;
         do {
             currentMatch = getBestMatch(current);
             if (currentMatch.isPresent()) {
                 Match match = currentMatch.get();
-                if (match.start() != 0) {
-                    String leftLiteral = current.substring(0, match.start()).trim();
-                    preTokens.add(Token.of(leftLiteral));
-                }
                 Token token = match.token();
                 preTokens.add(token);
-                current = current.substring(match.start() + match.match().length()).trim();
+                current = current.substring(match.match().length()).trim();
             }
         } while (currentMatch.isPresent());
         if (!current.isEmpty()) {
-            preTokens.add(Token.of(current));
+            throw new ExpressionException("No matching operator for '%s', non-functional text need to be surrounded by %s".formatted(current, escapeCharacter));
         }
 
         return setOperatorType(preTokens);
@@ -123,50 +128,46 @@ public class Tokenizer {
         return Operator.OperatorType.UNARY;
     }
 
-    private Optional<Match> getBestMatch(String input) {
+    private Optional<Match> getBestMatch(String input) throws ExpressionException {
         List<Match> allMatches = getAllMatches(input);
-
-        int minStart = allMatches.stream()
-                .mapToInt(Match::start)
-                .min().orElse(-1);
-        List<Match> minStartMatches = allMatches.stream()
-                .filter(m -> m.start() == minStart)
-                .toList();
-        int maxLength = minStartMatches.stream()
+        int maxLength = allMatches.stream()
                 .mapToInt(Match::length)
                 .max()
                 .orElse(0);
-        List<Match> minStartMaxLengthMatches = minStartMatches.stream()
+        List<Match> maxLengthMatches = allMatches.stream()
                 .filter(m -> m.length() == maxLength)
                 .toList();
-        if (minStartMaxLengthMatches.isEmpty()) {
+        if (maxLengthMatches.isEmpty()) {
             return Optional.empty();
         }
-        if (minStartMaxLengthMatches.size() > 1) {
-            throw new IllegalStateException("More then one operator matched the input %s: %s".formatted(input, minStartMaxLengthMatches.stream().map(Match::token).map(Token::toString).toList()));
+        if (maxLengthMatches.size() > 1) {
+            throw new IllegalStateException("More then one operator matched the input %s: %s".formatted(input, maxLengthMatches.stream().map(Match::token).map(Token::toString).toList()));
         }
 
-        return Optional.of(minStartMaxLengthMatches.get(0));
+        return Optional.of(maxLengthMatches.get(0));
     }
 
 
-    private List<Match> getAllMatches(String input) {
-        return tokenBuilders.stream()
-                .map(p -> getFirstMatch(input, p))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
+    private List<Match> getAllMatches(String input) throws ExpressionException {
+        ImmutableList.Builder<Match> matchBuilder = ImmutableList.builder();
+        for (Tokenizer.TokenBuilder tokenBuilder : tokenBuilders) {
+            Optional<Match> firstMatch = getFirstMatch(input, tokenBuilder);
+            firstMatch.ifPresent(matchBuilder::add);
+        }
+        return matchBuilder.build();
     }
 
-    private Optional<Match> getFirstMatch(String input, TokenBuilder tokenBuilder) {
+    private Optional<Match> getFirstMatch(String input, TokenBuilder tokenBuilder) throws ExpressionException {
         Matcher matcher = tokenBuilder.pattern().matcher(input);
         if (matcher.find()) {
-            if (matcher.start() != 0 || matcher.end() != 0) {
-                String matchGroup = matcher.group();
-                return Optional.of(new Match(matcher.start(), matchGroup, tokenBuilder.toToken().apply(matchGroup)));
-            }
+            String matchGroup = matcher.group().trim();
+            return Optional.of(new Match(matcher.start(), matchGroup, tokenBuilder.toToken().apply(matchGroup)));
         }
         return Optional.empty();
+    }
+
+    private interface ToToken {
+        Token apply(String in) throws ExpressionException;
     }
 
     private record Match(int start, String match, Token token) {
@@ -175,10 +176,9 @@ public class Tokenizer {
         }
     }
 
-
-    private record TokenBuilder(String regex, Function<String, Token> toToken) {
+    private record TokenBuilder(String regex, ToToken toToken) {
         Pattern pattern() {
-            return Pattern.compile(regex);
+            return Pattern.compile("^\\s*%s\\s*".formatted(regex));
         }
     }
 }

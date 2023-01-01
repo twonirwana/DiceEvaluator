@@ -10,10 +10,7 @@ import de.janno.evaluator.dice.operator.die.ExplodingDice;
 import de.janno.evaluator.dice.operator.die.RegularDice;
 import de.janno.evaluator.dice.operator.die.Reroll;
 import de.janno.evaluator.dice.operator.list.*;
-import de.janno.evaluator.dice.operator.math.Appending;
-import de.janno.evaluator.dice.operator.math.Divide;
-import de.janno.evaluator.dice.operator.math.Multiply;
-import de.janno.evaluator.dice.operator.math.NegateOrNegativAppending;
+import de.janno.evaluator.dice.operator.math.*;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
 import lombok.NonNull;
@@ -30,7 +27,9 @@ public class DiceEvaluator {
 
     private static final int DEFAULT_MAX_NUMBER_OF_DICE = 1000;
 
-    private static final Pattern LIST_REGEX = Pattern.compile("(.+(/.+)+)");
+    private static final String SEPARATOR = ",";
+    private static final String LEGACY_LIST_SEPARATOR = "/";
+    private static final Pattern LIST_REGEX = Pattern.compile("(.+([%s%s].+)+)".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR));
     private final Tokenizer tokenizer;
     private final Parameters parameters;
 
@@ -51,9 +50,11 @@ public class DiceEvaluator {
                         .add(new Appending())
                         .add(new Sum())
                         .add(new Repeat())
+                        .add(new RepeatList())
                         .add(new NegateOrNegativAppending())
                         .add(new Divide())
                         .add(new Multiply())
+                        .add(new Modulo())
                         .add(new KeepHighest())
                         .add(new KeepLowest())
                         .add(new GreaterThanFilter())
@@ -81,7 +82,7 @@ public class DiceEvaluator {
                         .add(new IfLesser())
                         .add(new GroupCount())
                         .build())
-                .separator(",")
+                .separator(SEPARATOR)
                 .build();
         tokenizer = new Tokenizer(parameters);
 
@@ -126,8 +127,7 @@ public class DiceEvaluator {
     protected @NonNull RollBuilder toValue(@NonNull String literal) {
         Matcher matcher = LIST_REGEX.matcher(literal);
         if (matcher.find()) {
-            //Todo is this needed: ('Head'+'Tail') is the same as [Head,Tail] but needs escaping
-            List<String> list = Arrays.asList(matcher.group(1).split("/"));
+            List<String> list = Arrays.asList(matcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
             return constants -> ImmutableList.of(new Roll(list.toString(), list.stream()
                     .map(String::trim)
                     .map(s -> new RollElement(s, RollElement.NO_COLOR))
@@ -150,7 +150,7 @@ public class DiceEvaluator {
             Operator operator = token.getOperator().get();
             int argumentCount = token.getOperatorType().orElseThrow().argumentCount;
             if (values.size() < argumentCount) {
-                throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getNames(), argumentCount));
+                throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getName(), argumentCount));
             }
             values.push(operator.evaluate(getArguments(values, argumentCount)));
         } else {
@@ -300,12 +300,16 @@ public class DiceEvaluator {
                     processTokenToValues(values, stack.pop());
                 }
                 stack.push(token);
-            } else {
-                // If the token is literal then add its value to the output queue.
-                if (previous.flatMap(Token::getLiteral).isPresent()) {
-                    throw new ExpressionException("There need to be an operator or a separator between two values");
+            } else if (token.getLiteral().isPresent()) {
+                //if there is a literal following a literal then this is an independent part of the expression
+                //and the left part needs to be processed
+                if (previous.flatMap(Token::getLiteral).isPresent() && !stack.isEmpty()) {
+                    processTokenToValues(values, stack.pop());
                 }
+                // If the token is literal then add its value to the output queue.
                 processTokenToValues(values, token);
+            } else {
+                throw new IllegalStateException("Unknown Token: %s".formatted(token));
             }
             previous = Optional.of(token);
         }

@@ -1,4 +1,4 @@
-package de.janno.evaluator.dice.operator.list;
+package de.janno.evaluator.dice.operator.math;
 
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
@@ -10,28 +10,27 @@ import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.*;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
-public class GreaterEqualThanFilter extends Operator {
+public final class Modulo extends Operator {
 
-    public GreaterEqualThanFilter() {
-        super(">=", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(GreaterEqualThanFilter.class));
+    public Modulo() {
+        super("mod", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(Modulo.class));
     }
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 2,2);
+            checkRollSize(getName(), rolls, 2, 2);
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
-            checkContainsOnlyInteger(getName(), left, "left");
+            checkAllElementsAreSameColor(getName(), left, right);
+            final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
             final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
-            //todo color only filtered by same color?
-            ImmutableList<RollElement> diceResult = left.getElements().stream()
-                    .filter(i -> i.asInteger().isPresent() && i.asInteger().get() >= rightNumber)
-                    .collect(ImmutableList.toImmutableList());
+
+            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(leftNumber % rightNumber), left.getElements().get(0).getColor()));
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
-                    diceResult,
+                    res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left, right)));
         };
