@@ -38,4 +38,4 @@
 | If In                | ifIn()     | ifIn(d6,[1,2],8)   |
 | Group Count          | groupC()   | groupC(20d6)       |
 | Concatenate          | concat()   | concat('Att:',d20) |
-| Value                | val()      | val($1,10d10)      |
+| Value                | val()      | val('$1',10d10)    |

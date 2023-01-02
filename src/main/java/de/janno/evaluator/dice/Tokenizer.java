@@ -75,7 +75,7 @@ public class Tokenizer {
             }
         } while (currentMatch.isPresent());
         if (!current.isEmpty()) {
-            throw new ExpressionException("No matching operator for '%s', non-functional text need to be surrounded by %s".formatted(current, escapeCharacter));
+            throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(current, escapeCharacter));
         }
 
         return setOperatorType(preTokens);

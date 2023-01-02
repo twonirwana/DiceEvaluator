@@ -124,7 +124,7 @@ public class DiceEvaluator {
         };
     }
 
-    protected @NonNull RollBuilder toValue(@NonNull String literal) {
+    private @NonNull RollBuilder toValue(@NonNull String literal) {
         Matcher matcher = LIST_REGEX.matcher(literal);
         if (matcher.find()) {
             List<String> list = Arrays.asList(matcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
