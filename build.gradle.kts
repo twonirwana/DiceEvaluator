@@ -16,7 +16,6 @@ repositories {
     mavenCentral()
 }
 
-
 dependencies {
     compileOnly("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.24")
@@ -38,6 +37,10 @@ java {
     }
     withJavadocJar()
     withSourcesJar()
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
 }
 
 tasks.getByName<Test>("test") {

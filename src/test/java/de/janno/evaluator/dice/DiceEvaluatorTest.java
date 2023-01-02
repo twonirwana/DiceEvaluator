@@ -246,7 +246,7 @@ public class DiceEvaluatorTest {
     private static Stream<Arguments> generateErrorData() {
         return Stream.of(
                 Arguments.of("=1", "Operator = has left associativity but the left value was: empty"),
-                Arguments.of("abc", "No matching operator for 'abc', non-functional text need to be surrounded by '' or []"),
+                Arguments.of("abc", "No matching operator for 'abc', non-functional text and value names must to be surrounded by '' or []"),
                 Arguments.of("1-", "Operator - has right associativity but the right value was: empty"),
                 Arguments.of("1*", "Operator * does not support unary operations"),
                 Arguments.of("*1", "Operator * does not support unary operations"),
@@ -261,8 +261,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("(", "Parentheses mismatched"),
                 Arguments.of(",3", "expression can't start with a separator"),
                 Arguments.of("10*", "Operator * does not support unary operations"),
-                Arguments.of("10*a", "No matching operator for 'a', non-functional text need to be surrounded by '' or []"),
-                Arguments.of("10*2.5", "No matching operator for '.5', non-functional text need to be surrounded by '' or []"),
+                Arguments.of("10*a", "No matching operator for 'a', non-functional text and value names must to be surrounded by '' or []"),
+                Arguments.of("10*2.5", "No matching operator for '.5', non-functional text and value names must to be surrounded by '' or []"),
                 Arguments.of("2147483647+1=", "integer overflow"),
                 Arguments.of("2147483647*2=", "integer overflow"),
                 Arguments.of("1/0", "/ by zero"),
