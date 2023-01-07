@@ -27,6 +27,9 @@ public class KeepLowest extends Operator {
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
             final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
+            if (rightNumber < 0) {
+                throw new ExpressionException(String.format("The number to keep can not be negativ but was %d", rightNumber));
+            }
             //todo right color only filtered by same color?
             ImmutableList<RollElement> keep = left.getElements().stream()
                     .collect(Collectors.groupingBy(RollElement::getColor)).values().stream()
