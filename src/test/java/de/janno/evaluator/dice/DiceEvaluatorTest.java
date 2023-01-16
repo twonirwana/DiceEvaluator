@@ -603,35 +603,37 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_explodingDice() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
-        List<Roll> res = underTest.evaluate("(2d!4=)d!6");
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 1, 4, 6, 6, 1, 5), 1000);
+        List<Roll> res = underTest.evaluate("(1d!2=)d!6");
 
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("4", "6", "6", "1", "5");
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
                 .map(r -> r.getRandomElements().stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue).toList()))
-                .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
-
+                .containsExactly(List.of("2", "1"), List.of("4", "6", "6", "1", "5"));
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
                 .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
-                .containsExactly(List.of(4, 4), List.of(6, 6, 6));
+                .containsExactly(List.of(2, 2), List.of(6, 6, 6, 6, 6));
     }
 
     @Test
     void getRandomElements_explodingAddDice() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
-        List<Roll> res = underTest.evaluate("(2d!!4=)d!!6");
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 1, 4, 6, 6, 1, 5), 1000);
+        List<Roll> res = underTest.evaluate("(1d!!2=)d!!6");
 
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("4", "13", "5");
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
                 .map(r -> r.getRandomElements().stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
                         .toList()))
-                .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
-
+                .containsExactly(List.of("2", "1"), List.of("4", "6", "6", "1", "5"));
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
                 .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
-                .containsExactly(List.of(4, 4), List.of(6, 6, 6));
+                .containsExactly(List.of(2, 2), List.of(6, 6, 6, 6, 6));
     }
 
     @Test
