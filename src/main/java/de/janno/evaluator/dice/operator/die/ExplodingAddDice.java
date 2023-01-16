@@ -7,8 +7,7 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static de.janno.evaluator.dice.DiceHelper.explodingAddDice;
-import static de.janno.evaluator.dice.DiceHelper.toRollElements;
+import static de.janno.evaluator.dice.DiceHelper.*;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -37,11 +36,10 @@ public final class ExplodingAddDice extends Operator {
                 if (sidesOfDie < 2) {
                     throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
                 }
-                final ImmutableList<RollElement> rollElements = toRollElements(explodingAddDice(1, sidesOfDie, numberSupplier));
+                final ImmutableList<ExplodedAddDie> explodingAddDice = explodingAddDice(1, sidesOfDie, numberSupplier);
+                final ImmutableList<RollElement> rollElements = explodedAddDie2RollElements(explodingAddDice);
                 randomElements.add(right.getRandomElementsInRoll());
-                randomElements.addAsRandomElements(rollElements.stream()
-                        .map(r -> new RandomElement(r, 1, sidesOfDie))
-                        .collect(ImmutableList.toImmutableList()));
+                randomElements.addAsRandomElements(explodedAddDie2RandomElements(explodingAddDice));
                 return ImmutableList.of(new Roll(getRightUnaryExpression(getName(), rolls),
                         rollElements,
                         randomElements.build(),
@@ -51,7 +49,6 @@ public final class ExplodingAddDice extends Operator {
             final Roll left = rolls.get(0);
             final Roll right = rolls.get(1);
             randomElements.add(left.getRandomElementsInRoll());
-
             randomElements.add(right.getRandomElementsInRoll());
             final int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
             if (numberOfDice > maxNumberOfDice) {
@@ -64,11 +61,9 @@ public final class ExplodingAddDice extends Operator {
             if (sidesOfDie < 2) {
                 throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
             }
-            final ImmutableList<RollElement> rollElements = toRollElements(explodingAddDice(numberOfDice, sidesOfDie, numberSupplier));
-
-            randomElements.addAsRandomElements(rollElements.stream()
-                    .map(r -> new RandomElement(r, 1, sidesOfDie))
-                    .collect(ImmutableList.toImmutableList()));
+            final ImmutableList<ExplodedAddDie> explodingAddDice = explodingAddDice(numberOfDice, sidesOfDie, numberSupplier);
+            final ImmutableList<RollElement> rollElements = explodedAddDie2RollElements(explodingAddDice);
+            randomElements.addAsRandomElements(explodedAddDie2RandomElements(explodingAddDice));
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
                     rollElements,
                     randomElements.build(),
