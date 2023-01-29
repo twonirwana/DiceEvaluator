@@ -258,7 +258,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("*1", "Operator * does not support unary operations"),
                 Arguments.of("10 5 +", "Operator + has right associativity but the right value was: empty"),
                 Arguments.of("10**5", "Operator * does not support unary operations"),
-                Arguments.of("3d6==[1/2]", "'==' requires as right a single element but was '[1, 2]'. Try to sum the numbers together like ([1, 2]=)"),
+                Arguments.of("3d6==[1/2]", "'==' requires as right a single element but was '[1, 2]'. Try to sum the numbers together like ([1/2]=)"),
                 Arguments.of("min()", "Invalid argument count for min"),
                 Arguments.of("min(,2)", "A separator can't be followed by another separator or open bracket"),
                 Arguments.of("min(1,)", "argument is missing"),
@@ -273,8 +273,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("2147483647*2=", "integer overflow"),
                 Arguments.of("1/0", "/ by zero"),
                 Arguments.of("color(3d6,[a/b])", "'color' requires as second argument a single element but was '[a, b]'"),
-                Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as 1 argument a single element but was '[2, 3]'. Try to sum the numbers together like (2d6=)"),
-                Arguments.of("ifIn(2d6,3,'three','not three')", "'ifIn' requires as 1 argument a single element but was '[2, 3]'. Try to sum the numbers together like (2d6=)"),
+                Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as 1 argument a single element but was '[2, 3]'. Try to sum the numbers together like ((2d6=)"),
+                Arguments.of("ifIn(2d6,3,'three','not three')", "'ifIn' requires as 1 argument a single element but was '[2, 3]'. Try to sum the numbers together like ((2d6=)"),
                 Arguments.of("ifL(1d6,2d6,'three','not three')", "'ifL' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
                 Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
                 Arguments.of("ifG(1d6,2d6,'three','not three')", "'ifG' requires as 2 argument a single element but was '[3, 1]'. Try to sum the numbers together like (2d6=)"),
@@ -336,8 +336,9 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("[1,2,3]");
+        List<Roll> res = underTest.evaluate("1d((6)+3=)");
         System.out.println(res.size());
+        System.out.println(res.get(0).getExpression());
         System.out.println(res);
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
     }
@@ -414,6 +415,10 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(res.stream().flatMap(r -> r.getElements().stream()).flatMap(e -> e.asInteger().stream())).containsExactlyElementsOf(expected);
+        //val is not given in the dice expression because it is on a roll without result
+        if (res.size() == 1 && !diceExpression.contains("val(")) {
+            assertThat(res.get(0).getExpression().replace(" ", "")).isEqualTo(diceExpression.replace(" ", ""));
+        }
     }
 
     @Test
@@ -550,6 +555,42 @@ public class DiceEvaluatorTest {
     }
 
     @Test
+    void separatorTest() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000);
+        List<Roll> res = underTest.evaluate("1d6,1d8");
+
+        assertThat(res).hasSize(2);
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("1");
+        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("2");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .flatMap(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)))
+                .containsExactly("1", "2");
+        assertThat(res.stream().map(Roll::getExpression))
+                .containsExactly("1d6", "1d8");
+    }
+
+    @Test
+    void spaceSeparatorTest() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000);
+        List<Roll> res = underTest.evaluate("1d6 1d8");
+
+        assertThat(res).hasSize(2);
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("1");
+        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("2");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .flatMap(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)))
+                .containsExactly("1", "2");
+        assertThat(res.stream().map(Roll::getExpression))
+                .containsExactly("1d6", "1d8");
+    }
+
+    @Test
     void getRandomElements_Repeat() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000);
         List<Roll> res = underTest.evaluate("5x1d6");
@@ -566,7 +607,8 @@ public class DiceEvaluatorTest {
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)))
                 .containsExactly("1", "2", "3", "4", "5");
-
+        assertThat(res.stream().map(Roll::getExpression))
+                .containsExactly("1d6", "1d6", "1d6", "1d6", "1d6");
     }
 
     @Test
@@ -582,7 +624,7 @@ public class DiceEvaluatorTest {
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)))
                 .containsExactly("1", "2", "3", "4", "5");
-
+        assertThat(res.get(0).getExpression()).isEqualTo("5r1d6");
     }
 
     @Test
@@ -600,6 +642,8 @@ public class DiceEvaluatorTest {
         assertThat(res.get(0).getRandomElementsString()).isEqualTo("[2, 3, 1, 4] [1, 1, 6, 3]");
         assertThat(res.get(1).getRandomElementsString()).isEqualTo("[2, 3, 6, 3]");
         assertThat(res.get(2).getRandomElementsString()).isEqualTo("[3, 2, 4, 4]");
+        assertThat(res.stream().map(Roll::getExpression))
+                .containsExactly("4d6rr1k3", "4d6rr1k3", "4d6rr1k3");
 
     }
 
@@ -618,6 +662,7 @@ public class DiceEvaluatorTest {
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
                 .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(2, 2), List.of(6, 6, 6, 6, 6));
+        assertThat(res.get(0).getExpression()).isEqualTo("(1d!2=)d!6");
     }
 
     @Test
@@ -636,6 +681,7 @@ public class DiceEvaluatorTest {
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
                 .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(2, 2), List.of(6, 6, 6, 6, 6));
+        assertThat(res.get(0).getExpression()).isEqualTo("(1d!!2=)d!!6");
     }
 
     @Test
@@ -657,7 +703,7 @@ public class DiceEvaluatorTest {
         assertThat(res).hasSize(1);
         assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3, 2, 1]");
         assertThat(res.get(0).getResultString()).isEqualTo("3, 2, 1");
-        assertThat(res.get(0).getExpression()).isEqualTo("3d20+10=");
+        assertThat(res.get(0).getExpression()).isEqualTo("3d(20+10=)");
     }
 
     @Test
@@ -668,7 +714,7 @@ public class DiceEvaluatorTest {
         assertThat(res).hasSize(1);
         assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [2, 1, 4]");
         assertThat(res.get(0).getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
-        assertThat(res.get(0).getExpression()).isEqualTo("color(1d6,red)+color(3d20,blue)");
+        assertThat(res.get(0).getExpression()).isEqualTo("color(1d6,'red')+color(3d20,'blue')");
     }
 
     @Test

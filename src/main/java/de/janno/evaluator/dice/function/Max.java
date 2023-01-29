@@ -15,10 +15,10 @@ public class Max extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(arguments, constants);
-            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+            checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
             final RollElement max = rolls.stream()
                     .flatMap(result -> result.getElements().stream())
@@ -28,7 +28,7 @@ public class Max extends Function {
                     .flatMap(result -> result.getElements().stream())
                     .filter(resultElement -> resultElement.compareTo(max) == 0)
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.copyOf(rolls)));

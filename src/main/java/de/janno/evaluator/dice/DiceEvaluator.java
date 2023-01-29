@@ -124,11 +124,11 @@ public class DiceEvaluator {
         };
     }
 
-    private @NonNull RollBuilder toValue(@NonNull String literal) {
+    private @NonNull RollBuilder toValue(@NonNull String literal, @NonNull String inputValue) {
         Matcher matcher = LIST_REGEX.matcher(literal);
         if (matcher.find()) {
             List<String> list = Arrays.asList(matcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
-            return constants -> ImmutableList.of(new Roll(list.toString(), list.stream()
+            return constants -> ImmutableList.of(new Roll(inputValue, list.stream()
                     .map(String::trim)
                     .map(s -> new RollElement(s, RollElement.NO_COLOR))
                     .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of()));
@@ -137,14 +137,14 @@ public class DiceEvaluator {
             if (constants.containsKey(literal)) {
                 return ImmutableList.of(constants.get(literal));
             }
-            return ImmutableList.of(new Roll(literal, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of()));
+            return ImmutableList.of(new Roll(inputValue, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of()));
         };
     }
 
     private void processTokenToValues(Deque<RollBuilder> values, Token token) throws ExpressionException {
         if (token.getLiteral().isPresent()) { // If the token is a literal, a constant, or a variable name
             String literal = token.getLiteral().get();
-            values.push(toValue(literal));
+            values.push(toValue(literal, token.getInputValue()));
 
         } else if (token.getOperator().isPresent()) { // If the token is an operator
             Operator operator = token.getOperator().get();
@@ -152,17 +152,17 @@ public class DiceEvaluator {
             if (values.size() < argumentCount) {
                 throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getName(), argumentCount));
             }
-            values.push(operator.evaluate(getArguments(values, argumentCount)));
+            values.push(operator.evaluate(getArguments(values, argumentCount), token.getInputValue()));
         } else {
             throw new ExpressionException(token.toString());
         }
     }
 
-    private void doFunction(Deque<RollBuilder> values, Function function, int argumentCount) throws ExpressionException {
+    private void doFunction(Deque<RollBuilder> values, Function function, int argumentCount, String inputValue) throws ExpressionException {
         if (function.getMinArgumentCount() > argumentCount || function.getMaxArgumentCount() < argumentCount || values.size() < argumentCount) {
             throw new ExpressionException("Invalid argument count for %s".formatted(function.getName()));
         }
-        final RollBuilder res = function.evaluate(getArguments(values, argumentCount));
+        final RollBuilder res = function.evaluate(getArguments(values, argumentCount), inputValue);
         values.push(res);
     }
 
@@ -258,7 +258,8 @@ public class DiceEvaluator {
                     // If the token at the top of the stack is a function token, pop it
                     // onto the output queue.
                     int argumentCount = values.size() - previousValuesSize.pop();
-                    doFunction(values, stack.pop().getFunction().orElseThrow(), argumentCount);
+                    final Token functionToken = stack.pop();
+                    doFunction(values, functionToken.getFunction().orElseThrow(), argumentCount, functionToken.getInputValue());
                 }
             } else if (token.isSeparator()) {
                 if (previous.isEmpty()) {
@@ -275,7 +276,8 @@ public class DiceEvaluator {
                     } else {
                         // Until the token at the top of the stack is a left parenthesis,
                         // pop operators off the stack onto the output queue.
-                        processTokenToValues(values, stack.pop());
+                        Token stackToken = stack.pop();
+                        processTokenToValues(values, stackToken);
                     }
                 }
                 if (openBracketOnStackReached) {

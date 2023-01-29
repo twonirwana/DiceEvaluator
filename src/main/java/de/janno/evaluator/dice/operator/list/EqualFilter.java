@@ -18,19 +18,19 @@ public class EqualFilter extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 2,2);
+            checkRollSize(inputValue, rolls, 2,2);
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
-            checkContainsSingleElement(getName(), right, "right");
+            checkContainsSingleElement(inputValue, right, "right");
 
             ImmutableList<RollElement> diceResult = left.getElements().stream()
                     .filter(i -> right.getElements().get(0).equals(i))
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left, right)));

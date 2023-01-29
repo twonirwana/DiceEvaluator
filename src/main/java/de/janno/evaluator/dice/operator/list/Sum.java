@@ -27,20 +27,20 @@ public class Sum extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1,1);
+            checkRollSize(inputValue, rolls, 1,1);
 
             Roll left = rolls.get(0);
-            checkContainsOnlyInteger(getName(), left, "left");
+            checkContainsOnlyInteger(inputValue, left, "left");
 
 
             ImmutableList<RollElement> res = left.getElements().stream().collect(Collectors.groupingBy(RollElement::getColor)).entrySet().stream()
                     .map(e -> new RollElement(String.valueOf(sumExact(e.getValue())), e.getKey()))
                     .collect(ImmutableList.toImmutableList());
 
-            return ImmutableList.of(new Roll(getLeftUnaryExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getLeftUnaryExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left)));

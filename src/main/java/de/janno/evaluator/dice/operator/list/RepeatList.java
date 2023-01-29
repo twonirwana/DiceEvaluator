@@ -18,11 +18,11 @@ public class RepeatList extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> leftRolls = operands.get(0).extendRoll(constants);
-            checkRollSize(getName(), leftRolls, 1, 1);
-            int left = leftRolls.get(0).asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), leftRolls.get(0), "left"));
+            checkRollSize(inputValue, leftRolls, 1, 1);
+            int left = leftRolls.get(0).asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, leftRolls.get(0), "left"));
             if (left > 10 || left < 1) {
                 throw new ExpressionException(String.format("The number of repeat must between 1-10 but was %d", left));
             }
@@ -37,7 +37,7 @@ public class RepeatList extends Operator {
             ImmutableList<Roll> rolls = builder.build();
 
 
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), ImmutableList.of(leftRolls.get(0), rolls.get(0))),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, ImmutableList.of(leftRolls.get(0), rolls.get(0))),
                     rolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
                     UniqueRandomElements.from(rolls),
                     rolls));

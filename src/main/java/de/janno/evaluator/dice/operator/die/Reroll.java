@@ -15,28 +15,28 @@ public class Reroll extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
 
             RollBuilder inputBuilder = operands.get(0);
             List<Roll> compareTos = operands.get(1).extendRoll(constants);
-            checkRollSize(getName(), compareTos, 1, 1);
+            checkRollSize(inputValue, compareTos, 1, 1);
             Roll compareTo = compareTos.get(0);
 
             List<Roll> rolls = inputBuilder.extendRoll(constants);
-            checkRollSize(getName(), rolls, 1, 1);
+            checkRollSize(inputValue, rolls, 1, 1);
             Roll roll = rolls.get(0);
             UniqueRandomElements.Builder builder = UniqueRandomElements.builder();
             builder.add(roll.getRandomElementsInRoll());
 
             if (roll.getElements().stream().anyMatch(r -> compareTo.getElements().contains(r))) {
                 rolls = inputBuilder.extendRoll(constants);
-                checkRollSize(getName(), rolls, 1, 1);
+                checkRollSize(inputValue, rolls, 1, 1);
                 roll = rolls.get(0);
                 builder.add(roll.getRandomElementsInRoll());
             }
 
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), ImmutableList.of(roll, compareTo)),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, ImmutableList.of(roll, compareTo)),
                     roll.getElements(),
                     builder.build(),
                     ImmutableList.<Roll>builder()

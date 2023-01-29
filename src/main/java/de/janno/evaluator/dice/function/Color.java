@@ -16,15 +16,15 @@ public class Color extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(arguments, constants);
-            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+            checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
             Roll p1 = rolls.get(0);
             Roll p2 = rolls.get(1);
-            checkContainsSingleElement(getName(), p2, "second argument");
+            checkContainsSingleElement(inputValue, p2, "second argument");
             String color = p2.getElements().get(0).getValue();
-            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     p1.getElements().stream()
                             .map(r -> new RollElement(r.getValue(), color))
                             .collect(ImmutableList.toImmutableList()),

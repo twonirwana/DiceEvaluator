@@ -24,10 +24,10 @@ public final class RegularDice extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1, 2);
+            checkRollSize(inputValue, rolls, 1, 2);
 
             final int numberOfDice;
             final Roll right;
@@ -38,17 +38,17 @@ public final class RegularDice extends Operator {
                 right = rolls.get(0);
                 numberOfDice = 1;
                 childrenRolls = ImmutableList.of(right);
-                expression = getRightUnaryExpression(getName(), rolls);
+                expression = getRightUnaryExpression(inputValue, rolls);
             } else if (rolls.size() == 2) {
                 Roll left = rolls.get(0);
                 right = rolls.get(1);
                 childrenRolls = ImmutableList.of(left, right);
-                numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
-                expression = getBinaryOperatorExpression(getName(), rolls);
+                numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
+                expression = getBinaryOperatorExpression(inputValue, rolls);
                 randomElements.add(left.getRandomElementsInRoll());
 
             } else {
-                throw new IllegalStateException("More then two operands for " + getName());
+                throw new IllegalStateException("More then two operands for " + inputValue);
             }
             randomElements.add(right.getRandomElementsInRoll());
 

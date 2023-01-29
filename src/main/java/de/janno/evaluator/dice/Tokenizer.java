@@ -25,17 +25,17 @@ public class Tokenizer {
         Stream.concat(parameters.getExpressionBrackets().stream(), parameters.getFunctionBrackets().stream())
                 .distinct() //expression and function brackets are allowed to contain the same elements
                 .forEach(c -> {
-                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getOpen()), s -> Token.openTokenOf(c)));
-                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getClose()), s -> Token.closeTokenOf(c)));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getOpen()), s -> Token.openTokenOf(c, s)));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getClose()), s -> Token.closeTokenOf(c, s)));
                 });
-        parameters.getFunctions().forEach(function -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(function.getName()), s -> Token.of(function))));
-        parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), s -> Token.of(operator))));
-        builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), s -> Token.separator()));
-        parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1)))));
+        parameters.getFunctions().forEach(function -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(function.getName()), s -> Token.of(function, s))));
+        parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), s -> Token.of(operator, s))));
+        builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), Token::separator));
+        parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1), s))));
         builder.add(new TokenBuilder("[0-9]+", s -> {
             try {
                 Integer.parseInt(s);
-                return Token.of(s);
+                return Token.of(s, s);
             } catch (Throwable t) {
                 throw new ExpressionException("The number '%s' was to big".formatted(s));
             }
@@ -86,11 +86,19 @@ public class Tokenizer {
         boolean lastOperatorWasUnaryLeft = false;
         for (int i = 0; i < in.size(); i++) {
             Token token = in.get(i);
+            Optional<String> previousOpenBracket = getPreviousOpenBrackets(in, i);
+            if (previousOpenBracket.isPresent()) {
+                token = Token.addOpenBracket(token, previousOpenBracket.get());
+            }
+            Optional<String> followingCloseBracket = getFollowingCloseBrackets(in, i);
+            if (followingCloseBracket.isPresent()) {
+                token = Token.addCloseBracket(token, followingCloseBracket.get());
+            }
             if (token.getOperator().isPresent()) {
                 Token left = i == 0 ? null : in.get(i - 1);
                 Token right = i == in.size() - 1 ? null : in.get(i + 1);
                 Operator.OperatorType type = determineAndValidateOperatorType(token.getOperator().get(), left, right, lastOperatorWasUnaryLeft);
-                builder.add(Token.of(token.getOperator().get(), type));
+                builder.add(Token.of(token.getOperator().get(), type, token.getInputValue()));
                 lastOperatorWasUnaryLeft = type == Operator.OperatorType.UNARY && token.getOperator().get().getAssociativityForOperantType(Operator.OperatorType.UNARY) == Operator.Associativity.LEFT;
             } else {
                 builder.add(token);
@@ -99,6 +107,39 @@ public class Tokenizer {
 
         }
         return builder.build();
+    }
+
+    private Optional<String> getPreviousOpenBrackets(List<Token> in, int index) {
+        if (index <= 0) {
+            return Optional.empty();
+        }
+        int i = index - 1;
+        StringBuilder brackets = new StringBuilder();
+        while (i >= 0 && in.get(i).getBrackets().isPresent() && in.get(i).isOpenBracket()) {
+            brackets.append(in.get(i).getBrackets().get().getOpen());
+            i--;
+        }
+        if (brackets.length() == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(brackets.toString());
+    }
+
+    private Optional<String> getFollowingCloseBrackets(List<Token> in, int index) {
+        if (index > in.size() - 2) {
+            return Optional.empty();
+        }
+
+        int i = index + 1;
+        StringBuilder brackets = new StringBuilder();
+        while (i < in.size() && in.get(i).getBrackets().isPresent() && in.get(i).isCloseBracket()) {
+            brackets.append(in.get(i).getBrackets().get().getClose());
+            i++;
+        }
+        if (brackets.length() == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(brackets.toString());
     }
 
     private Operator.OperatorType determineAndValidateOperatorType(@NonNull Operator operator, @Nullable Token left, @Nullable Token right, boolean lastOperatorWasUnaryLeft) throws ExpressionException {
@@ -146,7 +187,6 @@ public class Tokenizer {
 
         return Optional.of(maxLengthMatches.get(0));
     }
-
 
     private List<Match> getAllMatches(String input) throws ExpressionException {
         ImmutableList.Builder<Match> matchBuilder = ImmutableList.builder();

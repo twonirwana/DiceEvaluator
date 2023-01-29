@@ -15,10 +15,10 @@ public class Cancel extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(arguments, constants);
-            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+            checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
             Roll input = rolls.get(0);
             Roll typeA = rolls.get(1);
             Roll typeB = rolls.get(2);
@@ -41,7 +41,7 @@ public class Cancel extends Function {
             } else if (typeAMatch.size() < typeBMatch.size()) {
                 resultBuilder.addAll(getChancel(typeBMatch, typeAMatch));
             }
-            return ImmutableList.of(new Roll(getExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     resultBuilder.build(),
                     UniqueRandomElements.from(rolls),
                     ImmutableList.<Roll>builder()

@@ -18,10 +18,10 @@ public class Count extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1, 1);
+            checkRollSize(inputValue, rolls, 1, 1);
 
             Roll left = rolls.get(0);
 
@@ -35,7 +35,7 @@ public class Count extends Operator {
                         .map(e -> new RollElement(String.valueOf(e.getValue().size()), e.getKey()))
                         .collect(ImmutableList.toImmutableList());
             }
-            return ImmutableList.of(new Roll(getLeftUnaryExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getLeftUnaryExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left)));
