@@ -103,7 +103,6 @@ All functions are case insensitiv.
 
 == TODO
 
-* brackets into the result roll expression, currently they are missing
 * intersection operator
 * concatenate operator additional to the function
 * AddIf/AddIfLower/AddIfHigher?
