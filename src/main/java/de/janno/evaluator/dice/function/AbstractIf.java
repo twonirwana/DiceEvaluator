@@ -16,10 +16,10 @@ public abstract class AbstractIf extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(arguments, constants);
-            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+            checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
             Roll input = rolls.get(0);
 
             int counter = 1;
@@ -31,7 +31,7 @@ public abstract class AbstractIf extends Function {
                 randomElements.add(compareTo.getRandomElementsInRoll());
                 if (compare(input, counter, compareTo, counter + 1)) {
                     randomElements.add(trueResult.getRandomElementsInRoll());
-                    return  ImmutableList.of(new Roll(getExpression(getName(), rolls),
+                    return  ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                             trueResult.getElements(),
                             randomElements.build(),
                             ImmutableList.<Roll>builder()
@@ -51,7 +51,7 @@ public abstract class AbstractIf extends Function {
                 //if there is no default result, the result is the input
                 result = input;
             }
-            return  ImmutableList.of(new Roll(getExpression(getName(), rolls),
+            return  ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     result.getElements(),
                     randomElements.build(),
                     ImmutableList.<Roll>builder()

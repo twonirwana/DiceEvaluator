@@ -16,14 +16,17 @@ public final class Appending extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
         return constants -> {
 
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1, 2);
+            checkRollSize(inputValue, rolls, 1, 2);
 
             if (rolls.size() == 1) {
-                return ImmutableList.of(rolls.get(0));
+                return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
+                        rolls.get(0).getElements(),
+                        UniqueRandomElements.from(rolls),
+                        ImmutableList.of(rolls.get(0))));
             }
 
             Roll left = rolls.get(0);
@@ -32,7 +35,7 @@ public final class Appending extends Operator {
                     .addAll(left.getElements())
                     .addAll(right.getElements())
                     .build();
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left, right)));

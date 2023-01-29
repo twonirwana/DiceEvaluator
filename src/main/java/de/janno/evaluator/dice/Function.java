@@ -50,8 +50,8 @@ public abstract class Function {
     }
 
     protected static String getExpression(String name, List<Roll> arguments) {
-        return "%s(%s)".formatted(name, arguments.stream().map(Roll::getExpression).collect(Collectors.joining(",")));
+        return "%s%s".formatted(name, arguments.stream().map(Roll::getExpression).collect(Collectors.joining(",")));
     }
 
-    public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException;
+    public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException;
 }

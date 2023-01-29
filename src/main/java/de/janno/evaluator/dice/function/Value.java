@@ -15,16 +15,16 @@ public class Value extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(arguments, constants);
-            checkRollSize(getName(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+            checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
             String valName = rolls.get(0).getElements().get(0).getValue();
             if (constants.containsKey(valName)) {
                 throw new ExpressionException("The value name '%s' was defined more than once.".formatted(valName));
             }
-            constants.put(valName, new Roll(getExpression(Value.this.getName(), rolls),
+            constants.put(valName, new Roll(getExpression(inputValue, rolls),
                     rolls.get(1).getElements(),
                     UniqueRandomElements.from(rolls),
                     rolls.get(1).getChildrenRolls()));

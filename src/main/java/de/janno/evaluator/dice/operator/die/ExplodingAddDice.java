@@ -24,15 +24,15 @@ public final class ExplodingAddDice extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1, 2);
+            checkRollSize(inputValue, rolls, 1, 2);
 
             UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
             if (rolls.size() == 1) {
                 final Roll right = rolls.get(0);
-                final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
+                final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
                 if (sidesOfDie < 2) {
                     throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
                 }
@@ -40,7 +40,7 @@ public final class ExplodingAddDice extends Operator {
                 final ImmutableList<RollElement> rollElements = explodedAddDie2RollElements(explodingAddDice);
                 randomElements.add(right.getRandomElementsInRoll());
                 randomElements.addAsRandomElements(explodedAddDie2RandomElements(explodingAddDice));
-                return ImmutableList.of(new Roll(getRightUnaryExpression(getName(), rolls),
+                return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
                         rollElements,
                         randomElements.build(),
                         ImmutableList.of(right)));
@@ -50,21 +50,21 @@ public final class ExplodingAddDice extends Operator {
             final Roll right = rolls.get(1);
             randomElements.add(left.getRandomElementsInRoll());
             randomElements.add(right.getRandomElementsInRoll());
-            final int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), left, "left"));
+            final int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
             if (numberOfDice > maxNumberOfDice) {
                 throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
             }
             if (numberOfDice < 0) {
                 throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
             }
-            final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(getName(), right, "right"));
+            final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
             if (sidesOfDie < 2) {
                 throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
             }
             final ImmutableList<ExplodedAddDie> explodingAddDice = explodingAddDice(numberOfDice, sidesOfDie, numberSupplier);
             final ImmutableList<RollElement> rollElements = explodedAddDie2RollElements(explodingAddDice);
             randomElements.addAsRandomElements(explodedAddDie2RandomElements(explodingAddDice));
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     rollElements,
                     randomElements.build(),
                     ImmutableList.of(left, right)));

@@ -17,18 +17,18 @@ public final class NegateOrNegativAppending extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(getName(), rolls, 1, 2);
+            checkRollSize(inputValue, rolls, 1, 2);
 
             if (rolls.size() == 1) {
                 Roll right = rolls.get(0);
-                checkContainsOnlyInteger(getName(), right, "right");
+                checkContainsOnlyInteger(inputValue, right, "right");
                 ImmutableList<RollElement> negated = right.getElements().stream()
                         .map(e -> new RollElement(String.valueOf(e.asInteger().orElseThrow() * -1), e.getColor()))
                         .collect(ImmutableList.toImmutableList());
-                return ImmutableList.of(new Roll(getRightUnaryExpression(getName(), rolls),
+                return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
                         negated,
                         UniqueRandomElements.from(rolls),
                         ImmutableList.of(right)));
@@ -36,7 +36,7 @@ public final class NegateOrNegativAppending extends Operator {
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
-            checkContainsOnlyInteger(getName(), right, "right");
+            checkContainsOnlyInteger(inputValue, right, "right");
             final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()
                     .addAll(left.getElements())
                     .addAll(right.getElements().stream()
@@ -44,7 +44,7 @@ public final class NegateOrNegativAppending extends Operator {
                             .toList()
                     ).build();
 
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left, right)));
