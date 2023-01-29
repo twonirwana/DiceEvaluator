@@ -37,7 +37,7 @@ public class RepeatList extends Operator {
             ImmutableList<Roll> rolls = builder.build();
 
 
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), rolls),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), ImmutableList.of(leftRolls.get(0), rolls.get(0))),
                     rolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
                     UniqueRandomElements.from(rolls),
                     rolls));

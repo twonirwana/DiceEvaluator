@@ -215,6 +215,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("1d6 rr 3", List.of(1, 2), List.of("1")),
                 Arguments.of("1d6rr1", List.of(1, 1), List.of("1")),
                 Arguments.of("2d6 rr [1/5]", List.of(3, 5, 3, 4), List.of("3", "4")),
+                Arguments.of("1r1d10rr['8, 9, 10']", List.of(1), List.of("1")),
+                Arguments.of("2r1d10rr[8, 9, 10]", List.of(1, 8, 2), List.of("1", "2")),
 
                 //Exalted 3e
                 Arguments.of("val('$1', cancel(double(10d10,10),1,[7/8/9/10])), ifE(('$1'>=7)c,0,ifG(('$1'<=1)c,0,'Botch'))", List.of(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), List.of("0")),
@@ -573,7 +575,7 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("5r1d6");
 
         assertThat(res).hasSize(1);
-        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("1","2","3","4","5");
+        assertThat(res.get(0).getElements().stream().map(RollElement::getValue)).containsExactly("1", "2", "3", "4", "5");
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
                 .flatMap(r -> r.getRandomElements().stream()

@@ -36,7 +36,7 @@ public class Reroll extends Operator {
                 builder.add(roll.getRandomElementsInRoll());
             }
 
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), ImmutableList.of(compareTo, roll)),
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(getName(), ImmutableList.of(roll, compareTo)),
                     roll.getElements(),
                     builder.build(),
                     ImmutableList.<Roll>builder()
