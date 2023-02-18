@@ -23,8 +23,11 @@ public class RepeatList extends Operator {
             List<Roll> leftRolls = operands.get(0).extendRoll(constants);
             checkRollSize(inputValue, leftRolls, 1, 1);
             int left = leftRolls.get(0).asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, leftRolls.get(0), "left"));
-            if (left > 10 || left < 1) {
-                throw new ExpressionException(String.format("The number of repeat must between 1-10 but was %d", left));
+            if (left > 10 || left < 0) {
+                throw new ExpressionException(String.format("The number of list repeat must between 0-10 but was %d", left));
+            }
+            if (left == 0) {
+                return ImmutableList.of();
             }
 
             RollBuilder right = operands.get(1);
