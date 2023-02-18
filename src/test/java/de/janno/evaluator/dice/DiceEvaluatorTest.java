@@ -130,7 +130,9 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('$1',6d6), '$1'=, ('$1'>4)c", List.of(1, 2, 3, 4, 5, 6), List.of(21, 2)),
                 Arguments.of("val('$1', 2d6) val('$1', 1d6) '$1'", List.of(1, 2, 3), List.of(1, 2)), //the '$1' in the second val is replaced by the first
                 Arguments.of("val(2, 'abc'),d6", List.of(2), List.of(2)), //the replacement happens only in the formular, not in results
-
+                Arguments.of("1rd4", List.of(3), List.of(3)),
+                Arguments.of("2rd4", List.of(3,2), List.of(3,2)),
+                Arguments.of("0rd4", List.of(), List.of()),
                 Arguments.of("", null, List.of())
 
         );
@@ -298,6 +300,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('$1',1) val('$1',1) val('$1',1) '$1'", "The value name '1' was defined more than once."),
                 Arguments.of("11x(1d6)", "The number of repeat must between 1-10 but was 11"),
                 Arguments.of("0x(1d6)", "The number of repeat must between 1-10 but was 0"),
+                Arguments.of("11r(1d6)", "The number of list repeat must between 0-10 but was 11"),
+                Arguments.of("-1r(1d6)", "The number of list repeat must between 0-10 but was -1"),
                 Arguments.of("3d6x(1d6)", "'x' requires as left input a single integer but was '[2, 3, 1]'. Try to sum the numbers together like (3d6=)"),
                 Arguments.of("'a'x(1d6)", "'x' requires as left input a single integer but was '[a]'"),
                 Arguments.of("x(1d6)", "Operator x does not support unary operations"),
