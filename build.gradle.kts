@@ -4,7 +4,7 @@ plugins {
     id("maven-publish")
     id("signing")
     id("com.palantir.git-version") version "1.0.0"
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.2.0"
 }
 
 group = "io.github.twonirwana"
