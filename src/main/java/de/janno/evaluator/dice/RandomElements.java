@@ -14,4 +14,10 @@ public class RandomElements {
     public String toString() {
         return randomElements.stream().map(RandomElement::toString).collect(ImmutableList.toImmutableList()).toString();
     }
+
+    public RandomElements copyWithColor(String color) {
+        return new RandomElements(randomElements.stream()
+                .map(r -> r.copyWithColor(color))
+                .collect(ImmutableList.toImmutableList()));
+    }
 }

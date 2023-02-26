@@ -4,6 +4,7 @@ package de.janno.evaluator.dice;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -45,18 +46,23 @@ public class UniqueRandomElements {
     public static class Builder {
         private final ImmutableList.Builder<RandomElements> randomElements = ImmutableList.builder();
 
-        public Builder add(RandomElements randomElements) {
+        public Builder add(@NonNull RandomElements randomElements) {
             this.randomElements.add(randomElements);
             return this;
         }
 
-        public Builder addAsRandomElements(Collection<RandomElement> randomElements) {
+        public Builder addAsRandomElements(@NonNull Collection<RandomElement> randomElements) {
             this.randomElements.add(new RandomElements(ImmutableList.copyOf(randomElements)));
             return this;
         }
 
-        public Builder add(UniqueRandomElements randomElements) {
+        public Builder add(@NonNull UniqueRandomElements randomElements) {
             this.randomElements.addAll(randomElements.getRandomElements());
+            return this;
+        }
+
+        public Builder addWithColor(@NonNull UniqueRandomElements randomElements, @NonNull String color) {
+            randomElements.getRandomElements().forEach(re -> this.add(re.copyWithColor(color)));
             return this;
         }
 

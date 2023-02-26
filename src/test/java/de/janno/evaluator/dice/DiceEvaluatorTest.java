@@ -716,10 +716,36 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("color(1d6,'red') + color(3d20,'blue')");
 
         assertThat(res).hasSize(1);
-        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [2, 1, 4]");
+        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[red:3∈[1...6]], [blue:2∈[1...20], blue:1∈[1...20], blue:4∈[1...20]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[red:3] [blue:2, blue:1, blue:4]");
         assertThat(res.get(0).getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
         assertThat(res.get(0).getExpression()).isEqualTo("color(1d6,'red')+color(3d20,'blue')");
     }
+
+    @Test
+    void toStringValColorTest() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        List<Roll> res = underTest.evaluate("val('$r', 1d6) color('$r','red') + color('$r','blue')");
+
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getResultString()).isEqualTo("red:3, blue:3");
+        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[red:3∈[1...6]], [blue:3∈[1...6]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[red:3] [blue:3]");
+        assertThat(res.get(0).getExpression()).isEqualTo("val('$r',1d6), color('$r','red')+color('$r','blue')");
+    }
+
+    @Test
+    void toStringValTest() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        List<Roll> res = underTest.evaluate("val('$r', 1d6) '$r' + '$r'");
+
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getResultString()).isEqualTo("3, 3");
+        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[3∈[1...6]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3]");
+        assertThat(res.get(0).getExpression()).isEqualTo("val('$r',1d6), '$r'+'$r'");
+    }
+
 
     @Test
     void toStringMultiExpressionTest() throws ExpressionException {

@@ -120,7 +120,15 @@ public class DiceEvaluator {
                 List<Roll> r = rs.extendRoll(constantMap);
                 builder.addAll(r);
             }
-            return builder.build();
+            List<Roll> rolls = builder.build();
+            if (!constantMap.isEmpty()) {
+                //we need to add the val expression in front of the expression
+                String constantString = constantMap.values().stream().map(Roll::getExpression).collect(Collectors.joining(", "));
+                rolls = rolls.stream()
+                        .map(r -> new Roll("%s, %s".formatted(constantString, r.getExpression()), r.getElements(), r.getRandomElementsInRoll(), r.getChildrenRolls()))
+                        .collect(Collectors.toList());
+            }
+            return rolls;
         };
     }
 
@@ -135,7 +143,10 @@ public class DiceEvaluator {
         }
         return constants -> {
             if (constants.containsKey(literal)) {
-                return ImmutableList.of(constants.get(literal));
+                Roll constant = constants.get(literal);
+                //set the input as expression
+                Roll replacedValue = new Roll(inputValue, constant.getElements(), constant.getRandomElementsInRoll(), constant.getChildrenRolls());
+                return ImmutableList.of(replacedValue);
             }
             return ImmutableList.of(new Roll(inputValue, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of()));
         };
