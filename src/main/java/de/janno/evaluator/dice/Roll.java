@@ -37,7 +37,7 @@ public class Roll {
 
     public String getRandomElementsString() {
         return randomElementsInRoll.getRandomElements().stream()
-                .map(l -> l.getRandomElements().stream().map(RandomElement::getRollElement).map(RollElement::getValue).toList().toString())
+                .map(l -> l.getRandomElements().stream().map(RandomElement::getRollElement).map(RollElement::toString).toList().toString())
                 .collect(Collectors.joining(" "));
     }
 }

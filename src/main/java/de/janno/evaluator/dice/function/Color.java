@@ -24,11 +24,13 @@ public class Color extends Function {
             Roll p2 = rolls.get(1);
             checkContainsSingleElement(inputValue, p2, "second argument");
             String color = p2.getElements().get(0).getValue();
+            UniqueRandomElements.Builder builder = new UniqueRandomElements.Builder();
+            rolls.forEach(r -> builder.addWithColor(r.getRandomElementsInRoll(), color));
             return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     p1.getElements().stream()
                             .map(r -> new RollElement(r.getValue(), color))
                             .collect(ImmutableList.toImmutableList()),
-                    UniqueRandomElements.from(rolls),
+                    builder.build(),
                     p1.getChildrenRolls()));
         };
     }

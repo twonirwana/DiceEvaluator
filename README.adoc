@@ -84,7 +84,7 @@ All functions are case insensitiv.
 [width="100%",cols="6%,22%,14%,58%",options="header",]
 |===
 |Name |Notation |Example |Description
-|color |`color(<expression>, <'color'>)` |`color(4d6,'red')` |marks the elements of one inner expression with a text. All other operators will not combine elements of different colors. The color names must be surrounded by two `'`
+|color |`color(<expression>, <'color'>)` |`color(4d6,'red')` |marks the elements, and all in it involved random elements, of one inner expression with a text. All other operators will not combine elements of different colors. The color names must be surrounded by two `'`. If combined with `val` then it will copy the `val` dice each time.
 |min |`min(<expression1>, <expression2> ...)` |`min(4d6)` |returns the smallest elements (multiple if the smallest is not unique) of one or more inner expressions. Text is compared alphabetically
 |max |`max(<expression1>, <expression2> ...)` |`max(4d6)` |returns the smallest elements (multiple if the smallest is not unique) of one or more inner expressions. Text is compared alphabetically
 |sort asc |`asc(<expression1>, <expression2> ...)` |`asc(4d6)` |sorts all elements ascending of one or more inner expressions. Text is compared alphabetically

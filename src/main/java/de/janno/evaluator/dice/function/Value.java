@@ -24,7 +24,8 @@ public class Value extends Function {
             if (constants.containsKey(valName)) {
                 throw new ExpressionException("The value name '%s' was defined more than once.".formatted(valName));
             }
-            constants.put(valName, new Roll(getExpression(inputValue, rolls),
+            String expression = getExpression(inputValue, rolls);
+            constants.put(valName, new Roll(expression,
                     rolls.get(1).getElements(),
                     UniqueRandomElements.from(rolls),
                     rolls.get(1).getChildrenRolls()));
