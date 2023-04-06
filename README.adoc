@@ -66,7 +66,7 @@ All operators are case insensitiv.
 |Greater Then Filter |`<list> > <number>` |`3d6>3` |Keeps only the elements of the left list that are bigger as the right number |7 |left |one or more numbers |a single number
 |Lesser Then Filter |`<list> < <number>` |`3d6<3` |Keeps only the elements of the left list that are lesser as the right number |8 |left |one or more numbers |a single number
 |Greater Equal Then Filter |`<list> >= <number>` |`3d6>=3` |Keeps only the elements of the left list that are bigger or equal as the right number |9 |left |one or more numbers |a single number
-|Lesser Equal Then Filter |`<list> <= <number>` |`3d6<=3` |Keeps only the elements of the left list that are lesser or equal as the right number |10 |left |one or more numbers |a single number
+|Lesser Equal Then Filter |`<list> \<= <number>` |`3d6\<=3` |Keeps only the elements of the left list that are lesser or equal as the right number |10 |left |one or more numbers |a single number
 |Equal Filter |`<list> == <element>` |`3d6==3` |Keeps only the elements of the left list that are equal to the element |11 |left |one or more elements |a single elements
 |Keep Highest |`<list> k <numberToKept>` |`3d6k2` |keeps the highest values out a list, like the roll of multiple dice |12 |left |one or more elements |a single number
 |Keep Lowest |`<list> l <numberToKept>` |`3d6l2` |keeps the lowest values out a list, like the roll of multiple dice |13 |left |one or more elements |a single number
