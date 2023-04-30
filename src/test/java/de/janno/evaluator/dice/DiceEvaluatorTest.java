@@ -131,7 +131,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('$1', 2d6) val('$1', 1d6) '$1'", List.of(1, 2, 3), List.of(1, 2)), //the '$1' in the second val is replaced by the first
                 Arguments.of("val(2, 'abc'),d6", List.of(2), List.of(2)), //the replacement happens only in the formular, not in results
                 Arguments.of("1rd4", List.of(3), List.of(3)),
-                Arguments.of("2rd4", List.of(3,2), List.of(3,2)),
+                Arguments.of("2rd4", List.of(3, 2), List.of(3, 2)),
                 Arguments.of("0rd4", List.of(), List.of()),
                 Arguments.of("", null, List.of())
 
@@ -219,6 +219,21 @@ public class DiceEvaluatorTest {
                 Arguments.of("2d6 rr [1/5]", List.of(3, 5, 3, 4), List.of("3", "4")),
                 Arguments.of("1r1d10rr['8, 9, 10']", List.of(1), List.of("1")),
                 Arguments.of("2r1d10rr[8, 9, 10]", List.of(1, 8, 2), List.of("1", "2")),
+                Arguments.of("2147483647+1=", List.of(), List.of("2147483648")),
+                Arguments.of("2147483647*2=", List.of(), List.of("4294967294")),
+
+                Arguments.of("1/2", List.of(), List.of("0")),
+                Arguments.of("1//2", List.of(), List.of("0.5")),
+                Arguments.of("1//3", List.of(), List.of("0.33333")),
+                Arguments.of("-1//3", List.of(), List.of("-0.33333")),
+                Arguments.of("1//2*-1//2", List.of(), List.of("-0.25")),
+                Arguments.of("0.333333*3", List.of(), List.of("0.999999")),
+                Arguments.of("(1//3)+(1//3)+(1//3)=", List.of(), List.of("0.99999")),
+                Arguments.of("(1/3)+(1/3)+(1/3)=", List.of(), List.of("0")),
+                Arguments.of("(4//3)+(1//3)+1>1", List.of(), List.of("1.33333")),
+                Arguments.of("(4//3)+(1//3)+1>=1", List.of(), List.of("1.33333", "1")),
+                Arguments.of("(4//3)+(1//3)+1<1", List.of(), List.of("0.33333")),
+                Arguments.of("(4//3)+(1//3)+1<=1", List.of(), List.of("0.33333", "1")),
 
                 //Exalted 3e
                 Arguments.of("val('$1', cancel(double(10d10,10),1,[7/8/9/10])), ifE(('$1'>=7)c,0,ifG(('$1'<=1)c,0,'Botch'))", List.of(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), List.of("0")),
@@ -234,6 +249,20 @@ public class DiceEvaluatorTest {
                 Arguments.of(VAMPIRE_V5, List.of(5, 4, 10, 5, 1, 1), List.of("successes: 1")),
                 Arguments.of(VAMPIRE_V5, List.of(5, 4, 10, 5, 1, 10), List.of("successes: 4 messy critical")),
 
+                //One Roll Engine
+                Arguments.of("groupc(4d10+(4r10)>=6)", List.of(5, 4, 10, 6, 1, 10), List.of("5x10", "1x6")),
+
+                //Anima: Beyond Fantasy
+                Arguments.of("val('$r1',1d100) ifG('$r1',90,val('$r2',1d100) ifG('$r2',91,val('$r3',1d100) '$r3'+'$r2'+'$r1'=,'$r1'+'$r2'= ),'$r1' )", List.of(92, 92, 8), List.of("192")),
+
+                //Ironsworn
+                Arguments.of("ifE((2d10<(1d6+1=))c,0,'failure',1, 'mixed results', 'total success')", List.of(5, 10, 6), List.of("mixed results")),
+
+                //Cyberpunk Red
+                Arguments.of("val('$roll', 1d10) ifE('$roll', 1, '$roll'-1d10, 10, '$roll'+1d10, '$roll')+2=", List.of(5, 4, 10, 6, 1, 10), List.of("7")),
+
+                // traveler game with doubles crit system
+                Arguments.of(" val('$roll',3d6) val('$skill',3) (ifG('$roll'==1c,1, ifG('$skill', 0, 11, '$roll'k2=), ifG('$roll'==2c,1,ifG('$skill', 1, 12, '$roll'k2=), ifG('$roll'==3c,1,ifG('$skill', 2, 13, '$roll'k2=), ifG('$roll'==4c,1,ifG('$skill', 3, 14, '$roll'k2=),  ifG('$roll'==5c,1,ifG('$skill', 4, 15, '$roll'k2=),  ifG('$roll'==6c,1,ifG('$skill', 5, 16, '$roll'k2=), '$roll'k2=)))))))=", List.of(3, 3, 2), List.of("13")),
 
                 Arguments.of("1d0", List.of(), List.of())
         );
@@ -270,10 +299,8 @@ public class DiceEvaluatorTest {
                 Arguments.of(",3", "expression can't start with a separator"),
                 Arguments.of("10*", "Operator * does not support unary operations"),
                 Arguments.of("10*a", "No matching operator for 'a', non-functional text and value names must to be surrounded by '' or []"),
-                Arguments.of("10*2.5", "No matching operator for '.5', non-functional text and value names must to be surrounded by '' or []"),
-                Arguments.of("2147483647+1=", "integer overflow"),
-                Arguments.of("2147483647*2=", "integer overflow"),
                 Arguments.of("1/0", "/ by zero"),
+                Arguments.of("1//0", "/ by zero"),
                 Arguments.of("color(3d6,[a/b])", "'color' requires as second argument a single element but was '[a, b]'"),
                 Arguments.of("ifL(2d6,3,'three','not three')", "'ifL' requires as 1 argument a single element but was '[2, 3]'. Try to sum the numbers together like ((2d6=)"),
                 Arguments.of("ifIn(2d6,3,'three','not three')", "'ifIn' requires as 1 argument a single element but was '[2, 3]'. Try to sum the numbers together like ((2d6=)"),
@@ -305,9 +332,10 @@ public class DiceEvaluatorTest {
                 Arguments.of("3d6x(1d6)", "'x' requires as left input a single integer but was '[2, 3, 1]'. Try to sum the numbers together like (3d6=)"),
                 Arguments.of("'a'x(1d6)", "'x' requires as left input a single integer but was '[a]'"),
                 Arguments.of("x(1d6)", "Operator x does not support unary operations"),
-                Arguments.of("(3d[a/b/c])=", "'=' requires as left input only integers but was '[b, c, a]'"),
+                Arguments.of("(3d[a/b/c])=", "'=' requires as left input only decimals but was '[b, c, a]'"),
                 Arguments.of("color(2,'red')*color(2,'black')", "'*' requires all elements to be the same color, the colors where '[red, black]'"),
                 Arguments.of("1000d999999999999999999999999999999", "The number '999999999999999999999999999999' was to big"),
+                Arguments.of("9.99999999999999999999999999999", "The number '9.99999999999999999999999999999' was to big"),
                 Arguments.of("(3x2d6)=", "'=' requires as 1 inputs but was '[[2, 3], [1, 4], [1, 1]]'")
         );
     }
@@ -340,7 +368,7 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("1d((6)+3=)");
+        List<Roll> res = underTest.evaluate("2*0.5");
         System.out.println(res.size());
         System.out.println(res.get(0).getExpression());
         System.out.println(res);
@@ -480,12 +508,21 @@ public class DiceEvaluatorTest {
     }
 
     @Test
-    void NotSingleIntegerException() {
+    void integerDevide_NotSingleIntegerException() {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000);
         assertThatThrownBy(() -> underTest.evaluate("2d6 / 3"))
                 .isInstanceOf(ExpressionException.class)
                 .hasMessage("'/' requires as left input a single integer but was '[4, 1]'. Try to sum the numbers together like (2d6=)");
     }
+
+    @Test
+    void decimalDevide_NotSingleDecimalException() {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000);
+        assertThatThrownBy(() -> underTest.evaluate("2d6 // 3"))
+                .isInstanceOf(ExpressionException.class)
+                .hasMessage("'//' requires as left input a single decimal but was '[4, 1]'. Try to sum the numbers together like (2d6=)");
+    }
+
 
     @Test
     void divisorZero() {

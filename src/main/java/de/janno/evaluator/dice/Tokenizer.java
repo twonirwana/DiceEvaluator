@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 
 
 public class Tokenizer {
+    private final static String ALL_NUMBER_REGEX = "\\d+\\.?\\d*";
+    private final static Pattern SMALL_NUMBER_PATTERN = Pattern.compile("\\d{1,10}\\.?\\d{0,10}");
     private final ImmutableList<TokenBuilder> tokenBuilders;
     private final String escapeCharacter;
 
@@ -32,13 +34,11 @@ public class Tokenizer {
         parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), s -> Token.of(operator, s))));
         builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), Token::separator));
         parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1), s))));
-        builder.add(new TokenBuilder("[0-9]+", s -> {
-            try {
-                Integer.parseInt(s);
+        builder.add(new TokenBuilder(ALL_NUMBER_REGEX, s -> {
+            if (SMALL_NUMBER_PATTERN.matcher(s).matches()) {
                 return Token.of(s, s);
-            } catch (Throwable t) {
-                throw new ExpressionException("The number '%s' was to big".formatted(s));
             }
+            throw new ExpressionException("The number '%s' was to big".formatted(s));
         }));
         tokenBuilders = builder.build();
 

@@ -9,6 +9,7 @@
 | Sum                  | =          | 3d6=               |
 | Appending            | +          | 3d6+2d12           |
 | Negative Appending   | -          | 3d6-2d12 or -2d6   |
+| Decimal Divide       | //         | 2/6                |
 | Divide               | /          | 12/6               |
 | Multiply             | *          | 12*d6              |
 | Modulo               | mod        | d6 mod 2           |

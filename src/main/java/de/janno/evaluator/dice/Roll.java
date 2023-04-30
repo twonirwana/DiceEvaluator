@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 import lombok.Value;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,8 +28,15 @@ public class Roll {
         return Optional.empty();
     }
 
-    public boolean containsOnlyIntegers() {
-        return elements.stream().map(RollElement::asInteger).allMatch(Optional::isPresent);
+    public Optional<BigDecimal> asDecimal() {
+        if (elements.size() == 1) {
+            return elements.get(0).asDecimal();
+        }
+        return Optional.empty();
+    }
+
+    public boolean containsOnlyDecimals() {
+        return elements.stream().map(RollElement::asDecimal).allMatch(Optional::isPresent);
     }
 
     public String getResultString() {

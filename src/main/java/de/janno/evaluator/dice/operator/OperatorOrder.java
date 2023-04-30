@@ -19,7 +19,8 @@ public final class OperatorOrder {
                     .add(Sum.class) //sum must be applied as last
                     .add(Modulo.class)
                     .add(Multiply.class)
-                    .add(Divide.class)
+                    .add(DecimalDivide.class)
+                    .add(IntegerDivide.class)
                     .add(Count.class) //count should be after all list filters
                     .add(GreaterThanFilter.class)
                     .add(LesserThanFilter.class)

@@ -48,37 +48,40 @@ Operators with a higher precedence are evaluated first.
 Brackets can be used to change the order of evaluation.
 For example `1d4+3d6` is the appending of roll of 1d4 and 3d6, but `(1d4+3=)d6)` gets first the sum of the roll of 1d4 and 3 and then rolls this number of d6.
 
-The number of dice is limited to 1000 and every number approve 2147483647 result in an error.
+The number of dice is limited to 1000 and every number approve 10 digits or with more than 10 digit after the decimal dot result in an error.
 
 === Operators
+
 All operators are case insensitiv.
 
 [width="100%",cols="9%,8%,7%,48%,4%,8%,8%,8%",options="header",]
 |===
 |Name |Notation |Example |Description |Precedent |Associativity |Left parameter |Right parameter
-|Repeat |`<number>x<expression>` |`3x2d6` |Repeats the expression separately a number of times given in <number>. This should be used outside other expressions and will not work inside most expressions |0 |left |a single number between 1-10 | a expression
-|List Repeat |`<number>r<expression>` |`3r(2d6=)` |Repeats the expression a number of times given in <number> and combines the results in one list. |1 |left |a single number between 0-10 | a expression
-|Sum |`<left> =` |`2d6=` |Sums the list of on the left side of the symbol |2 |left |a list |-
-|Modulo |`<left> mod <right>` |`d6 mod 2` | returns the remainder of the division |3 |left |a single number |a single non zero number
+|Repeat |`<number>x<expression>` |`3x2d6` |Repeats the expression separately a number of times given in <number>. This should be used outside other expressions and will not work inside most expressions |0 |left |a single integer number between 1-10 | a expression
+|List Repeat |`<number>r<expression>` |`3r(2d6=)` |Repeats the expression a number of times given in <number> and combines the results in one list. |1 |left |a single integer number between 0-10 | a expression
+|Sum |`<left> =` |`2d6=` |Sums the list of on the left side of the symbol |2 |left |a list of numbers |-
+|Modulo |`<left> mod <right>` |`d6 mod 2` | returns the remainder of the division |3 |left |a single integer number |a single non zero integer number
 |Multiply |`<left> * <right>` |`2 * 6` |Multiplies the right number with the left number |4 |left |a single number |a single number
-|Divide |`<left> / <right>` |`4 / 2` |Divides the right number with the left number |5 |left |a single number |a single number
-|Count |`<list> c` |`3d6>3c` |Counts the number of elements in a list |6 |left |a list |-
-|Greater Then Filter |`<list> > <number>` |`3d6>3` |Keeps only the elements of the left list that are bigger as the right number |7 |left |one or more numbers |a single number
-|Lesser Then Filter |`<list> < <number>` |`3d6<3` |Keeps only the elements of the left list that are lesser as the right number |8 |left |one or more numbers |a single number
-|Greater Equal Then Filter |`<list> >= <number>` |`3d6>=3` |Keeps only the elements of the left list that are bigger or equal as the right number |9 |left |one or more numbers |a single number
-|Lesser Equal Then Filter |`<list> \<= <number>` |`3d6\<=3` |Keeps only the elements of the left list that are lesser or equal as the right number |10 |left |one or more numbers |a single number
-|Equal Filter |`<list> == <element>` |`3d6==3` |Keeps only the elements of the left list that are equal to the element |11 |left |one or more elements |a single elements
-|Keep Highest |`<list> k <numberToKept>` |`3d6k2` |keeps the highest values out a list, like the roll of multiple dice |12 |left |one or more elements |a single number
-|Keep Lowest |`<list> l <numberToKept>` |`3d6l2` |keeps the lowest values out a list, like the roll of multiple dice |13 |left |one or more elements |a single number
-|Appending |`<left> + <right>` |`2d6 + 2` or `+3` |Combines the rolls of both sides to a single list. If used as unary operator, it will be ignored e.g. `+5` will process to `5` |14 (max for unary) |left for binary and right for unary |none or more elements |one or more elements
-|Negative Appending |`<left> - <right>` |`2 - 1` or `-d6` |Combines the rolls of both sides to a single list. The right side is multiplied by -1. |15 |left for binary and right for unary |none or more elements |one or more numbers
-|Reroll |`<expression>rr<rerollIfIn>` |`10d6rr1` | Reroll the whole `<expression>` once if any of the elements of `<expression>` are in the elements of `<rerollIfIn>` |16 |left|one or more elements|one or more elements
-|Exploding Add Dice |`<numberOfDice>d!!<numberOfFaces>` |`3d!!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the die previous resul total. A roll of the reroll the sum of the value. |17 |left for binary and right for unary |none or a single positiv number (max 1000) |a single number
-|Exploding Dice |`<numberOfDice>d!<numberOfFaces>` |`4d!6` or `d!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the dice set total. A reroll will be represented as two dice roll elements |18 |left for binary and right for unary |none or a single number (max 1000) |a single positiv number
-|Regular Dice |`<numberOfDice>d<numberOfFaces>` |`3d20`, `d20` or `3d[2/4/8]` |Throws a number of dice given by the left number. The number sides are given by the right number. If the right side a list, an element of the list is randomly picked. The roll is a list with the dice throw |19 |left for binary and right for unary |none or a single number (max 1000) |a single positiv number or multiple elements
+|Divide |`<left> / <right>` |`4 / 2` |Divides the right number with the left number and rounds down to the next full number |5 |left |a single integer number |a single integer number
+|Decimal Divide |`<left> // <right>` |`4 / 2` |Divides the right number with the left number and provides a decimal number with up to 5 decimal digital |6 |left |a single number |a single number
+|Count |`<list> c` |`3d6>3c` |Counts the number of elements in a list |7 |left |a list |-
+|Greater Then Filter |`<list> > <number>` |`3d6>3` |Keeps only the elements of the left list that are bigger as the right number |8 |left |one or more numbers |a single number
+|Lesser Then Filter |`<list> < <number>` |`3d6<3` |Keeps only the elements of the left list that are lesser as the right number |9 |left |one or more numbers |a single number
+|Greater Equal Then Filter |`<list> >= <number>` |`3d6>=3` |Keeps only the elements of the left list that are bigger or equal as the right number |10 |left |one or more numbers |a single number
+|Lesser Equal Then Filter |`<list> \<= <number>` |`3d6\<=3` |Keeps only the elements of the left list that are lesser or equal as the right number |11 |left |one or more numbers |a single number
+|Equal Filter |`<list> == <element>` |`3d6==3` |Keeps only the elements of the left list that are equal to the element |12 |left |one or more elements |a single elements
+|Keep Highest |`<list> k <numberToKept>` |`3d6k2` |keeps the highest values out a list, like the roll of multiple dice |13 |left |one or more elements |a single number
+|Keep Lowest |`<list> l <numberToKept>` |`3d6l2` |keeps the lowest values out a list, like the roll of multiple dice |14 |left |one or more elements |a single number
+|Appending |`<left> + <right>` |`2d6 + 2` or `+3` |Combines the rolls of both sides to a single list. If used as unary operator, it will be ignored e.g. `+5` will process to `5` |15 (max for unary) |left for binary and right for unary |none or more elements |one or more elements
+|Negative Appending |`<left> - <right>` |`2 - 1` or `-d6` |Combines the rolls of both sides to a single list. The right side is multiplied by -1. |16 |left for binary and right for unary |none or more elements |one or more numbers
+|Reroll |`<expression>rr<rerollIfIn>` |`10d6rr1` | Reroll the whole `<expression>` once if any of the elements of `<expression>` are in the elements of `<rerollIfIn>` |17 |left|one or more elements|one or more elements
+|Exploding Add Dice |`<numberOfDice>d!!<numberOfFaces>` |`3d!!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the die previous resul total. A roll of the reroll the sum of the value. |18 |left for binary and right for unary |none or a single positiv integer number (max 1000) |a single integer number
+|Exploding Dice |`<numberOfDice>d!<numberOfFaces>` |`4d!6` or `d!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the dice set total. A reroll will be represented as two dice roll elements |19 |left for binary and right for unary |none or a single integer number (max 1000) |a single positiv integer number
+|Regular Dice |`<numberOfDice>d<numberOfFaces>` |`3d20`, `d20` or `3d[2/4/8]` |Throws a number of dice given by the left number. The number sides are given by the right number. If the right side a list, an element of the list is randomly picked. The roll is a list with the dice throw |20 |left for binary and right for unary |none or a single integer number (max 1000) |a single positiv number or multiple elements
 |===
 
 === Functions
+
 All functions are case insensitiv.
 
 [width="100%",cols="6%,22%,14%,58%",options="header",]

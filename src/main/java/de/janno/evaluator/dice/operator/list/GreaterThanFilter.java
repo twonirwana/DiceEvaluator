@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -24,11 +25,11 @@ public class GreaterThanFilter extends Operator {
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
-            checkContainsOnlyInteger(inputValue, left, "left");
-            final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
+            checkContainsOnlyDecimal(inputValue, left, "left");
+            final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
             //todo color only filtered by same color?
             ImmutableList<RollElement> diceResult = left.getElements().stream()
-                    .filter(i -> i.asInteger().isPresent() && i.asInteger().get() > rightNumber)
+                    .filter(i -> i.asDecimal().isPresent() && i.asDecimal().get().compareTo(rightNumber) > 0)
                     .collect(ImmutableList.toImmutableList());
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,
