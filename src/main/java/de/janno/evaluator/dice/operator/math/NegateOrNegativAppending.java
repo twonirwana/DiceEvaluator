@@ -5,13 +5,16 @@ import de.janno.evaluator.dice.*;
 import de.janno.evaluator.dice.operator.OperatorOrder;
 import lombok.NonNull;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
-import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyInteger;
+import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyDecimal;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public final class NegateOrNegativAppending extends Operator {
+    private final static BigDecimal MINUS_ONE = BigDecimal.valueOf(-1);
+
     public NegateOrNegativAppending() {
         super("-", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(NegateOrNegativAppending.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(NegateOrNegativAppending.class));
     }
@@ -24,9 +27,9 @@ public final class NegateOrNegativAppending extends Operator {
 
             if (rolls.size() == 1) {
                 Roll right = rolls.get(0);
-                checkContainsOnlyInteger(inputValue, right, "right");
+                checkContainsOnlyDecimal(inputValue, right, "right");
                 ImmutableList<RollElement> negated = right.getElements().stream()
-                        .map(e -> new RollElement(String.valueOf(e.asInteger().orElseThrow() * -1), e.getColor()))
+                        .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getColor()))
                         .collect(ImmutableList.toImmutableList());
                 return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
                         negated,
@@ -36,11 +39,11 @@ public final class NegateOrNegativAppending extends Operator {
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
-            checkContainsOnlyInteger(inputValue, right, "right");
+            checkContainsOnlyDecimal(inputValue, right, "right");
             final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()
                     .addAll(left.getElements())
                     .addAll(right.getElements().stream()
-                            .map(e -> new RollElement(String.valueOf(e.asInteger().orElseThrow() * -1), e.getColor()))
+                            .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getColor()))
                             .toList()
                     ).build();
 

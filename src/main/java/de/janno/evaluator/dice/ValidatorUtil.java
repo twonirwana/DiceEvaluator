@@ -4,6 +4,7 @@ import lombok.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,14 +15,21 @@ public final class ValidatorUtil {
                 .toList(), getSumHelp(roll)));
     }
 
+    public static ExpressionException throwNotDecimalExpression(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) {
+        return new ExpressionException(String.format("'%s' requires as %s input a single decimal but was '%s'%s", inputName, location, roll.getElements().stream()
+                .map(RollElement::getValue)
+                .toList(), getSumHelp(roll)));
+    }
+
+
     private static String getSumHelp(@NonNull Roll roll) {
-        boolean numberList = roll.getElements().stream().allMatch(RollElement::isInteger);
+        boolean numberList = roll.getElements().stream().map(RollElement::asInteger).allMatch(Optional::isPresent);
         return numberList ? ". Try to sum the numbers together like (%s=)".formatted(roll.getExpression()) : "";
     }
 
-    public static void checkContainsOnlyInteger(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) throws ExpressionException {
-        if (!roll.containsOnlyIntegers()) {
-            throw new ExpressionException(String.format("'%s' requires as %s input only integers but was '%s'", inputName, location, roll.getElements().stream()
+    public static void checkContainsOnlyDecimal(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) throws ExpressionException {
+        if (!roll.containsOnlyDecimals()) {
+            throw new ExpressionException(String.format("'%s' requires as %s input only decimals but was '%s'", inputName, location, roll.getElements().stream()
                     .map(RollElement::getValue).toList()));
         }
     }

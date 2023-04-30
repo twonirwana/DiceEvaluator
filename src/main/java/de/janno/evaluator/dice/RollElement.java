@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Value
@@ -15,20 +16,22 @@ public class RollElement implements Comparable<RollElement> {
     @NonNull
     String color;
 
-    public boolean isInteger() {
+
+    public Optional<Integer> asInteger() {
         try {
-            Integer.parseInt(value);
-            return true;
+            return Optional.of(Integer.parseInt(value));
         } catch (NumberFormatException e) {
-            return false;
+            return Optional.empty();
         }
     }
 
-    public Optional<Integer> asInteger() {
-        if (isInteger()) {
-            return Optional.of(Integer.parseInt(value));
+
+    public Optional<BigDecimal> asDecimal() {
+        try {
+            return Optional.of(new BigDecimal(value));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -19,14 +20,14 @@ public final class Multiply extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(inputValue, rolls, 2,2);
+            checkRollSize(inputValue, rolls, 2, 2);
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
             checkAllElementsAreSameColor(inputValue, left, right);
-            final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
-            final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
-            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(Math.multiplyExact(leftNumber, rightNumber)), left.getElements().get(0).getColor()));
+            final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, left, "left"));
+            final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
+            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.multiply(rightNumber).stripTrailingZeros().toPlainString(), left.getElements().get(0).getColor()));
 
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,
