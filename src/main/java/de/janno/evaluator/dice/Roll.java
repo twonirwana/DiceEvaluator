@@ -35,10 +35,6 @@ public class Roll {
         return Optional.empty();
     }
 
-    public boolean containsOnlyIntegers() {
-        return elements.stream().map(RollElement::asInteger).allMatch(Optional::isPresent);
-    }
-
     public boolean containsOnlyDecimals() {
         return elements.stream().map(RollElement::asDecimal).allMatch(Optional::isPresent);
     }
