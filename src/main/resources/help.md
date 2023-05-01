@@ -24,6 +24,15 @@
 | Repeat               | x          | 3x2d6              |
 | Repeat List          | r          | 3r2d6              |
 | Reroll               | rr         | 3d10 rr 1          |
+| Equal                | =?         | d6=?6              |
+| Greater              | >?         | d6>?5              |
+| Greater Equal        | >=?        | d6>=?5             |
+| Lower                | <?         | d6<?4              |
+| Lower Equal          | <=?        | d6<=?4             |
+| In                   | in         | d6 in [1/3/5]      |
+| And                  | &&         | d6>?1 && d6<5      |
+| Or                   | ||         | d6>?1 || d6<5      |
+| Negate               | !          | !d6>?1             |
 | Brackets             | ()         | (2d4=)d6           |
 | Text                 | ''         | 'Damage ' + d6     |
 | Sort asc             | asc()      | asc(10d10)         |
@@ -33,10 +42,7 @@
 | Color                | color()    | color(3d4, 'red')  |
 | Chancel              | chancel()  | chancel(8d10,10,1) |
 | Replace              | replace()  | replace(6d10,1,2)  |
-| If Equal             | ifE()      | ifE(d6,6,Y,N)      |
-| If Greater           | ifG()      | ifG(d6,3,Y,N)      |
-| If Lesser            | ifL()      | ifL(d6,3,Y,N)      |
-| If In                | ifIn()     | ifIn(d6,[1,2],8)   |
+| If                   | if()       | if(d6=?6,'Y','N')  |
 | Group Count          | groupC()   | groupC(20d6)       |
 | Concatenate          | concat()   | concat('Att:',d20) |
 | Value                | val()      | val('$1',10d10)    |

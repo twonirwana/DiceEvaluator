@@ -222,6 +222,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("2147483647+1=", List.of(), List.of("2147483648")),
                 Arguments.of("2147483647*2=", List.of(), List.of("4294967294")),
 
+                //decimal
                 Arguments.of("1/2", List.of(), List.of("0")),
                 Arguments.of("1//2", List.of(), List.of("0.5")),
                 Arguments.of("1//3", List.of(), List.of("0.33333")),
@@ -234,6 +235,52 @@ public class DiceEvaluatorTest {
                 Arguments.of("(4//3)+(1//3)+1>=1", List.of(), List.of("1.33333", "1")),
                 Arguments.of("(4//3)+(1//3)+1<1", List.of(), List.of("0.33333")),
                 Arguments.of("(4//3)+(1//3)+1<=1", List.of(), List.of("0.33333", "1")),
+
+                //bool
+                Arguments.of("!'false'", List.of(), List.of("true")),
+                Arguments.of("!'true'", List.of(), List.of("false")),
+                Arguments.of("'true'&&'false'", List.of(), List.of("false")),
+                Arguments.of("'true'&&'true'", List.of(), List.of("true")),
+                Arguments.of("'false'&&'false'", List.of(), List.of("false")),
+                Arguments.of("'false'||'false'", List.of(), List.of("false")),
+                Arguments.of("'false'||'true'", List.of(), List.of("true")),
+                Arguments.of("'true'||'true'", List.of(), List.of("true")),
+                Arguments.of("!('true'||'true')", List.of(), List.of("false")),
+                Arguments.of("!'true'||'true'", List.of(), List.of("true")),
+                Arguments.of("if('true','a','b')", List.of(), List.of("a")),
+                Arguments.of("if('true','a')", List.of(), List.of("a")),
+                Arguments.of("if('false','a')", List.of(), List.of()),
+                Arguments.of("if('false','a','b')", List.of(), List.of("b")),
+                Arguments.of("if('true','a','false','b','c')", List.of(), List.of("a")),
+                Arguments.of("if('true','a','false','b')", List.of(), List.of("a")),
+                Arguments.of("if('false','a','true','b')", List.of(), List.of("b")),
+                Arguments.of("if('false','a','true','b','c')", List.of(), List.of("b")),
+                Arguments.of("if('false','a','false','b')", List.of(), List.of()),
+                Arguments.of("if('false','a','false','b','c')", List.of(), List.of("c")),
+
+                Arguments.of("3>?2", List.of(), List.of("true")),
+                Arguments.of("2>?2", List.of(), List.of("false")),
+                Arguments.of("3>=?2", List.of(), List.of("true")),
+                Arguments.of("2>=?2", List.of(), List.of("true")),
+                Arguments.of("1>=?2", List.of(), List.of("false")),
+                Arguments.of("2<?3", List.of(), List.of("true")),
+                Arguments.of("2<?2", List.of(), List.of("false")),
+                Arguments.of("2<=?3", List.of(), List.of("true")),
+                Arguments.of("2<=?2", List.of(), List.of("true")),
+                Arguments.of("3<=?2", List.of(), List.of("false")),
+                Arguments.of("1=?2", List.of(), List.of("false")),
+                Arguments.of("1=?1", List.of(), List.of("true")),
+                Arguments.of("'a'=?'a'", List.of(), List.of("true")),
+                Arguments.of("'a'=?'ab'", List.of(), List.of("false")),
+                Arguments.of("[a/b/c]=?[a/b/c]", List.of(), List.of("true")),
+                Arguments.of("[a/b/c]=?[a/c/b]", List.of(), List.of("false")),
+                Arguments.of("[a/b] in [a/b/c]", List.of(), List.of("true")),
+                Arguments.of("[a/b]in[c/b]", List.of(), List.of("false")),
+                Arguments.of("val('$1',2d6) if('$1'= >=?9, 'crit', '$1'=)", List.of(4,6), List.of("crit")),
+                Arguments.of("val('$1',2d6) '$1'==6c =? 1", List.of(4,6), List.of("true")),
+                Arguments.of("val('$1',2d6) if('$1'==6c =? 1, 'crit', '$1'=)", List.of(4,6), List.of("crit")),
+                Arguments.of("val('$1',2d6) if('$1'= >=?9 && '$1'==6c =? 1, 'crit', '$1'=)", List.of(4,6), List.of("crit")),
+                Arguments.of("val('$1',2d6) if('$1'= >=?9 && '$1'==6c =? 1, 'crit', '$1'=)", List.of(5,5), List.of("10")),
 
                 //Exalted 3e
                 Arguments.of("val('$1', cancel(double(10d10,10),1,[7/8/9/10])), ifE(('$1'>=7)c,0,ifG(('$1'<=1)c,0,'Botch'))", List.of(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), List.of("0")),
@@ -336,7 +383,22 @@ public class DiceEvaluatorTest {
                 Arguments.of("color(2,'red')*color(2,'black')", "'*' requires all elements to be the same color, the colors where '[red, black]'"),
                 Arguments.of("1000d999999999999999999999999999999", "The number '999999999999999999999999999999' was to big"),
                 Arguments.of("9.99999999999999999999999999999", "The number '9.99999999999999999999999999999' was to big"),
-                Arguments.of("(3x2d6)=", "'=' requires as 1 inputs but was '[[2, 3], [1, 4], [1, 1]]'")
+                Arguments.of("(3x2d6)=", "'=' requires as 1 inputs but was '[[2, 3], [1, 4], [1, 1]]'"),
+
+                Arguments.of("1&&'ab'", "'&&' requires as left input a single boolean but was '[1]'"),
+                Arguments.of("1||'ab'", "'||' requires as left input a single boolean but was '[1]'"),
+                Arguments.of("1<?'ab'", "'<?' requires as right input a single decimal but was '[ab]'"),
+                Arguments.of("'ab'<?'1'", "'<?' requires as left input a single decimal but was '[1]'. Try to sum the numbers together like ('1'=)"),
+                Arguments.of("1<=?'ab'", "'<=?' requires as right input a single decimal but was '[ab]'"),
+                Arguments.of("'ab'<=?'1'", "'<=?' requires as left input a single decimal but was '[1]'. Try to sum the numbers together like ('1'=)"),
+                Arguments.of("1>?'ab'", "'>?' requires as right input a single decimal but was '[ab]'"),
+                Arguments.of("'ab'>?'1'", "'>?' requires as left input a single decimal but was '[1]'. Try to sum the numbers together like ('1'=)"),
+                Arguments.of("1>=?'ab'", "'>=?' requires as right input a single decimal but was '[ab]'"),
+                Arguments.of("'ab'>=?'1'", "'>=?' requires as left input a single decimal but was '[ab]'"),
+                Arguments.of("!'ab'", "'!' requires as right input a single boolean but was '[ab]'"),
+
+                Arguments.of("d", "Operator d has right associativity but the right value was: empty")
+
         );
     }
 
@@ -366,9 +428,9 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4,6), 1000);
 
-        List<Roll> res = underTest.evaluate("2*0.5");
+        List<Roll> res = underTest.evaluate("val('$1',2d6) '$1'==6c =? 1");
         System.out.println(res.size());
         System.out.println(res.get(0).getExpression());
         System.out.println(res);
@@ -781,6 +843,18 @@ public class DiceEvaluatorTest {
         assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[3∈[1...6]]");
         assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3]");
         assertThat(res.get(0).getExpression()).isEqualTo("val('$r',1d6), '$r'+'$r'");
+    }
+
+    @Test
+    void ifBoolTest() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3), 1000);
+        List<Roll> res = underTest.evaluate("val('$r',1d6) if('$r'=?1,'a','$r'=?2,'b','c')");
+
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getResultString()).isEqualTo("c");
+        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[3∈[1...6]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3]");
+        assertThat(res.get(0).getExpression()).isEqualTo("val('$r',1d6), if('$r'=?1,'a','$r'=?2,'b','c')");
     }
 
 

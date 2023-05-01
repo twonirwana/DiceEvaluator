@@ -34,6 +34,16 @@ public class RollElement implements Comparable<RollElement> {
         }
     }
 
+    public Optional<Boolean> asBoolean() {
+        if (value.equals(String.valueOf(true))) {
+            return Optional.of(true);
+        }
+        if (value.equals(String.valueOf(false))) {
+            return Optional.of(false);
+        }
+        return Optional.empty();
+    }
+
     @Override
     public int compareTo(@NonNull RollElement rollElement) {
         if (!this.getColor().equals(rollElement.getColor())) {

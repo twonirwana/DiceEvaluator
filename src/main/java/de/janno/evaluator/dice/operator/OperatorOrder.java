@@ -2,6 +2,7 @@ package de.janno.evaluator.dice.operator;
 
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.Operator;
+import de.janno.evaluator.dice.operator.bool.*;
 import de.janno.evaluator.dice.operator.die.ExplodingAddDice;
 import de.janno.evaluator.dice.operator.die.ExplodingDice;
 import de.janno.evaluator.dice.operator.die.RegularDice;
@@ -16,7 +17,16 @@ public final class OperatorOrder {
             ImmutableList.<Class<? extends Operator>>builder()
                     .add(Repeat.class)
                     .add(RepeatList.class)
-                    .add(Sum.class) //sum must be applied as last
+                    .add(OrBool.class)
+                    .add(AndBool.class)
+                    .add(NegateBool.class)
+                    .add(EqualBool.class)
+                    .add(LesserBool.class)
+                    .add(LesserEqualBool.class)
+                    .add(GreaterBool.class)
+                    .add(GreaterEqualBool.class)
+                    .add(InBool.class) //boolean must be applied as last operator
+                    .add(Sum.class) //sum must be applied as last number operator
                     .add(Modulo.class)
                     .add(Multiply.class)
                     .add(DecimalDivide.class)

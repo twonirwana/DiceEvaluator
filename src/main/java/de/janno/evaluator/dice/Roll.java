@@ -34,6 +34,12 @@ public class Roll {
         }
         return Optional.empty();
     }
+    public Optional<Boolean> asBoolean() {
+        if (elements.size() == 1) {
+            return elements.get(0).asBoolean();
+        }
+        return Optional.empty();
+    }
 
     public boolean containsOnlyDecimals() {
         return elements.stream().map(RollElement::asDecimal).allMatch(Optional::isPresent);

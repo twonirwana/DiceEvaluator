@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import de.janno.evaluator.dice.function.Double;
 import de.janno.evaluator.dice.function.*;
+import de.janno.evaluator.dice.operator.bool.*;
 import de.janno.evaluator.dice.operator.die.ExplodingAddDice;
 import de.janno.evaluator.dice.operator.die.ExplodingDice;
 import de.janno.evaluator.dice.operator.die.RegularDice;
@@ -65,6 +66,15 @@ public class DiceEvaluator {
                         .add(new EqualFilter())
                         .add(new Count())
                         .add(new Reroll())
+                        .add(new EqualBool())
+                        .add(new GreaterBool())
+                        .add(new GreaterEqualBool())
+                        .add(new LesserBool())
+                        .add(new LesserEqualBool())
+                        .add(new InBool())
+                        .add(new AndBool())
+                        .add(new OrBool())
+                        .add(new NegateBool())
                         .build())
                 .functions(ImmutableList.<Function>builder()
                         .add(new Color())
@@ -77,6 +87,7 @@ public class DiceEvaluator {
                         .add(new Cancel())
                         .add(new Double())
                         .add(new IfEqual())
+                        .add(new If())
                         .add(new IfGreater())
                         .add(new IfIn())
                         .add(new Replace())
