@@ -15,6 +15,13 @@ public final class ValidatorUtil {
                 .toList(), getSumHelp(roll)));
     }
 
+    public static ExpressionException throwNotBoolean(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) {
+        return new ExpressionException(String.format("'%s' requires as %s input a single boolean but was '%s'", inputName, location, roll.getElements().stream()
+                .map(RollElement::getValue)
+                .toList()));
+    }
+
+
     public static ExpressionException throwNotDecimalExpression(@NonNull String inputName, @NonNull Roll roll, @NonNull String location) {
         return new ExpressionException(String.format("'%s' requires as %s input a single decimal but was '%s'%s", inputName, location, roll.getElements().stream()
                 .map(RollElement::getValue)
