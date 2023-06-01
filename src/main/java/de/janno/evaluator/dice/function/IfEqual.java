@@ -9,6 +9,6 @@ public class IfEqual extends AbstractIf {
 
     @Override
     protected boolean compare(Roll input, int inputPosition, Roll compareTo, int compareToPosition) {
-        return input.getElements().equals(compareTo.getElements());
+        return input.equalForValueAndTag(compareTo);
     }
 }

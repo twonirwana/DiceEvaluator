@@ -30,9 +30,9 @@ public class KeepLowest extends Operator {
             if (rightNumber < 0) {
                 throw new ExpressionException(String.format("The number to keep can not be negativ but was %d", rightNumber));
             }
-            //todo right color only filtered by same color?
+            //todo right only filtered by same tag?
             ImmutableList<RollElement> keep = left.getElements().stream()
-                    .collect(Collectors.groupingBy(RollElement::getColor)).values().stream()
+                    .collect(Collectors.groupingBy(RollElement::getTag)).values().stream()
                     .flatMap(cl -> cl.stream()
                             .sorted()
                             .limit(rightNumber)

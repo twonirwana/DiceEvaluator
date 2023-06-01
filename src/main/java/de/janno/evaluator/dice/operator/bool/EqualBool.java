@@ -20,12 +20,13 @@ public class EqualBool extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(inputValue, rolls, 2,2);
+            checkRollSize(inputValue, rolls, 2, 2);
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
 
-            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf(left.getElements().equals(right.getElements())), RollElement.NO_COLOR));
+            final boolean isEqual = left.equalForValueAndTag(right);
+            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf(isEqual), RollElement.NO_TAG, RollElement.NO_COLOR));
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),

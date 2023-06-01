@@ -33,7 +33,7 @@ public class KeepHighest extends Operator {
             }
             //todo right color only filtered by same color?
             ImmutableList<RollElement> keep = left.getElements().stream()
-                    .collect(Collectors.groupingBy(RollElement::getColor)).values().stream()
+                    .collect(Collectors.groupingBy(RollElement::getTag)).values().stream()
                     .flatMap(cl -> cl.stream()
                             .sorted(Comparator.reverseOrder())
                             .limit(rightNumber)

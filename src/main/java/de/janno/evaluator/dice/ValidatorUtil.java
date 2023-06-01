@@ -60,7 +60,7 @@ public final class ValidatorUtil {
     }
 
     public static void checkAllElementsAreSameColor(@NonNull String operatorName, @NonNull Roll... rolls) throws ExpressionException {
-        Set<String> allElementColors = Arrays.stream(rolls).flatMap(r -> r.getElements().stream()).map(RollElement::getColor).collect(Collectors.toSet());
+        Set<String> allElementColors = Arrays.stream(rolls).flatMap(r -> r.getElements().stream()).map(RollElement::getTag).collect(Collectors.toSet());
         if (allElementColors.size() != 1) {
             throw new ExpressionException(String.format("'%s' requires all elements to be the same color, the colors where '%s'", operatorName, allElementColors));
         }

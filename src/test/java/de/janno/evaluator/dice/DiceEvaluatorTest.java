@@ -428,9 +428,9 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4,6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,4,5,6), 1000);
 
-        List<Roll> res = underTest.evaluate("val('$1',2d6) '$1'==6c =? 1");
+        List<Roll> res = underTest.evaluate("if(color(1d6,'red')=?1,'true','false')");
         System.out.println(res.size());
         System.out.println(res.get(0).getExpression());
         System.out.println(res);
@@ -815,8 +815,8 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("color(1d6,'red') + color(3d20,'blue')");
 
         assertThat(res).hasSize(1);
-        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[red:3∈[1...6]], [blue:2∈[1...20], blue:1∈[1...20], blue:4∈[1...20]]");
-        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[red:3] [blue:2, blue:1, blue:4]");
+        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[3∈[1...6]], [2∈[1...20], 1∈[1...20], 4∈[1...20]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [2, 1, 4]");
         assertThat(res.get(0).getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
         assertThat(res.get(0).getExpression()).isEqualTo("color(1d6,'red')+color(3d20,'blue')");
     }
@@ -828,8 +828,8 @@ public class DiceEvaluatorTest {
 
         assertThat(res).hasSize(1);
         assertThat(res.get(0).getResultString()).isEqualTo("red:3, blue:3");
-        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[red:3∈[1...6]], [blue:3∈[1...6]]");
-        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[red:3] [blue:3]");
+        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[3∈[1...6]], [3∈[1...6]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [3]");
         assertThat(res.get(0).getExpression()).isEqualTo("val('$r',1d6), color('$r','red')+color('$r','blue')");
     }
 
@@ -879,7 +879,7 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(values(res)).containsExactlyElementsOf(expectedValues);
-        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getColor)).containsExactlyElementsOf(expectedColors);
+        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getTag)).containsExactlyElementsOf(expectedColors);
     }
 
     @Test

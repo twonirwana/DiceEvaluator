@@ -24,7 +24,7 @@ public class Concat extends Function {
                     .map(Roll::getResultString)
                     .collect(Collectors.joining());
             return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
-                    ImmutableList.of(new RollElement(joined, RollElement.NO_COLOR)),
+                    ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
                     UniqueRandomElements.from(rolls),
                     ImmutableList.copyOf(rolls)));
         };

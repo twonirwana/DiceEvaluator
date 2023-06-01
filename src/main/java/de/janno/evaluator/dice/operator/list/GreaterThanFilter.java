@@ -27,7 +27,7 @@ public class GreaterThanFilter extends Operator {
             Roll right = rolls.get(1);
             checkContainsOnlyDecimal(inputValue, left, "left");
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
-            //todo color only filtered by same color?
+            //todo only filtered by same tag?
             ImmutableList<RollElement> diceResult = left.getElements().stream()
                     .filter(i -> i.asDecimal().isPresent() && i.asDecimal().get().compareTo(rightNumber) > 0)
                     .collect(ImmutableList.toImmutableList());

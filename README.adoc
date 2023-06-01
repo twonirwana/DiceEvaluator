@@ -120,4 +120,3 @@ All functions are case insensitiv.
 
 * intersection operator
 * concatenate operator additional to the function
-* AddIf/AddIfLower/AddIfHigher?

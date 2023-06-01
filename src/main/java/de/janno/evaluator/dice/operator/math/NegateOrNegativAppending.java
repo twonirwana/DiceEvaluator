@@ -29,7 +29,7 @@ public final class NegateOrNegativAppending extends Operator {
                 Roll right = rolls.get(0);
                 checkContainsOnlyDecimal(inputValue, right, "right");
                 ImmutableList<RollElement> negated = right.getElements().stream()
-                        .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getColor()))
+                        .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
                         .collect(ImmutableList.toImmutableList());
                 return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
                         negated,
@@ -43,7 +43,7 @@ public final class NegateOrNegativAppending extends Operator {
             final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()
                     .addAll(left.getElements())
                     .addAll(right.getElements().stream()
-                            .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getColor()))
+                            .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
                             .toList()
                     ).build();
 

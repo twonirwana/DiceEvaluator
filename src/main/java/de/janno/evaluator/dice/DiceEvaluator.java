@@ -150,7 +150,7 @@ public class DiceEvaluator {
             List<String> list = Arrays.asList(matcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
             return constants -> ImmutableList.of(new Roll(inputValue, list.stream()
                     .map(String::trim)
-                    .map(s -> new RollElement(s, RollElement.NO_COLOR))
+                    .map(s -> new RollElement(s, RollElement.NO_TAG, RollElement.NO_COLOR))
                     .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of()));
         }
         return constants -> {
@@ -160,7 +160,7 @@ public class DiceEvaluator {
                 Roll replacedValue = new Roll(inputValue, constant.getElements(), constant.getRandomElementsInRoll(), constant.getChildrenRolls());
                 return ImmutableList.of(replacedValue);
             }
-            return ImmutableList.of(new Roll(inputValue, ImmutableList.of(new RollElement(literal, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of()));
+            return ImmutableList.of(new Roll(inputValue, ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of()));
         };
     }
 

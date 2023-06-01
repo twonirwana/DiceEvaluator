@@ -40,8 +40,8 @@ public class RandomElement {
         this.maxInc = maxInc;
     }
 
-    public RandomElement copyWithColor(@NonNull String color) {
-        return new RandomElement(new RollElement(this.rollElement.getValue(), color), this.randomSelectedFrom, this.minInc, this.maxInc);
+    public RandomElement copyWithTagAndColor(@NonNull String color) {
+        return new RandomElement(new RollElement(this.rollElement.getValue(), this.rollElement.getTag(), color), this.randomSelectedFrom, this.minInc, this.maxInc);
     }
 
     public String toString() {

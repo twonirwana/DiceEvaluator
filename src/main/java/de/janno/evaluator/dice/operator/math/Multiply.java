@@ -27,7 +27,7 @@ public final class Multiply extends Operator {
             checkAllElementsAreSameColor(inputValue, left, right);
             final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, left, "left"));
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
-            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.multiply(rightNumber).stripTrailingZeros().toPlainString(), left.getElements().get(0).getColor()));
+            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.multiply(rightNumber).stripTrailingZeros().toPlainString(), left.getElements().get(0).getTag(), RollElement.NO_COLOR));
 
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,

@@ -25,14 +25,14 @@ public class Count extends Operator {
 
             Roll left = rolls.get(0);
 
-            //count of each color separate
+            //count of each tag separate
             ImmutableList<RollElement> res;
             if (rolls.stream().mapToLong(result -> result.getElements().size()).sum() == 0) {
-                res = ImmutableList.of(new RollElement("0", RollElement.NO_COLOR));
+                res = ImmutableList.of(new RollElement("0", RollElement.NO_TAG, RollElement.NO_COLOR));
             } else {
                 res = left.getElements().stream()
-                        .collect(Collectors.groupingBy(RollElement::getColor)).entrySet().stream()
-                        .map(e -> new RollElement(String.valueOf(e.getValue().size()), e.getKey()))
+                        .collect(Collectors.groupingBy(RollElement::getTag)).entrySet().stream()
+                        .map(e -> new RollElement(String.valueOf(e.getValue().size()), e.getKey(), RollElement.NO_COLOR))
                         .collect(ImmutableList.toImmutableList());
             }
             return ImmutableList.of(new Roll(getLeftUnaryExpression(inputValue, rolls),

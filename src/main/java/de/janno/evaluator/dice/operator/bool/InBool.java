@@ -25,7 +25,7 @@ public class InBool extends Operator {
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
 
-            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf(right.getElements().containsAll(left.getElements())), RollElement.NO_COLOR));
+            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf(right.getElements().containsAll(left.getElements())), RollElement.NO_TAG, RollElement.NO_COLOR));
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),

@@ -28,7 +28,7 @@ public final class IntegerDivide extends Operator {
             final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
             final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
 
-            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(Math.divideExact(leftNumber, rightNumber)), left.getElements().get(0).getColor()));
+            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(Math.divideExact(leftNumber, rightNumber)), left.getElements().get(0).getTag(), RollElement.NO_COLOR));
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),

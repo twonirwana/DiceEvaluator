@@ -17,7 +17,7 @@ public class RandomElements {
 
     public RandomElements copyWithColor(String color) {
         return new RandomElements(randomElements.stream()
-                .map(r -> r.copyWithColor(color))
+                .map(r -> r.copyWithTagAndColor(color))
                 .collect(ImmutableList.toImmutableList()));
     }
 }
