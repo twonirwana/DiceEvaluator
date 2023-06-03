@@ -33,13 +33,14 @@
 | And                  | &&         | d6>?1 && d6<5      |
 | Or                   | ||         | d6>?1 || d6<5      |
 | Negate               | !          | !d6>?1             |
+| Color                | col        | d6 col 'red'       |
+| Tag                  | tag        | d6 tag 'marked'    |
 | Brackets             | ()         | (2d4=)d6           |
 | Text                 | ''         | 'Damage ' + d6     |
 | Sort asc             | asc()      | asc(10d10)         |
 | Sort desc            | desc()     | desc(10d10)        |
 | Min                  | min()      | min(3d4, 8)        |
 | Max                  | max()      | max(3d4, 8)        |
-| Color                | color()    | color(3d4, 'red')  |
 | Chancel              | chancel()  | chancel(8d10,10,1) |
 | Replace              | replace()  | replace(6d10,1,2)  |
 | If                   | if()       | if(d6=?6,'Y','N')  |

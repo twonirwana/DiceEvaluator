@@ -6,6 +6,7 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.*;
@@ -27,9 +28,10 @@ public class GreaterThanFilter extends Operator {
             Roll right = rolls.get(1);
             checkContainsOnlyDecimal(inputValue, left, "left");
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
-            //todo only filtered by same tag?
             ImmutableList<RollElement> diceResult = left.getElements().stream()
-                    .filter(i -> i.asDecimal().isPresent() && i.asDecimal().get().compareTo(rightNumber) > 0)
+                    .filter(i -> i.asDecimal().isPresent() && i.asDecimal().get().compareTo(rightNumber) > 0
+                            //the filter is only applied to elements with the same tag
+                            || !Objects.equals(i.getTag(), right.getElements().get(0).getTag()))
                     .collect(ImmutableList.toImmutableList());
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,

@@ -24,7 +24,7 @@ public final class IntegerDivide extends Operator {
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
-            checkAllElementsAreSameColor(inputValue, left, right);
+            checkAllElementsAreSameTag(inputValue, left, right);
             final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
             final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
 

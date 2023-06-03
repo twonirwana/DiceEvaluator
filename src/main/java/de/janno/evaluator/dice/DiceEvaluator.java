@@ -6,10 +6,7 @@ import com.google.common.io.Resources;
 import de.janno.evaluator.dice.function.Double;
 import de.janno.evaluator.dice.function.*;
 import de.janno.evaluator.dice.operator.bool.*;
-import de.janno.evaluator.dice.operator.die.ExplodingAddDice;
-import de.janno.evaluator.dice.operator.die.ExplodingDice;
-import de.janno.evaluator.dice.operator.die.RegularDice;
-import de.janno.evaluator.dice.operator.die.Reroll;
+import de.janno.evaluator.dice.operator.die.*;
 import de.janno.evaluator.dice.operator.list.*;
 import de.janno.evaluator.dice.operator.math.*;
 import de.janno.evaluator.dice.random.NumberSupplier;
@@ -49,6 +46,8 @@ public class DiceEvaluator {
                         .add(new ExplodingDice(numberSupplier, maxNumberOfDice))
                         .add(new ExplodingAddDice(numberSupplier, maxNumberOfDice))
                         .add(new Appending())
+                        .add(new Color())
+                        .add(new Tag())
                         .add(new Sum())
                         .add(new Repeat())
                         .add(new RepeatList())
@@ -77,7 +76,7 @@ public class DiceEvaluator {
                         .add(new NegateBool())
                         .build())
                 .functions(ImmutableList.<Function>builder()
-                        .add(new Color())
+                        .add(new ColorFunction())
                         .add(new Value())
                         .add(new Concat())
                         .add(new SortAsc())

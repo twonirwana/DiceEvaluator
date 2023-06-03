@@ -6,7 +6,8 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
+import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
+import static de.janno.evaluator.dice.ValidatorUtil.*;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Tag extends Operator {
@@ -18,32 +19,22 @@ public class Tag extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
 
-            RollBuilder inputBuilder = operands.get(0);
-            List<Roll> compareTos = operands.get(1).extendRoll(constants);
-            checkRollSize(inputValue, compareTos, 1, 1);
-            Roll compareTo = compareTos.get(0);
+            List<Roll> rolls = extendAllBuilder(operands, constants);
+            checkRollSize(inputValue, rolls, 2, 2);
 
-            List<Roll> rolls = inputBuilder.extendRoll(constants);
-            checkRollSize(inputValue, rolls, 1, 1);
-            Roll roll = rolls.get(0);
-            UniqueRandomElements.Builder builder = UniqueRandomElements.builder();
-            builder.add(roll.getRandomElementsInRoll());
+            Roll left = rolls.get(0);
+            Roll right = rolls.get(1);
+            checkAllElementsAreSameTag(inputValue, left, right);
+            checkContainsSingleElement(inputValue, right, "second argument");
+            String tag = right.getElements().get(0).getValue();
 
-            if (roll.getElements().stream().anyMatch(r -> compareTo.getElements().contains(r))) {
-                rolls = inputBuilder.extendRoll(constants);
-                checkRollSize(inputValue, rolls, 1, 1);
-                roll = rolls.get(0);
-                builder.add(roll.getRandomElementsInRoll());
-            }
-
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, ImmutableList.of(roll, compareTo)),
-                    roll.getElements(),
-                    builder.build(),
-                    ImmutableList.<Roll>builder()
-                            .addAll(compareTo.getChildrenRolls())
-                            .addAll(roll.getChildrenRolls())
-                            .build()));
-
+            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+                    left.getElements().stream()
+                            .map(r -> new RollElement(r.getValue(), tag, r.getColor()))
+                            .collect(ImmutableList.toImmutableList()),
+                    //tags are not applied to the random elements
+                    UniqueRandomElements.from(rolls),
+                    ImmutableList.of(left, right)));
         };
     }
 

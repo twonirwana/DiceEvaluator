@@ -26,7 +26,7 @@ public final class DecimalDivide extends Operator {
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
-            checkAllElementsAreSameColor(inputValue, left, right);
+            checkAllElementsAreSameTag(inputValue, left, right);
             final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, left, "left"));
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
 

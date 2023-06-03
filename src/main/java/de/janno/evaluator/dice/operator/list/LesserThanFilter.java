@@ -6,6 +6,7 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.*;
@@ -21,7 +22,7 @@ public class LesserThanFilter extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return constants -> {
             List<Roll> rolls = extendAllBuilder(operands, constants);
-            checkRollSize(inputValue, rolls, 2,2);
+            checkRollSize(inputValue, rolls, 2, 2);
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
@@ -29,7 +30,9 @@ public class LesserThanFilter extends Operator {
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
             //todo only filtered by same tag?
             ImmutableList<RollElement> diceResult = left.getElements().stream()
-                    .filter(i -> i.asDecimal().isPresent() && i.asDecimal().get().compareTo(rightNumber) < 0)
+                    .filter(i -> i.asDecimal().isPresent() && i.asDecimal().get().compareTo(rightNumber) < 0
+                            //the filter is only applied to elements with the same tag
+                            || !Objects.equals(i.getTag(), right.getElements().get(0).getTag()))
                     .collect(ImmutableList.toImmutableList());
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,

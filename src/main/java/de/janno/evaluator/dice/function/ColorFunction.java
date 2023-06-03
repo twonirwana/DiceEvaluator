@@ -12,9 +12,9 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 @Deprecated
 //"use tag and color operator"
-public class Color extends Function {
+public class ColorFunction extends Function {
 
-    public Color() {
+    public ColorFunction() {
         super("color", 2);
     }
 

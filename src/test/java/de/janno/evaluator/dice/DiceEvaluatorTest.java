@@ -141,7 +141,7 @@ public class DiceEvaluatorTest {
     private static List<String> values(List<Roll> in) {
         return in.stream()
                 .flatMap(r -> r.getElements().stream())
-                .map(RollElement::getValue)
+                .map(RollElement::toString)
                 .toList();
     }
 
@@ -276,11 +276,49 @@ public class DiceEvaluatorTest {
                 Arguments.of("[a/b/c]=?[a/c/b]", List.of(), List.of("false")),
                 Arguments.of("[a/b] in [a/b/c]", List.of(), List.of("true")),
                 Arguments.of("[a/b]in[c/b]", List.of(), List.of("false")),
-                Arguments.of("val('$1',2d6) if('$1'= >=?9, 'crit', '$1'=)", List.of(4,6), List.of("crit")),
-                Arguments.of("val('$1',2d6) '$1'==6c =? 1", List.of(4,6), List.of("true")),
-                Arguments.of("val('$1',2d6) if('$1'==6c =? 1, 'crit', '$1'=)", List.of(4,6), List.of("crit")),
-                Arguments.of("val('$1',2d6) if('$1'= >=?9 && '$1'==6c =? 1, 'crit', '$1'=)", List.of(4,6), List.of("crit")),
-                Arguments.of("val('$1',2d6) if('$1'= >=?9 && '$1'==6c =? 1, 'crit', '$1'=)", List.of(5,5), List.of("10")),
+                Arguments.of("val('$1',2d6) if('$1'= >=?9, 'crit', '$1'=)", List.of(4, 6), List.of("crit")),
+                Arguments.of("val('$1',2d6) '$1'==6c =? 1", List.of(4, 6), List.of("true")),
+                Arguments.of("val('$1',2d6) if('$1'==6c =? 1, 'crit', '$1'=)", List.of(4, 6), List.of("crit")),
+                Arguments.of("val('$1',2d6) if('$1'= >=?9 && '$1'==6c =? 1, 'crit', '$1'=)", List.of(4, 6), List.of("crit")),
+                Arguments.of("val('$1',2d6) if('$1'= >=?9 && '$1'==6c =? 1, 'crit', '$1'=)", List.of(5, 5), List.of("10")),
+
+                //color function
+                Arguments.of("color(3d6,'red')", List.of(3, 2, 1), List.of("red:3", "red:2", "red:1")),
+                Arguments.of("(color(3d6,'red')+color(3d4,'black'))c", List.of(), List.of("red:3", "black:3")),
+                Arguments.of("(color(3d6,'red')+color(3d4,'black'))=", List.of(), List.of("red:18", "black:12")),
+                Arguments.of("(color(3d6,'red')+color(3d4,'black'))k2", List.of(1, 2, 3, 2, 2, 2), List.of("red:1", "red:2", "red:3", "black:2", "black:2", "black:2")),
+                Arguments.of("(color(3d6,'red')+color(3d4,'black'))l2", List.of(1, 2, 3, 2, 2, 2), List.of("red:1", "red:2", "red:3", "black:2", "black:2", "black:2")),
+                Arguments.of("asc((color(3d6,'red')+color(3d4,'black')))", List.of(1, 2, 3, 2, 2, 2), List.of("black:2", "black:2", "black:2", "red:1", "red:2", "red:3")),
+                Arguments.of("desc((color(3d6,'red')+color(3d4,'black')))", List.of(1, 2, 3, 2, 2, 2), List.of("red:3", "red:2", "red:1", "black:2", "black:2", "black:2")),
+
+                //tag
+                Arguments.of("6tag'red'>=10", List.of(), List.of("red:6")),
+                Arguments.of("6tag'red'>=6", List.of(), List.of("red:6")),
+                Arguments.of("6tag'red'>=10tag'red'", List.of(), List.of()),
+                Arguments.of("6tag'red'>=6tag'red'", List.of(), List.of("red:6")),
+
+                Arguments.of("6tag'red'>10", List.of(), List.of("red:6")),
+                Arguments.of("6tag'red'>5", List.of(), List.of("red:6")),
+                Arguments.of("6tag'red'>10tag'red'", List.of(), List.of()),
+                Arguments.of("6tag'red'>5tag'red'", List.of(), List.of("red:6")),
+
+                Arguments.of("6tag'red'<5", List.of(), List.of("red:6")),
+                Arguments.of("6tag'red'<7", List.of(), List.of("red:6")),
+                Arguments.of("6tag'red'<5tag'red'", List.of(), List.of()),
+                Arguments.of("6tag'red'<7tag'red'", List.of(), List.of("red:6")),
+
+                Arguments.of("6tag'red'<=5", List.of(), List.of("red:6")),
+                Arguments.of("6tag'red'<=7", List.of(), List.of("red:6")),
+                Arguments.of("6tag'red'<=5tag'red'", List.of(), List.of()),
+                Arguments.of("6tag'red'<=7tag'red'", List.of(), List.of("red:6")),
+
+                Arguments.of("(7 tag 'red' + 6+5 tag 'red' +4) k 1", List.of(), List.of("6", "red:7", "red:5")),
+                Arguments.of("(7 tag 'red' + 6+5 tag 'red' +4) k 1 tag 'red'", List.of(), List.of("red:7", "6", "4")),
+
+                Arguments.of("(7 tag 'red' + 6+5 tag 'red' +4) l 1", List.of(), List.of("4", "red:7", "red:5")),
+                Arguments.of("(7 tag 'red' + 6+5 tag 'red' +4) l 1 tag 'red'", List.of(), List.of("red:5", "6", "4")),
+
+                Arguments.of("groupC((7 + 3+ 2+3+3+7) tag 'red' + (7 + 3+ 2+3+3+7))", List.of(), List.of("3x3", "red:3x3", "2x7", "red:2x7", "red:1x2", "1x2")),
 
                 //Exalted 3e
                 Arguments.of("val('$1', cancel(double(10d10,10),1,[7/8/9/10])), ifE(('$1'>=7)c,0,ifG(('$1'<=1)c,0,'Botch'))", List.of(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), List.of("0")),
@@ -312,18 +350,6 @@ public class DiceEvaluatorTest {
                 Arguments.of(" val('$roll',3d6) val('$skill',3) (ifG('$roll'==1c,1, ifG('$skill', 0, 11, '$roll'k2=), ifG('$roll'==2c,1,ifG('$skill', 1, 12, '$roll'k2=), ifG('$roll'==3c,1,ifG('$skill', 2, 13, '$roll'k2=), ifG('$roll'==4c,1,ifG('$skill', 3, 14, '$roll'k2=),  ifG('$roll'==5c,1,ifG('$skill', 4, 15, '$roll'k2=),  ifG('$roll'==6c,1,ifG('$skill', 5, 16, '$roll'k2=), '$roll'k2=)))))))=", List.of(3, 3, 2), List.of("13")),
 
                 Arguments.of("1d0", List.of(), List.of())
-        );
-    }
-
-    private static Stream<Arguments> generateColorDiceData() {
-        return Stream.of(
-                Arguments.of("color(3d6,'red')", List.of(3, 2, 1), List.of("3", "2", "1"), List.of("red", "red", "red")),
-                Arguments.of("(color(3d6,'red')+color(3d4,'black'))c", List.of(), List.of("3", "3"), List.of("red", "black")),
-                Arguments.of("(color(3d6,'red')+color(3d4,'black'))=", List.of(), List.of("18", "12"), List.of("red", "black")),
-                Arguments.of("(color(3d6,'red')+color(3d4,'black'))k2", List.of(1, 2, 3, 2, 2, 2), List.of("3", "2", "2", "2"), List.of("red", "red", "black", "black")),
-                Arguments.of("(color(3d6,'red')+color(3d4,'black'))l2", List.of(1, 2, 3, 2, 2, 2), List.of("1", "2", "2", "2"), List.of("red", "red", "black", "black")),
-                Arguments.of("asc((color(3d6,'red')+color(3d4,'black')))", List.of(1, 2, 3, 2, 2, 2), List.of("2", "2", "2", "1", "2", "3"), List.of("black", "black", "black", "red", "red", "red")),
-                Arguments.of("desc((color(3d6,'red')+color(3d4,'black')))", List.of(1, 2, 3, 2, 2, 2), List.of("3", "2", "1", "2", "2", "2"), List.of("red", "red", "red", "black", "black", "black"))
         );
     }
 
@@ -380,7 +406,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("'a'x(1d6)", "'x' requires as left input a single integer but was '[a]'"),
                 Arguments.of("x(1d6)", "Operator x does not support unary operations"),
                 Arguments.of("(3d[a/b/c])=", "'=' requires as left input only decimals but was '[b, c, a]'"),
-                Arguments.of("color(2,'red')*color(2,'black')", "'*' requires all elements to be the same color, the colors where '[red, black]'"),
+                Arguments.of("color(2,'red')*color(2,'black')", "'*' requires all elements to be the same tag, the tags where '[red, black]'"),
                 Arguments.of("1000d999999999999999999999999999999", "The number '999999999999999999999999999999' was to big"),
                 Arguments.of("9.99999999999999999999999999999", "The number '9.99999999999999999999999999999' was to big"),
                 Arguments.of("(3x2d6)=", "'=' requires as 1 inputs but was '[[2, 3], [1, 4], [1, 1]]'"),
@@ -428,7 +454,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1,2,3,4,5,6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
 
         List<Roll> res = underTest.evaluate("if(color(1d6,'red')=?1,'true','false')");
         System.out.println(res.size());
@@ -822,6 +848,46 @@ public class DiceEvaluatorTest {
     }
 
     @Test
+    void colTest() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        List<Roll> res = underTest.evaluate("1d6 col 'red' +  3d20 col 'blue'");
+
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[3∈[1...6]], [2∈[1...20], 1∈[1...20], 4∈[1...20]]");
+        assertThat(res.get(0).getRandomElementsInRoll().getRandomElements().stream()
+                .flatMap(r -> r.getRandomElements().stream())
+                .map(RandomElement::getRollElement)
+                .map(RollElement::getColor)).containsExactly("red", "blue", "blue", "blue");
+        assertThat(res.get(0).getRandomElementsInRoll().getRandomElements().stream()
+                .flatMap(r -> r.getRandomElements().stream())
+                .map(RandomElement::getRollElement)
+                .map(RollElement::getTag)).containsExactly("", "", "", "");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [2, 1, 4]");
+        assertThat(res.get(0).getResultString()).isEqualTo("3, 2, 1, 4");
+        assertThat(res.get(0).getExpression()).isEqualTo("1d6col'red'+3d20col'blue'");
+    }
+
+    @Test
+    void tagTest() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        List<Roll> res = underTest.evaluate("1d6 tag 'red' +  3d20 tag 'blue'");
+
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[3∈[1...6]], [2∈[1...20], 1∈[1...20], 4∈[1...20]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [2, 1, 4]");
+        assertThat(res.get(0).getRandomElementsInRoll().getRandomElements().stream()
+                .flatMap(r -> r.getRandomElements().stream())
+                .map(RandomElement::getRollElement)
+                .map(RollElement::getColor)).containsExactly("", "", "", "");
+        assertThat(res.get(0).getRandomElementsInRoll().getRandomElements().stream()
+                .flatMap(r -> r.getRandomElements().stream())
+                .map(RandomElement::getRollElement)
+                .map(RollElement::getTag)).containsExactly("", "", "", "");
+        assertThat(res.get(0).getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
+        assertThat(res.get(0).getExpression()).isEqualTo("1d6tag'red'+3d20tag'blue'");
+    }
+
+    @Test
     void toStringValColorTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
         List<Roll> res = underTest.evaluate("val('$r', 1d6) color('$r','red') + color('$r','blue')");
@@ -870,16 +936,6 @@ public class DiceEvaluatorTest {
         assertThat(res.get(1).getRandomElementsString()).isEqualTo("[6, 6] [4, 4, 4]");
         assertThat(res.get(1).getResultString()).isEqualTo("10, 4, 4, 4");
         assertThat(res.get(1).getExpression()).isEqualTo("10+min(2d6,3d4)");
-    }
-
-    @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}-{3}")
-    @MethodSource("generateColorDiceData")
-    void rollStringDiceExpressionWithColor(String diceExpression, List<Integer> diceNumbers, List<String> expectedValues, List<String> expectedColors) throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
-        List<Roll> res = underTest.evaluate(diceExpression);
-
-        assertThat(values(res)).containsExactlyElementsOf(expectedValues);
-        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getTag)).containsExactlyElementsOf(expectedColors);
     }
 
     @Test
