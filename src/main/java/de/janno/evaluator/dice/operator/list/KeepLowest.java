@@ -30,16 +30,24 @@ public class KeepLowest extends Operator {
             if (rightNumber < 0) {
                 throw new ExpressionException(String.format("The number to keep can not be negativ but was %d", rightNumber));
             }
-            //todo right color only filtered by same color?
+            final String rightTag = right.getElements().get(0).getTag();
+            ImmutableList<RollElement> otherTagElements = left.getElements().stream()
+                    .filter(r -> !r.getTag().equals(rightTag))
+                    .collect(ImmutableList.toImmutableList());
+
             ImmutableList<RollElement> keep = left.getElements().stream()
-                    .collect(Collectors.groupingBy(RollElement::getColor)).values().stream()
+                    .filter(r -> r.getTag().equals(rightTag))
+                    .collect(Collectors.groupingBy(RollElement::getTag)).values().stream()
                     .flatMap(cl -> cl.stream()
                             .sorted()
                             .limit(rightNumber)
                     )
                     .collect(ImmutableList.toImmutableList());
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
-                    keep,
+                    ImmutableList.<RollElement>builder()
+                            .addAll(keep)
+                            .addAll(otherTagElements)
+                            .build(),
                     UniqueRandomElements.from(rolls),
                     ImmutableList.of(left, right)));
         };

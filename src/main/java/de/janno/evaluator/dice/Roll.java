@@ -34,6 +34,7 @@ public class Roll {
         }
         return Optional.empty();
     }
+
     public Optional<Boolean> asBoolean() {
         if (elements.size() == 1) {
             return elements.get(0).asBoolean();
@@ -53,5 +54,17 @@ public class Roll {
         return randomElementsInRoll.getRandomElements().stream()
                 .map(l -> l.getRandomElements().stream().map(RandomElement::getRollElement).map(RollElement::toString).toList().toString())
                 .collect(Collectors.joining(" "));
+    }
+
+    public boolean equalForValueAndTag(Roll other) {
+        if (this.getElements().size() != other.getElements().size()) {
+            return false;
+        }
+        for (int i = 0; i < this.getElements().size(); i++) {
+            if (!this.getElements().get(i).isEqualValueAndTag(other.getElements().get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

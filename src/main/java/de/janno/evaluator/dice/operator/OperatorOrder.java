@@ -3,10 +3,7 @@ package de.janno.evaluator.dice.operator;
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.Operator;
 import de.janno.evaluator.dice.operator.bool.*;
-import de.janno.evaluator.dice.operator.die.ExplodingAddDice;
-import de.janno.evaluator.dice.operator.die.ExplodingDice;
-import de.janno.evaluator.dice.operator.die.RegularDice;
-import de.janno.evaluator.dice.operator.die.Reroll;
+import de.janno.evaluator.dice.operator.die.*;
 import de.janno.evaluator.dice.operator.list.*;
 import de.janno.evaluator.dice.operator.math.*;
 
@@ -43,6 +40,8 @@ public final class OperatorOrder {
                     .add(Appending.class)
                     .add(NegateOrNegativAppending.class)
                     .add(Reroll.class)
+                    .add(Tag.class)
+                    .add(Color.class)
                     .add(ExplodingAddDice.class)
                     .add(ExplodingDice.class)
                     .add(RegularDice.class)

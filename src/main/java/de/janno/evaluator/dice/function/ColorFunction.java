@@ -10,8 +10,11 @@ import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
-public class Color extends Function {
-    public Color() {
+@Deprecated
+//"use tag and color operator"
+public class ColorFunction extends Function {
+
+    public ColorFunction() {
         super("color", 2);
     }
 
@@ -28,7 +31,7 @@ public class Color extends Function {
             rolls.forEach(r -> builder.addWithColor(r.getRandomElementsInRoll(), color));
             return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     p1.getElements().stream()
-                            .map(r -> new RollElement(r.getValue(), color))
+                            .map(r -> new RollElement(r.getValue(), color, color))
                             .collect(ImmutableList.toImmutableList()),
                     builder.build(),
                     p1.getChildrenRolls()));

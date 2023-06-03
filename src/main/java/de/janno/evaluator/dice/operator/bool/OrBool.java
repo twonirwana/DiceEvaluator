@@ -29,7 +29,7 @@ public class OrBool extends Operator {
             final boolean rightBoolValue = right.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, right, "right"));
 
 
-            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf((leftBoolValue || rightBoolValue)), RollElement.NO_COLOR));
+            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf((leftBoolValue || rightBoolValue)), RollElement.NO_TAG, RollElement.NO_COLOR));
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),

@@ -28,7 +28,7 @@ public class EqualFilter extends Operator {
             checkContainsSingleElement(inputValue, right, "right");
 
             ImmutableList<RollElement> diceResult = left.getElements().stream()
-                    .filter(i -> right.getElements().get(0).equals(i))
+                    .filter(re -> right.getElements().get(0).isEqualValueAndTag(re))
                     .collect(ImmutableList.toImmutableList());
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,

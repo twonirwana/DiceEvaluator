@@ -29,14 +29,14 @@ public final class DiceHelper {
         return in.stream()
                 .map(ExplodedAddDie::getValue)
                 .map(String::valueOf)
-                .map(i -> new RollElement(i, RollElement.NO_COLOR))
+                .map(i -> new RollElement(i, RollElement.NO_TAG, RollElement.NO_COLOR))
                 .collect(ImmutableList.toImmutableList());
     }
 
     public static @NonNull ImmutableList<RandomElement> explodedAddDie2RandomElements(@NonNull List<ExplodedAddDie> in) {
         return in.stream()
                 .flatMap(r -> r.getDiceThrowResults().stream().map(String::valueOf)
-                        .map(i -> new RollElement(i, RollElement.NO_COLOR))
+                        .map(i -> new RollElement(i, RollElement.NO_TAG, RollElement.NO_COLOR))
                         .map(re -> new RandomElement(re, 1, r.getSidesOfDie())))
                 .collect(ImmutableList.toImmutableList());
     }
@@ -44,7 +44,7 @@ public final class DiceHelper {
     public static @NonNull ImmutableList<RollElement> toRollElements(@NonNull List<Integer> in) {
         return in.stream()
                 .map(String::valueOf)
-                .map(i -> new RollElement(i, RollElement.NO_COLOR))
+                .map(i -> new RollElement(i, RollElement.NO_TAG, RollElement.NO_COLOR))
                 .collect(ImmutableList.toImmutableList());
     }
 

@@ -27,7 +27,7 @@ public class NegateBool extends Operator {
 
             final boolean boolValue = value.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, value, "right"));
 
-            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf((!boolValue)), RollElement.NO_COLOR));
+            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf((!boolValue)), RollElement.NO_TAG, RollElement.NO_COLOR));
             return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),

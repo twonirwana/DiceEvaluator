@@ -26,11 +26,11 @@ public final class DecimalDivide extends Operator {
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
-            checkAllElementsAreSameColor(inputValue, left, right);
+            checkAllElementsAreSameTag(inputValue, left, right);
             final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, left, "left"));
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
 
-            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.divide(rightNumber, 5, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString(), left.getElements().get(0).getColor()));
+            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.divide(rightNumber, 5, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString(), left.getElements().get(0).getTag(), RollElement.NO_COLOR));
             return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
