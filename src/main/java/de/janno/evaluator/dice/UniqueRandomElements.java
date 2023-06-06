@@ -7,10 +7,8 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @EqualsAndHashCode
 @Getter
@@ -18,10 +16,22 @@ public class UniqueRandomElements {
     private final ImmutableList<RandomElements> randomElements;
 
     public UniqueRandomElements(ImmutableList<RandomElements> randomElements) {
-        Set<UUID> uuids = new HashSet<>();
-        this.randomElements = randomElements.stream()
-                .filter(r -> !r.getRandomElements().isEmpty())
-                .filter(r -> uuids.add(r.getUuid()))
+        ImmutableList<RandomElements> uniqueList = ImmutableList.of();
+        for (RandomElements re : randomElements) {
+            uniqueList = addElement(uniqueList, re);
+        }
+        this.randomElements = uniqueList;
+    }
+
+    //the last unique RandomElements remains, not the best option because it depends on the correct order of the list.
+    //TODO find a better solution to ensure that the last color application will overwrite the randomElements color
+    private static ImmutableList<RandomElements> addElement(ImmutableList<RandomElements> randomElements, RandomElements toAdd) {
+        if (toAdd.getRandomElements().isEmpty()) {
+            return randomElements;
+        }
+        return Stream.concat(
+                        randomElements.stream().filter(re -> !toAdd.getUuid().equals(re.getUuid())),
+                        Stream.of(toAdd))
                 .collect(ImmutableList.toImmutableList());
     }
 

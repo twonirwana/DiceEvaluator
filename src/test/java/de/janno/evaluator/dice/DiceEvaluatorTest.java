@@ -482,6 +482,7 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("val('1',1d6) if('1' =? 1,  '1' col 'red', '1')" );
 
         assertThat(res.get(0).getRandomElementsInRoll().getRandomElements()).hasSize(1);
+        assertThat(res.get(0).getRandomElementsInRoll().getRandomElements().get(0).getRandomElements().get(0).getRollElement().getColor()).isEqualTo("red");
     }
 
     @Test
