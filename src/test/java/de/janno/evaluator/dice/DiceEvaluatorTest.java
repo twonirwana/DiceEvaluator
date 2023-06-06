@@ -456,10 +456,12 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("if(color(1d6,'red')=?1,'true','false')");
+        List<Roll> res = underTest.evaluate("val('1',1d6) if('1' =? 1,  '1' col 'red', '1')");
         System.out.println(res.size());
         System.out.println(res.get(0).getExpression());
         System.out.println(res);
+        System.out.println(res.get(0).getRandomElementsInRoll());
+        System.out.println(res.get(0).getRandomElementsString());
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
     }
 
@@ -473,6 +475,14 @@ public class DiceEvaluatorTest {
         assertThat(res).hasSize(size);
     }
 
+    @Test
+    void testColDontCopyUniqueRandomElements() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
+
+        List<Roll> res = underTest.evaluate("val('1',1d6) if('1' =? 1,  '1' col 'red', '1')" );
+
+        assertThat(res.get(0).getRandomElementsInRoll().getRandomElements()).hasSize(1);
+    }
 
     @Test
     void testRegularDieHeap() throws ExpressionException {
@@ -894,8 +904,8 @@ public class DiceEvaluatorTest {
 
         assertThat(res).hasSize(1);
         assertThat(res.get(0).getResultString()).isEqualTo("red:3, blue:3");
-        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[3∈[1...6]], [3∈[1...6]]");
-        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3] [3]");
+        assertThat(res.get(0).getRandomElementsInRoll().toString()).isEqualTo("[3∈[1...6]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[3]");
         assertThat(res.get(0).getExpression()).isEqualTo("val('$r',1d6), color('$r','red')+color('$r','blue')");
     }
 
