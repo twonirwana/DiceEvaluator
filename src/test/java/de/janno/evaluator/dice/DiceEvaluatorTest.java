@@ -1,5 +1,6 @@
 package de.janno.evaluator.dice;
 
+import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
 import org.junit.jupiter.api.Test;
@@ -456,13 +457,25 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("val('1',1d6) if('1' =? 1,  '1' col 'red', '1')");
+        List<Roll> res = underTest.evaluate("val('$r',color(1d9,'blue')) val('$h',color(1d10,'purple_dark')) val('$s',('$r'+'$h')>=6c) val('$rt','$r'==10c) val('$ht','$h'==10c) val('$ho','$h'==1c) val('$2s',((('$rt'+'$ht'=))/2)*2) val('$ts',('$s'+'$2s'=)) concat('successes: ', '$ts', ifE('$ts',0,ifG('$ho',1,' bestial failure' , ''),''), ifE('$rt' mod 2, 1, ifE('$ht' mod 2, 1, ' messy critical', ''), ''))");
         System.out.println(res.size());
         System.out.println(res.get(0).getExpression());
         System.out.println(res);
         System.out.println(res.get(0).getRandomElementsInRoll());
         System.out.println(res.get(0).getRandomElementsString());
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
+    }
+
+    @Test
+    void valRandomElementsInCorrectOrder() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
+
+        List<Roll> res = underTest.evaluate("val('$r',color(1d9,'blue')) val('$h',color(1d10,'purple_dark')) val('$s',('$r'+'$h')>=6c) val('$rt','$r'==10c) val('$ht','$h'==10c) val('$ho','$h'==1c) val('$2s',((('$rt'+'$ht'=))/2)*2) val('$ts',('$s'+'$2s'=)) concat('successes: ', '$ts', ifE('$ts',0,ifG('$ho',1,' bestial failure' , ''),''), ifE('$rt' mod 2, 1, ifE('$ht' mod 2, 1, ' messy critical', ''), ''))");
+
+        assertThat(values(res)).containsExactly("successes: 0, blue:1, purple_dark:1");
+        assertThat(res.size()).isEqualTo(1);
+        assertThat(res.get(0).getRandomElementsInRoll().getRandomElements().toString()).isEqualTo("[[1∈[1...9]], [2∈[1...10]]]");
+        assertThat(res.get(0).getRandomElementsString()).isEqualTo("[1] [2]");
     }
 
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
