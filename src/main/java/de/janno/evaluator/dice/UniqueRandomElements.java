@@ -8,7 +8,6 @@ import lombok.NonNull;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @EqualsAndHashCode
 @Getter
@@ -29,10 +28,23 @@ public class UniqueRandomElements {
         if (toAdd.getRandomElements().isEmpty()) {
             return randomElements;
         }
-        return Stream.concat(
-                        randomElements.stream().filter(re -> !toAdd.getUuid().equals(re.getUuid())),
-                        Stream.of(toAdd))
+        //add the new one if there is none with the same uuid
+        if (randomElements.stream().noneMatch(re -> toAdd.getUuid().equals(re.getUuid()))) {
+            return ImmutableList.<RandomElements>builder()
+                    .addAll(randomElements)
+                    .add(toAdd)
+                    .build();
+        }
+        //if there is one with the same uuid, it gets replaced (relevant for not changing the color of the random elements)
+        return randomElements.stream()
+                .map(re -> {
+                    if (toAdd.getUuid().equals(re.getUuid())) {
+                        return toAdd;
+                    }
+                    return re;
+                })
                 .collect(ImmutableList.toImmutableList());
+
     }
 
     public static UniqueRandomElements from(Collection<Roll> rolls) {
