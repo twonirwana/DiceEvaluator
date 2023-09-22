@@ -1,6 +1,5 @@
 package de.janno.evaluator.dice;
 
-import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
 import org.junit.jupiter.api.Test;
@@ -492,7 +491,7 @@ public class DiceEvaluatorTest {
     void testColDontCopyUniqueRandomElements() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("val('1',1d6) if('1' =? 1,  '1' col 'red', '1')" );
+        List<Roll> res = underTest.evaluate("val('1',1d6) if('1' =? 1,  '1' col 'red', '1')");
 
         assertThat(res.get(0).getRandomElementsInRoll().getRandomElements()).hasSize(1);
         assertThat(res.get(0).getRandomElementsInRoll().getRandomElements().get(0).getRandomElements().get(0).getRollElement().getColor()).isEqualTo("red");
