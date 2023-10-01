@@ -19,6 +19,7 @@ public class Tokenizer {
     private final static Pattern SMALL_NUMBER_PATTERN = Pattern.compile("\\d{1,10}\\.?\\d{0,10}");
     private final ImmutableList<TokenBuilder> tokenBuilders;
     private final String escapeCharacter;
+    private final ImmutableList<Pattern> allOperatorAndFunctionNamePatterns;
 
     public Tokenizer(Parameters parameters) {
         escapeCharacter = parameters.getEscapeBrackets().stream()
@@ -51,6 +52,11 @@ public class Tokenizer {
         if (!duplicateRegex.isEmpty()) {
             throw new IllegalArgumentException("The following regex for tokenizing where used more then once: " + duplicateRegex);
         }
+        allOperatorAndFunctionNamePatterns = Stream.concat(
+                        parameters.getOperators().stream().map(Operator::getName),
+                        parameters.getFunctions().stream().map(Function::getName))
+                .map(n -> Pattern.compile(escapeForRegexAndAddCaseInsensitivity(n)))
+                .collect(ImmutableList.toImmutableList());
     }
 
     private static String buildEscapeBracketsRegex(BracketPair bracketPair) {
@@ -119,7 +125,7 @@ public class Tokenizer {
             brackets.append(in.get(i).getBrackets().get().getOpen());
             i--;
         }
-        if (brackets.length() == 0) {
+        if (brackets.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(brackets.toString());
@@ -136,7 +142,7 @@ public class Tokenizer {
             brackets.append(in.get(i).getBrackets().get().getClose());
             i++;
         }
-        if (brackets.length() == 0) {
+        if (brackets.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(brackets.toString());
@@ -204,6 +210,10 @@ public class Tokenizer {
             return Optional.of(new Match(matcher.start(), matchGroup, tokenBuilder.toToken().apply(matchGroup)));
         }
         return Optional.empty();
+    }
+
+    public boolean expressionContainsOperatorOrFunction(String expression) {
+        return allOperatorAndFunctionNamePatterns.stream().anyMatch(p -> p.matcher(expression).find());
     }
 
     private interface ToToken {

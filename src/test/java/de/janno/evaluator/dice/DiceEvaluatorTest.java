@@ -452,6 +452,17 @@ public class DiceEvaluatorTest {
         );
     }
 
+    private static Stream<Arguments> generateHasOperatorOrFunction() {
+        return Stream.of(
+                Arguments.of("=1", true),
+                Arguments.of("1", false),
+                Arguments.of("20", false),
+                Arguments.of("u", false),
+                Arguments.of("  ud  ", true),
+                Arguments.of("  D  ", true)
+        );
+    }
+
     @Test
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
@@ -634,7 +645,6 @@ public class DiceEvaluatorTest {
                 .hasMessage("'//' requires as left input a single decimal but was '[4, 1]'. Try to sum the numbers together like (2d6=)");
     }
 
-
     @Test
     void divisorZero() {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
@@ -655,7 +665,6 @@ public class DiceEvaluatorTest {
                         .map(RollElement::getValue).toList()))
                 .containsExactlyElementsOf(expectedRandomElements);
     }
-
 
     @Test
     void getRandomElements_regularDice() throws ExpressionException {
@@ -946,7 +955,6 @@ public class DiceEvaluatorTest {
         assertThat(res.get(0).getExpression()).isEqualTo("val('$r',1d6), if('$r'=?1,'a','$r'=?2,'b','c')");
     }
 
-
     @Test
     void toStringMultiExpressionTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
@@ -1012,5 +1020,13 @@ public class DiceEvaluatorTest {
     void testHelp() {
         assertThat(DiceEvaluator.getHelpText())
                 .contains("Regular Dice");
+    }
+
+    @ParameterizedTest(name = "{index} expression:{0} -> {1}")
+    @MethodSource("generateHasOperatorOrFunction")
+    void resultSize(String expression, boolean hasOperatorOrFunction) {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+
+        assertThat(underTest.expressionContainsOperatorOrFunction(expression)).isEqualTo(hasOperatorOrFunction);
     }
 }
