@@ -205,6 +205,14 @@ public class DiceEvaluator {
     }
 
     /**
+     * Checks if the provided contains any characters matching an operator or function.
+     * Even if the method returns true, the expression can still be invalid.
+     */
+    public boolean expressionContainsOperatorOrFunction(String expression) {
+        return tokenizer.expressionContainsOperatorOrFunction(expression);
+    }
+
+    /**
      * Evaluates an expression.
      *
      * @param expression The expression to evaluate
@@ -215,6 +223,14 @@ public class DiceEvaluator {
         return buildRollSupplier(expression).roll();
     }
 
+    /**
+     * Create a roller for an expression. The roller is the expression as function can be used again to roll the expression
+     * again. Each execution of the roller will generate new random elements.
+     *
+     * @param expression The expression to evaluate
+     * @return A roller that executes the expression
+     * @throws ExpressionException if the expression is not correct.
+     */
     public Roller buildRollSupplier(String expression) throws ExpressionException {
         expression = expression.trim();
         if (Strings.isNullOrEmpty(expression)) {
