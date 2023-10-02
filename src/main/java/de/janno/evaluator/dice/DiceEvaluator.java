@@ -239,7 +239,7 @@ public class DiceEvaluator {
 
         final List<Token> tokens = tokenizer.tokenize(expression);
         final Deque<RollBuilder> values = new ArrayDeque<>(tokens.size()); // values stack
-        final Deque<Token> stack = new ArrayDeque<>(tokens.size()); // operators, function and brackets stack
+        final LinkedList<Token> stack = new LinkedList<>(); // operators, function and brackets stack
         final Deque<Integer> previousValuesSize = new ArrayDeque<>(tokens.size());
         Optional<Token> previous = Optional.empty();
         for (Token token : tokens) {
@@ -265,6 +265,8 @@ public class DiceEvaluator {
             } else if (token.isCloseBracket()) {
                 if (previous.isEmpty()) {
                     throw new ExpressionException("expression can't start with a close bracket");
+                } else if (previous.get().isOpenBracket()) {
+                    throw new ExpressionException("empty brackets are not allowed");
                 }
                 if (previous.map(Token::isSeparator).get()) {
                     throw new ExpressionException("argument is missing");
@@ -308,18 +310,22 @@ public class DiceEvaluator {
                     throw new ExpressionException("A separator can't be followed by another separator or open bracket");
                 }
                 boolean openBracketOnStackReached = false;
+
                 while (!stack.isEmpty() && !openBracketOnStackReached) {
                     if (stack.peek().isOpenBracket()) {
                         openBracketOnStackReached = true;
+                        if (stack.size() < 2 || stack.get(1).getFunction().isEmpty()) {
+                            throw new ExpressionException("Separator '%s' in bracket '%s' without leading function is not allowed"
+                                    .formatted(parameters.getSeparator(), parameters.getExpressionBrackets().stream()
+                                            .map(Object::toString)
+                                            .collect(Collectors.joining(","))));
+                        }
                     } else {
                         // Until the token at the top of the stack is a left parenthesis,
                         // pop operators off the stack onto the output queue.
                         Token stackToken = stack.pop();
                         processTokenToValues(values, stackToken);
                     }
-                }
-                if (openBracketOnStackReached) {
-                    stack.push(stack.pop());
                 }
             } else if (token.getFunction().isPresent()) {
                 // If the token is a function token, then push it onto the stack.
