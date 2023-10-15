@@ -21,8 +21,8 @@ public class Double extends Function {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(arguments, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
             Roll input = rolls.get(0);
             Roll toDuplicate = rolls.get(1);

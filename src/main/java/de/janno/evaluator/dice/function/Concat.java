@@ -17,8 +17,8 @@ public class Concat extends Function {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(arguments, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
             String joined = rolls.stream()
                     .map(Roll::getResultString)

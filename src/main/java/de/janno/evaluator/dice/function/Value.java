@@ -5,8 +5,9 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class Value extends Function {
@@ -16,16 +17,26 @@ public class Value extends Function {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(arguments, constants);
+        return variables -> {
+            Map<String, Roll> variableNameMap = new ConcurrentHashMap<>(); //don't replace literals in the first argument of the function, but it can use new variables
+            RollBuilder.RollsAndIndex firstNonEmptyRoll = RollBuilder.getFirstNonEmptyRolls(arguments, variableNameMap);
+
+            ImmutableList.Builder<Roll> rollBuilder = ImmutableList.<Roll>builder()
+                    .addAll(firstNonEmptyRoll.getRolls());
+            variables.putAll(variableNameMap);
+         //   List<RollBuilder> remainingRollBuilder = arguments.subList(firstNonEmptyRoll.getIndex() + 1, arguments.size() +1);
+            //      List<Roll> rolls = rollBuilder.addAll(RollBuilder.extendAllBuilder(remainingRollBuilder, variableNameMap))
+            //                    .build();
+            //todo null value later in the roll
+            List<Roll> rolls = rollBuilder.addAll(arguments.get(firstNonEmptyRoll.getIndex() + 1).extendRoll(variables))
+                    .build();
+
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
             String valName = rolls.get(0).getElements().get(0).getValue();
-            if (constants.containsKey(valName)) {
-                throw new ExpressionException("The value name '%s' was defined more than once.".formatted(valName));
-            }
+
             String expression = getExpression(inputValue, rolls);
-            constants.put(valName, new Roll(expression,
+            variables.put(valName, new Roll(expression,
                     rolls.get(1).getElements(),
                     UniqueRandomElements.from(rolls),
                     rolls.get(1).getChildrenRolls()));

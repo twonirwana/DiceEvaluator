@@ -20,8 +20,8 @@ public class GroupCount extends de.janno.evaluator.dice.Function {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(arguments, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
             final ImmutableList<RollElement> res = rolls.stream()
                     .flatMap(result -> result.getElements().stream())

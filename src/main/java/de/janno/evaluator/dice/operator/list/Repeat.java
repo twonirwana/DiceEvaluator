@@ -22,8 +22,8 @@ public class Repeat extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> leftRolls = operands.get(0).extendRoll(constants);
+        return variables -> {
+            List<Roll> leftRolls = operands.get(0).extendRoll(variables);
             checkRollSize(inputValue, leftRolls, 1, 1);
             int left = leftRolls.get(0).asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, leftRolls.get(0), "left"));
             if (left > 10 || left < 1) {
@@ -32,7 +32,7 @@ public class Repeat extends Operator {
             RollBuilder right = operands.get(1);
             ImmutableList.Builder<Roll> builder = ImmutableList.builder();
             for (int i = 0; i < left; i++) {
-                builder.addAll(right.extendRoll(new HashMap<>(constants)));
+                builder.addAll(right.extendRoll(new HashMap<>(variables)));
             }
             return builder.build();
         };

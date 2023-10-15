@@ -127,6 +127,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('$1',6d6), '$1'=, ('$1'>4)c", List.of(1, 2, 3, 4, 5, 6), List.of(21, 2)),
                 Arguments.of("val('$1', 2d6) val('$1', 1d6) '$1'", List.of(1, 2, 3), List.of(1, 2)), //the '$1' in the second val is replaced by the first
                 Arguments.of("val(2, 'abc'),d6", List.of(2), List.of(2)), //the replacement happens only in the formular, not in results
+                Arguments.of("4 + val('a',3) 'a'", List.of(), List.of(4, 3)),
+                Arguments.of("val('a',3) 4 + 'a'", List.of(), List.of(4, 3)),
                 Arguments.of("1rd4", List.of(3), List.of(3)),
                 Arguments.of("2rd4", List.of(3, 2), List.of(3, 2)),
                 Arguments.of("0rd4", List.of(), List.of()),
@@ -191,12 +193,17 @@ public class DiceEvaluatorTest {
                 Arguments.of("ifIn(1d6,2,'2')", List.of(5), List.of("5")),
                 Arguments.of("ifIn(1d6,[2/3],'2or3','!2or3')", List.of(4), List.of("!2or3")),
                 Arguments.of("replace(8d10, [9/10], 'bonus')", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("bonus", "bonus", "3", "4", "5", "6", "7", "1")),
+                Arguments.of("replace(8d10, [9/10], '')", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("3", "4", "5", "6", "7", "1")),
+                Arguments.of("replace(8d10, [9/10], [])", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("3", "4", "5", "6", "7", "1")),
                 Arguments.of("replace(8d10, [9/10], [a/a])", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("a", "a", "a", "a", "3", "4", "5", "6", "7", "1")),
                 Arguments.of("replace(8d10, [9/10], 'bonus')", List.of(1, 2, 3, 4, 5, 6, 7, 8), List.of("1", "2", "3", "4", "5", "6", "7", "8")),
                 Arguments.of("[b/2/a]k2", List.of(), List.of("b", "a")),
                 Arguments.of("[b/2/a]l2", List.of(), List.of("2", "a")),
                 Arguments.of("'3.5'+'2.5'", List.of(), List.of("3.5", "2.5")),
-                Arguments.of("concat('Attack: ', 3d6) ", List.of(1, 2, 3), List.of("Attack: 1, 2, 3")),
+                Arguments.of("concat('Attack: ', 3d6)", List.of(1, 2, 3), List.of("Attack: 1, 2, 3")),
+                Arguments.of("concat('Attack:', '')", List.of(), List.of("Attack:")),
+                Arguments.of("concat('Attack:', ' ')", List.of(), List.of("Attack: ")),
+                Arguments.of("concat('Attack:', [])", List.of(), List.of("Attack:")),
                 Arguments.of("concat('Attack: ', 1d20, ' Damage: ', 2d10+5=) ", List.of(1, 2, 3), List.of("Attack: 1 Damage: 10")),
                 Arguments.of("val(1, ('a'+'b'+'c')) 3d1", List.of(1, 2, 3), List.of("a", "b", "c")),
 
@@ -468,12 +475,12 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("val('$r',color(1d9,'blue')) val('$h',color(1d10,'purple_dark')) val('$s',('$r'+'$h')>=6c) val('$rt','$r'==10c) val('$ht','$h'==10c) val('$ho','$h'==1c) val('$2s',((('$rt'+'$ht'=))/2)*2) val('$ts',('$s'+'$2s'=)) concat('successes: ', '$ts', ifE('$ts',0,ifG('$ho',1,' bestial failure' , ''),''), ifE('$rt' mod 2, 1, ifE('$ht' mod 2, 1, ' messy critical', ''), ''))");
+        List<Roll> res = underTest.evaluate("4 + val('a',3) 'a'");
         System.out.println(res.size());
-        System.out.println(res.get(0).getExpression());
+        res.forEach(r -> System.out.println(r.getExpression()));
         System.out.println(res);
-        System.out.println(res.get(0).getRandomElementsInRoll());
-        System.out.println(res.get(0).getRandomElementsString());
+        res.forEach(r -> System.out.println(r.getRandomElementsInRoll()));
+        res.forEach(r -> System.out.println(r.getRandomElementsString()));
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
     }
 

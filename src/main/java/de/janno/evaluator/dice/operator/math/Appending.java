@@ -17,9 +17,9 @@ public final class Appending extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
-        return constants -> {
+        return variables -> {
 
-            List<Roll> rolls = extendAllBuilder(operands, constants);
+            List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 1, 2);
 
             if (rolls.size() == 1) {

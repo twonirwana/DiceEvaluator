@@ -27,7 +27,7 @@ public class DiceEvaluator {
 
     private static final String SEPARATOR = ",";
     private static final String LEGACY_LIST_SEPARATOR = "/";
-    private static final Pattern LIST_REGEX = Pattern.compile("(.+([%s%s].+)+)".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR));
+    private static final Pattern LIST_REGEX = Pattern.compile("(.+([%s%s].+)+)".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)); //the brackets are used for the escape and are not part of the literal
     private final Tokenizer tokenizer;
     private final Parameters parameters;
 
@@ -78,7 +78,7 @@ public class DiceEvaluator {
                 .functions(ImmutableList.<Function>builder()
                         .add(new ColorFunction())
                         .add(new Value())
-                        .add(new Concat())
+                        .add(new Concat()) //todo add operator
                         .add(new SortAsc())
                         .add(new SortDesc())
                         .add(new Min())
@@ -125,18 +125,13 @@ public class DiceEvaluator {
 
     public static Roller createRollSupplier(List<RollBuilder> rollBuilders) {
         return () -> {
-            Map<String, Roll> constantMap = new HashMap<>();
-            ImmutableList.Builder<Roll> builder = ImmutableList.builder();
-            for (RollBuilder rs : rollBuilders) {
-                List<Roll> r = rs.extendRoll(constantMap);
-                builder.addAll(r);
-            }
-            List<Roll> rolls = builder.build();
-            if (!constantMap.isEmpty()) {
+            Map<String, Roll> variableMap = new HashMap<>();
+            List<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, variableMap);
+            if (!variableMap.isEmpty()) {
                 //we need to add the val expression in front of the expression
-                String constantString = constantMap.values().stream().map(Roll::getExpression).collect(Collectors.joining(", "));
+                String variablestring = variableMap.values().stream().map(Roll::getExpression).collect(Collectors.joining(", "));
                 rolls = rolls.stream()
-                        .map(r -> new Roll("%s, %s".formatted(constantString, r.getExpression()), r.getElements(), r.getRandomElementsInRoll(), r.getChildrenRolls()))
+                        .map(r -> new Roll("%s, %s".formatted(variablestring, r.getExpression()), r.getElements(), r.getRandomElementsInRoll(), r.getChildrenRolls()))
                         .collect(Collectors.toList());
             }
             return rolls;
@@ -144,20 +139,23 @@ public class DiceEvaluator {
     }
 
     private @NonNull RollBuilder toValue(@NonNull String literal, @NonNull String inputValue) {
-        Matcher matcher = LIST_REGEX.matcher(literal);
-        if (matcher.find()) {
-            List<String> list = Arrays.asList(matcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
-            return constants -> ImmutableList.of(new Roll(inputValue, list.stream()
+        Matcher listMatcher = LIST_REGEX.matcher(literal);
+        if (listMatcher.find()) {
+            List<String> list = Arrays.asList(listMatcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
+            return variables -> ImmutableList.of(new Roll(inputValue, list.stream()
                     .map(String::trim)
                     .map(s -> new RollElement(s, RollElement.NO_TAG, RollElement.NO_COLOR))
                     .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of()));
         }
-        return constants -> {
-            if (constants.containsKey(literal)) {
-                Roll constant = constants.get(literal);
+        return variables -> {
+            if (variables.containsKey(literal)) {
+                Roll variableValue = variables.get(literal);
                 //set the input as expression
-                Roll replacedValue = new Roll(inputValue, constant.getElements(), constant.getRandomElementsInRoll(), constant.getChildrenRolls());
+                Roll replacedValue = new Roll(inputValue, variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls());
                 return ImmutableList.of(replacedValue);
+            }
+            if (literal.isEmpty()) {
+                return ImmutableList.of(new Roll(inputValue, ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of()));
             }
             return ImmutableList.of(new Roll(inputValue, ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of()));
         };
@@ -181,9 +179,6 @@ public class DiceEvaluator {
     }
 
     private void doFunction(Deque<RollBuilder> values, Function function, int argumentCount, String inputValue) throws ExpressionException {
-        if (function.getMinArgumentCount() > argumentCount || function.getMaxArgumentCount() < argumentCount || values.size() < argumentCount) {
-            throw new ExpressionException("Invalid argument count for %s".formatted(function.getName()));
-        }
         final RollBuilder res = function.evaluate(getArguments(values, argumentCount), inputValue);
         values.push(res);
     }
