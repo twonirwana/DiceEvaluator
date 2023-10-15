@@ -6,6 +6,7 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -30,10 +31,10 @@ public class LesserEqualBool extends Operator {
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
 
             ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf(leftNumber.compareTo(rightNumber) <= 0), RollElement.NO_TAG, RollElement.NO_COLOR));
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 }

@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 import lombok.Value;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @FunctionalInterface
 public interface RollBuilder {
@@ -19,19 +19,16 @@ public interface RollBuilder {
     }
 
     static void extendRollBuilder(@NonNull Map<String, Roll> variableMap, RollBuilder rs, ImmutableList.Builder<Roll> builder) throws ExpressionException {
-        List<Roll> r = rs.extendRoll(variableMap);
+        Optional<List<Roll>> r = rs.extendRoll(variableMap);
         //don't add empty rolls, they are the result from the value function and change the number of rolls (and then the operator/function
         //uses the roll with the wrong index
-        if (!r.isEmpty()) {
-            builder.addAll(r);
-        }
+        r.ifPresent(builder::addAll);
     }
 
     static RollsAndIndex getFirstNonEmptyRolls(List<RollBuilder> rollBuilders, Map<String, Roll> variableMap) throws ExpressionException {
-        List<Roll> firstNonEmptyRoll = Collections.emptyList();
+        Optional<List<Roll>> firstNonEmptyRoll = Optional.empty();
         int index = 0;
-        //todo all are empty
-        while (firstNonEmptyRoll.isEmpty()) {
+        while (firstNonEmptyRoll.isEmpty() && index < rollBuilders.size()) {
             firstNonEmptyRoll = rollBuilders.get(index).extendRoll(variableMap);
             index++;
         }
@@ -39,15 +36,16 @@ public interface RollBuilder {
     }
 
     /**
-     * val produces empty results, they musst be filtered out or the argument count in functions are not correct.
+     * Creates a concrete roll from a roll builder (applies all random function aka throwing the dice).
+     * <p>
+     * Some functions or operators (e.g. val repeatList) produces empty results, they musst be filtered out or the argument count in functions are not correct.
      * This is not a problem in operators because there the number of arguments is always correct because val is already pushed on the result stack
      */
-    //todo return optional
-    @NonNull List<Roll> extendRoll(@NonNull Map<String, Roll> variableMap) throws ExpressionException;
+    @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variableMap) throws ExpressionException;
 
     @Value
     class RollsAndIndex {
-        @NonNull List<Roll> rolls;
+        @NonNull Optional<List<Roll>> rolls;
         int index;
     }
 }

@@ -4,8 +4,10 @@ import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -22,14 +24,10 @@ public class Value extends Function {
             RollBuilder.RollsAndIndex firstNonEmptyRoll = RollBuilder.getFirstNonEmptyRolls(arguments, variableNameMap);
 
             ImmutableList.Builder<Roll> rollBuilder = ImmutableList.<Roll>builder()
-                    .addAll(firstNonEmptyRoll.getRolls());
+                    .addAll(firstNonEmptyRoll.getRolls().orElse(Collections.emptyList()));
             variables.putAll(variableNameMap);
-         //   List<RollBuilder> remainingRollBuilder = arguments.subList(firstNonEmptyRoll.getIndex() + 1, arguments.size() +1);
-            //      List<Roll> rolls = rollBuilder.addAll(RollBuilder.extendAllBuilder(remainingRollBuilder, variableNameMap))
-            //                    .build();
-            //todo null value later in the roll
-            List<Roll> rolls = rollBuilder.addAll(arguments.get(firstNonEmptyRoll.getIndex() + 1).extendRoll(variables))
-                    .build();
+            List<RollBuilder> remainingRollBuilder = arguments.subList(firstNonEmptyRoll.getIndex() + 1, arguments.size());
+            List<Roll> rolls = rollBuilder.addAll(RollBuilder.extendAllBuilder(remainingRollBuilder, variables)).build();
 
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
@@ -41,7 +39,7 @@ public class Value extends Function {
                     UniqueRandomElements.from(rolls),
                     rolls.get(1).getChildrenRolls()));
 
-            return ImmutableList.of();
+            return Optional.empty();
         };
     }
 }

@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.*;
@@ -30,12 +31,12 @@ public class Color extends Operator {
             //colors are applied to the random elements, so they can be used for dice images
             UniqueRandomElements.Builder builder = new UniqueRandomElements.Builder();
             rolls.forEach(r -> builder.addWithColor(r.getRandomElementsInRoll(), color));
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     left.getElements().stream()
                             .map(r -> new RollElement(r.getValue(), r.getTag(), color))
                             .collect(ImmutableList.toImmutableList()),
                     builder.build(),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 

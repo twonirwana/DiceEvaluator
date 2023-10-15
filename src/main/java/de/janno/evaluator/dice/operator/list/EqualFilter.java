@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
@@ -30,10 +31,10 @@ public class EqualFilter extends Operator {
             ImmutableList<RollElement> diceResult = left.getElements().stream()
                     .filter(re -> right.getElements().get(0).isEqualValueAndTag(re))
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return  Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 }

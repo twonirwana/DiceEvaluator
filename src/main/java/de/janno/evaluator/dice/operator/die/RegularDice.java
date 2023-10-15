@@ -6,6 +6,7 @@ import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.DiceHelper.*;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -79,10 +80,10 @@ public final class RegularDice extends Operator {
                         .collect(ImmutableList.toImmutableList()));
             }
 
-            return ImmutableList.of(new Roll(expression,
+            return Optional.of(ImmutableList.of(new Roll(expression,
                     rollElements,
                     randomElements.build(),
-                    childrenRolls));
+                    childrenRolls)));
         };
     }
 }

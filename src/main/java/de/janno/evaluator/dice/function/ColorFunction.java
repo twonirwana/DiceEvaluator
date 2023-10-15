@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
@@ -29,12 +30,12 @@ public class ColorFunction extends Function {
             String color = p2.getElements().get(0).getValue();
             UniqueRandomElements.Builder builder = new UniqueRandomElements.Builder();
             rolls.forEach(r -> builder.addWithColor(r.getRandomElementsInRoll(), color));
-            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     p1.getElements().stream()
                             .map(r -> new RollElement(r.getValue(), color, color))
                             .collect(ImmutableList.toImmutableList()),
                     builder.build(),
-                    p1.getChildrenRolls()));
+                    p1.getChildrenRolls())));
         };
     }
 }

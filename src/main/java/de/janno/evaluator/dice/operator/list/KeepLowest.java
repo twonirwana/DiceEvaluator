@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -43,13 +44,13 @@ public class KeepLowest extends Operator {
                             .limit(rightNumber)
                     )
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     ImmutableList.<RollElement>builder()
                             .addAll(keep)
                             .addAll(otherTagElements)
                             .build(),
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 }

@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -28,10 +29,10 @@ public class Max extends Function {
                     .flatMap(result -> result.getElements().stream())
                     .filter(resultElement -> resultElement.compareTo(max) == 0)
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.copyOf(rolls)));
+                    ImmutableList.copyOf(rolls))));
         };
     }
 }

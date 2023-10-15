@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -35,14 +36,14 @@ public class Replace extends Function {
                     .collect(ImmutableList.toImmutableList());
 
 
-            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     rollElements,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.<Roll>builder()
                             .addAll(input.getChildrenRolls())
                             .addAll(find.getChildrenRolls())
                             .addAll(replace.getChildrenRolls())
-                            .build()));
+                            .build())));
         };
     }
 }

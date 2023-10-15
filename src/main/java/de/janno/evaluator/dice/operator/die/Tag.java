@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.*;
@@ -28,13 +29,13 @@ public class Tag extends Operator {
             checkContainsSingleElement(inputValue, right, "second argument");
             String tag = right.getElements().get(0).getValue();
 
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     left.getElements().stream()
                             .map(r -> new RollElement(r.getValue(), tag, r.getColor()))
                             .collect(ImmutableList.toImmutableList()),
                     //tags are not applied to the random elements
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 

@@ -8,6 +8,7 @@ import lombok.Value;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -30,10 +31,10 @@ public class GroupCount extends de.janno.evaluator.dice.Function {
                     .map(groupedElements -> new RollElement("%dx%s".formatted(groupedElements.getValue().size(), groupedElements.getKey().getValue()), groupedElements.getKey().getTag(), RollElement.NO_COLOR))
                     .collect(ImmutableList.toImmutableList());
 
-            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.copyOf(rolls)));
+                    ImmutableList.copyOf(rolls))));
         };
     }
 

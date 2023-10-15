@@ -7,6 +7,7 @@ import lombok.NonNull;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.*;
@@ -31,10 +32,10 @@ public final class DecimalDivide extends Operator {
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
 
             final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.divide(rightNumber, 5, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString(), left.getElements().get(0).getTag(), RollElement.NO_COLOR));
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 }

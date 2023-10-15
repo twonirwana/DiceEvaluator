@@ -7,8 +7,10 @@ import de.janno.evaluator.dice.Roll;
 import de.janno.evaluator.dice.RollBuilder;
 import lombok.NonNull;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -23,7 +25,7 @@ public class Repeat extends Operator {
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return variables -> {
-            List<Roll> leftRolls = operands.get(0).extendRoll(variables);
+            List<Roll> leftRolls = operands.get(0).extendRoll(variables).orElse(Collections.emptyList());
             checkRollSize(inputValue, leftRolls, 1, 1);
             int left = leftRolls.get(0).asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, leftRolls.get(0), "left"));
             if (left > 10 || left < 1) {
@@ -32,9 +34,11 @@ public class Repeat extends Operator {
             RollBuilder right = operands.get(1);
             ImmutableList.Builder<Roll> builder = ImmutableList.builder();
             for (int i = 0; i < left; i++) {
-                builder.addAll(right.extendRoll(new HashMap<>(variables)));
+                List<Roll> rightRoll = right.extendRoll(variables).orElse(Collections.emptyList());
+                checkRollSize(inputValue, rightRoll, 1, 1);
+                builder.addAll(rightRoll);
             }
-            return builder.build();
+            return Optional.of(builder.build());
         };
     }
 

@@ -7,6 +7,7 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyDecimal;
@@ -31,10 +32,10 @@ public final class NegateOrNegativAppending extends Operator {
                 ImmutableList<RollElement> negated = right.getElements().stream()
                         .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
                         .collect(ImmutableList.toImmutableList());
-                return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
+                return Optional.of(ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
                         negated,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(right)));
+                        ImmutableList.of(right))));
             }
 
             Roll left = rolls.get(0);
@@ -47,10 +48,10 @@ public final class NegateOrNegativAppending extends Operator {
                             .toList()
                     ).build();
 
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 

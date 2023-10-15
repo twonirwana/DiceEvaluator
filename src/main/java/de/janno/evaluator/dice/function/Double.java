@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -37,13 +38,13 @@ public class Double extends Function {
                     })
                     .collect(ImmutableList.toImmutableList());
 
-            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     rollElements,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.<Roll>builder()
                             .addAll(input.getChildrenRolls())
                             .addAll(toDuplicate.getChildrenRolls())
-                            .build()));
+                            .build())));
         };
     }
 }

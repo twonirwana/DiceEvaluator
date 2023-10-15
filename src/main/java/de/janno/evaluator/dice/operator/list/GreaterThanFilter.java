@@ -7,6 +7,7 @@ import lombok.NonNull;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.*;
@@ -22,7 +23,7 @@ public class GreaterThanFilter extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return variables -> {
             List<Roll> rolls = extendAllBuilder(operands, variables);
-            checkRollSize(inputValue, rolls, 2,2);
+            checkRollSize(inputValue, rolls, 2, 2);
 
             Roll left = rolls.get(0);
             Roll right = rolls.get(1);
@@ -33,10 +34,10 @@ public class GreaterThanFilter extends Operator {
                             //the filter is only applied to elements with the same tag
                             || !Objects.equals(i.getTag(), right.getElements().get(0).getTag()))
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 }

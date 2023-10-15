@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -35,10 +36,10 @@ public class Count extends Operator {
                         .map(e -> new RollElement(String.valueOf(e.getValue().size()), e.getKey(), RollElement.NO_COLOR))
                         .collect(ImmutableList.toImmutableList());
             }
-            return ImmutableList.of(new Roll(getLeftUnaryExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getLeftUnaryExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left)));
+                    ImmutableList.of(left))));
         };
     }
 

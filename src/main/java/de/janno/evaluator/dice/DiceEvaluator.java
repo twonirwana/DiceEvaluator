@@ -142,22 +142,22 @@ public class DiceEvaluator {
         Matcher listMatcher = LIST_REGEX.matcher(literal);
         if (listMatcher.find()) {
             List<String> list = Arrays.asList(listMatcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
-            return variables -> ImmutableList.of(new Roll(inputValue, list.stream()
+            return variables -> Optional.of(ImmutableList.of(new Roll(inputValue, list.stream()
                     .map(String::trim)
                     .map(s -> new RollElement(s, RollElement.NO_TAG, RollElement.NO_COLOR))
-                    .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of()));
+                    .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of())));
         }
         return variables -> {
             if (variables.containsKey(literal)) {
                 Roll variableValue = variables.get(literal);
                 //set the input as expression
                 Roll replacedValue = new Roll(inputValue, variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls());
-                return ImmutableList.of(replacedValue);
+                return Optional.of(ImmutableList.of(replacedValue));
             }
             if (literal.isEmpty()) {
-                return ImmutableList.of(new Roll(inputValue, ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of()));
+                return Optional.of(ImmutableList.of(new Roll(inputValue, ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of())));
             }
-            return ImmutableList.of(new Roll(inputValue, ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of()));
+            return Optional.of(ImmutableList.of(new Roll(inputValue, ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
         };
     }
 
