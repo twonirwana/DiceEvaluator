@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,17 +25,20 @@ public class If extends Function {
             ImmutableList.Builder<Roll> allRolls = ImmutableList.builder();
             RollBuilder.RollsAndIndex next = RollBuilder.getNextNonEmptyRolls(arguments, 0, variables);
             if (next.getRolls().isEmpty()) {
-                throw new ExpressionException(String.format("'%s' requires as %s inputs but was '%s'", inputValue, 1, Collections.emptyList()));
+                throw new ExpressionException(String.format("'%s' requires as %s inputs but was empty", inputValue, 1));
             }
             UniqueRandomElements.Builder booleanRandomElements = UniqueRandomElements.builder();
             Map<String, Roll> trueVariable = new ConcurrentHashMap<>(variables);
             RollBuilder.RollsAndIndex after = RollBuilder.getNextNonEmptyRolls(arguments, next.getIndex() + 1, trueVariable);
 
+            if (after.getRolls().isEmpty()) {
+                throw new ExpressionException(String.format("'%s' requires as %s inputs but was empty", inputValue, 2));
+            }
+
             while (after.getRolls().isPresent()) {
                 checkRollSize(inputValue, next.getRolls().get(), 1, 1);
                 allRolls.addAll(next.getRolls().get());
                 allRolls.addAll(after.getRolls().get());
-                //todo random elements over all expression
                 Roll booleanExpression = next.getRolls().get().get(0);
                 int nextIndex = next.getIndex();
                 final boolean booleanValue = booleanExpression.asBoolean()
@@ -57,7 +59,6 @@ public class If extends Function {
                                             .addAll(r.getChildrenRolls())
                                             .build()))
                             .collect(ImmutableList.toImmutableList()));
-
                 }
                 next = RollBuilder.getNextNonEmptyRolls(arguments, after.getIndex() + 1, variables);
                 trueVariable = new ConcurrentHashMap<>(variables); //reset the true variables

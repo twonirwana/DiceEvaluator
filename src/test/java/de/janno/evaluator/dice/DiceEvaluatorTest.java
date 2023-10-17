@@ -135,7 +135,10 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('a',1d6) val('a',2d10) 'a'", List.of(1, 7, 8), List.of(7, 8)),
                 Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10) '') +'a'", List.of(1), List.of(-10)),
                 Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10) '') +'a'", List.of(5), List.of(10)),
-
+                Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10)) + 'a'", List.of(1), List.of(-10)),// interpreted as if with two parameters
+                Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10)) + 'a'", List.of(5), List.of(10)), // interpreted as if with two parameters
+                Arguments.of("if(1d6>?4, val('a',10), val('a',-10) '') + 'a'", List.of(1), List.of()), // interpreted as if with two parameters
+                Arguments.of("if(1d6>?4, val('a',10), val('a',-10) '') + 'a'", List.of(5), List.of(-10)), // interpreted as if with two parameters
                 //repeat list
                 Arguments.of("1rd4", List.of(3), List.of(3)),
                 Arguments.of("2rd4", List.of(3, 2), List.of(3, 2)),
@@ -440,7 +443,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("'ab'>=?'1'", "'>=?' requires as left input a single decimal but was '[ab]'"),
                 Arguments.of("!'ab'", "'!' requires as right input a single boolean but was '[ab]'"),
 
-                Arguments.of("d", "Operator d has right associativity but the right value was: empty")
+                Arguments.of("d", "Operator d has right associativity but the right value was: empty"),
+                Arguments.of("if(1d6>?4, val('a',10), val('a',-10)) 'a'", "'if' requires as 2 inputs but was empty")
 
         );
     }
