@@ -35,6 +35,17 @@ public interface RollBuilder {
         return new RollsAndIndex(firstNonEmptyRoll, index - 1);
     }
 
+    static RollsAndIndex getNextNonEmptyRolls(List<RollBuilder> rollBuilders, int startIndex, Map<String, Roll> variableMap) throws ExpressionException {
+        Optional<List<Roll>> firstNonEmptyRoll = Optional.empty();
+        List<RollBuilder> subList = rollBuilders.subList(startIndex, rollBuilders.size());
+        int index = 0;
+        while (firstNonEmptyRoll.isEmpty() && index < subList.size()) {
+            firstNonEmptyRoll = subList.get(index).extendRoll(variableMap);
+            index++;
+        }
+        return new RollsAndIndex(firstNonEmptyRoll, startIndex + index - 1);
+    }
+
     /**
      * Creates a concrete roll from a roll builder (applies all random function aka throwing the dice).
      * <p>

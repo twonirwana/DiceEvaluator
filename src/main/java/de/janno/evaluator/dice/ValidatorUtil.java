@@ -52,7 +52,7 @@ public final class ValidatorUtil {
 
     public static void checkRollSize(@NonNull String inputName, @NonNull List<Roll> rolls, int minInc, int maxInc) throws ExpressionException {
         if (rolls.size() < minInc || rolls.size() > maxInc) {
-            String range = minInc == maxInc ? String.valueOf(minInc) : "%d-%d".formatted(maxInc, maxInc);
+            String range = minInc == maxInc ? String.valueOf(minInc) : "%d-%d".formatted(minInc, maxInc);
             throw new ExpressionException(String.format("'%s' requires as %s inputs but was '%s'", inputName, range, rolls.stream()
                     .map(Roll::getElements).toList()
             ));

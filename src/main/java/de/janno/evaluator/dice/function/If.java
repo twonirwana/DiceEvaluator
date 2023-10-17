@@ -4,65 +4,81 @@ import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotBoolean;
 
 public class If extends Function {
     public If() {
-        super("if", 2, Integer.MAX_VALUE);
+        super("if", 1, Integer.MAX_VALUE);
     }
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
         return variables -> {
-            List<Roll> rolls = extendAllBuilder(arguments, variables);
-            checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
-            final AtomicInteger counter = new AtomicInteger(0);
-            UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
-            while (counter.get() < rolls.size() - 1) {
-                Roll booleanExpression = rolls.get(counter.get());
+
+            ImmutableList.Builder<Roll> allRolls = ImmutableList.builder();
+            RollBuilder.RollsAndIndex next = RollBuilder.getNextNonEmptyRolls(arguments, 0, variables);
+            if (next.getRolls().isEmpty()) {
+                throw new ExpressionException(String.format("'%s' requires as %s inputs but was '%s'", inputValue, 1, Collections.emptyList()));
+            }
+            UniqueRandomElements.Builder booleanRandomElements = UniqueRandomElements.builder();
+            Map<String, Roll> trueVariable = new ConcurrentHashMap<>(variables);
+            RollBuilder.RollsAndIndex after = RollBuilder.getNextNonEmptyRolls(arguments, next.getIndex() + 1, trueVariable);
+
+            while (after.getRolls().isPresent()) {
+                checkRollSize(inputValue, next.getRolls().get(), 1, 1);
+                allRolls.addAll(next.getRolls().get());
+                allRolls.addAll(after.getRolls().get());
+                //todo random elements over all expression
+                Roll booleanExpression = next.getRolls().get().get(0);
+                int nextIndex = next.getIndex();
                 final boolean booleanValue = booleanExpression.asBoolean()
-                        .orElseThrow(() -> throwNotBoolean(inputValue, booleanExpression, "position %d".formatted(counter.get())));
-
-                Roll trueResult = rolls.get(counter.get() + 1);
-                randomElements.add(booleanExpression.getRandomElementsInRoll());
+                        .orElseThrow(() -> throwNotBoolean(inputValue, booleanExpression, "position %d".formatted(nextIndex)));
+                booleanRandomElements.add(booleanExpression.getRandomElementsInRoll());
                 if (booleanValue) {
-                    randomElements.add(trueResult.getRandomElementsInRoll());
-                    return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
-                            trueResult.getElements(),
-                            randomElements.build(),
-                            ImmutableList.<Roll>builder()
-                                    .addAll(booleanExpression.getChildrenRolls())
-                                    .addAll(trueResult.getChildrenRolls())
-                                    .build())));
+                    List<Roll> trueResult = after.getRolls().get();
+                    variables.putAll(trueVariable);
+                    UniqueRandomElements allBooleanRandomElements = booleanRandomElements.build();
+                    return Optional.of(trueResult.stream()
+                            .map(r -> new Roll(getExpression(inputValue, allRolls.build()), r.getElements(),
+                                    UniqueRandomElements.builder()
+                                            .add(allBooleanRandomElements)
+                                            .add(r.getRandomElementsInRoll())
+                                            .build(),
+                                    ImmutableList.<Roll>builder()
+                                            .addAll(booleanExpression.getChildrenRolls())
+                                            .addAll(r.getChildrenRolls())
+                                            .build()))
+                            .collect(ImmutableList.toImmutableList()));
+
                 }
-                counter.addAndGet(2);
+                next = RollBuilder.getNextNonEmptyRolls(arguments, after.getIndex() + 1, variables);
+                trueVariable = new ConcurrentHashMap<>(variables); //reset the true variables
+                after = RollBuilder.getNextNonEmptyRolls(arguments, next.getIndex() + 1, trueVariable);
             }
 
-            final Roll result;
             //there is a last element in the arguments, which is the default result
-            if (counter.get() != rolls.size()) {
-                result = rolls.get(rolls.size() - 1);
-                randomElements.add(result.getRandomElementsInRoll());
-                return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
-                        result.getElements(),
-                        randomElements.build(),
-                        ImmutableList.<Roll>builder()
-                                .addAll(result.getChildrenRolls())
-                                .build())));
+            if (next.getRolls().isPresent()) {
+                List<Roll> defaultResult = next.getRolls().get();
+                allRolls.addAll(defaultResult);
+                variables.putAll(trueVariable); // if there was a result but it was empty (only val) then we need to take the val values
+                return Optional.of(defaultResult.stream()
+                        .map(r -> new Roll(getExpression(inputValue, allRolls.build()), r.getElements(),
+                                UniqueRandomElements.builder()
+                                        .add(booleanRandomElements.build())
+                                        .add(r.getRandomElementsInRoll())
+                                        .build(), r.getChildrenRolls()))
+                        .collect(ImmutableList.toImmutableList()));
 
             } else {
-                //if there is no default result, the result is empty
-                return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
-                        ImmutableList.of(),
-                        randomElements.build(),
-                        ImmutableList.of())));
+                return Optional.empty();
             }
 
         };

@@ -114,6 +114,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("-5 mod 2", List.of(), List.of(-1)),
                 Arguments.of("5 mod -2", List.of(), List.of(1)),
                 Arguments.of("0 mod 4", List.of(), List.of(0)),
+
+                //val
                 Arguments.of("val('$1', 3d6) '$1'", List.of(1, 2, 3), List.of(1, 2, 3)),
                 Arguments.of("val('$1', 3d6) '$1' + '$1'", List.of(1, 2, 3), List.of(1, 2, 3, 1, 2, 3)),
                 Arguments.of("val('$1', 3d6) '$1', '$1'", List.of(1, 2, 3), List.of(1, 2, 3, 1, 2, 3)),
@@ -129,9 +131,17 @@ public class DiceEvaluatorTest {
                 Arguments.of("val(2, 'abc'),d6", List.of(2), List.of(2)), //the replacement happens only in the formular, not in results
                 Arguments.of("4 + val('a',3) 'a'", List.of(), List.of(4, 3)),
                 Arguments.of("val('a',3) 4 + 'a'", List.of(), List.of(4, 3)),
+                Arguments.of("val('a',3) val('a',4) 'a'", List.of(), List.of(4)),
+                Arguments.of("val('a',1d6) val('a',2d10) 'a'", List.of(1, 7, 8), List.of(7, 8)),
+                Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10) '') +'a'", List.of(1), List.of(-10)),
+                Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10) '') +'a'", List.of(5), List.of(10)),
+
+                //repeat list
                 Arguments.of("1rd4", List.of(3), List.of(3)),
                 Arguments.of("2rd4", List.of(3, 2), List.of(3, 2)),
                 Arguments.of("0rd4", List.of(), List.of()),
+
+                //empty
                 Arguments.of("", null, List.of())
 
         );
@@ -472,11 +482,11 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 2, 3, 4, 5, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("val('$1', val('$2', 3d6) + 7) '$1' , '$2'");
+        List<Roll> res = underTest.evaluate("if(1d6>?4, val('a',10) '', val('a',-10) '') +'a'");
         System.out.println(res.size());
-        res.forEach(r -> System.out.println(r.getExpression()));
+        res.forEach(r -> System.out.println(r.getResultString()));
         System.out.println(res);
         res.forEach(r -> System.out.println(r.getRandomElementsInRoll()));
         res.forEach(r -> System.out.println(r.getRandomElementsString()));
