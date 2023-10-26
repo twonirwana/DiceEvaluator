@@ -133,12 +133,6 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('a',3) 4 + 'a'", List.of(), List.of(4, 3)),
                 Arguments.of("val('a',3) val('a',4) 'a'", List.of(), List.of(4)),
                 Arguments.of("val('a',1d6) val('a',2d10) 'a'", List.of(1, 7, 8), List.of(7, 8)),
-                Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10) '') +'a'", List.of(1), List.of(-10)),
-                Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10) '') +'a'", List.of(5), List.of(10)),
-                Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10)) + 'a'", List.of(1), List.of(-10)),// interpreted as if with two parameters
-                Arguments.of("if(1d6>?4, val('a',10) '', val('a',-10)) + 'a'", List.of(5), List.of(10)), // interpreted as if with two parameters
-                Arguments.of("if(1d6>?4, val('a',10), val('a',-10) '') + 'a'", List.of(1), List.of()), // interpreted as if with two parameters
-                Arguments.of("if(1d6>?4, val('a',10), val('a',-10) '') + 'a'", List.of(5), List.of(-10)), // interpreted as if with two parameters
                 //repeat list
                 Arguments.of("1rd4", List.of(3), List.of(3)),
                 Arguments.of("2rd4", List.of(3, 2), List.of(3, 2)),
@@ -442,9 +436,9 @@ public class DiceEvaluatorTest {
                 Arguments.of("1>=?'ab'", "'>=?' requires as right input a single decimal but was '[ab]'"),
                 Arguments.of("'ab'>=?'1'", "'>=?' requires as left input a single decimal but was '[ab]'"),
                 Arguments.of("!'ab'", "'!' requires as right input a single boolean but was '[ab]'"),
-
-                Arguments.of("d", "Operator d has right associativity but the right value was: empty"),
-                Arguments.of("if(1d6>?4, val('a',10), val('a',-10)) 'a'", "'if' requires as 2 inputs but was empty")
+                Arguments.of("if('false', 'a','','b') 'a'", "'if' requires as position 3 input a single boolean but was '[]'"),
+                Arguments.of("if('false', val('a',10) '', val('a',-10) '') +'a'", "'if' requires as position 3 input a single boolean but was '[]'"), //the value produce the wrong number of arguments
+                Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
         );
     }
@@ -486,9 +480,9 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 2, 3, 4, 5, 6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
 
-        List<Roll> res = underTest.evaluate("if(1d6>?4, val('a',10) '', val('a',-10) '') +'a'");
+        List<Roll> res = underTest.evaluate("if(1d6>?4, val('a',10), val('a',-10)) 'a'");
         System.out.println(res.size());
         res.forEach(r -> System.out.println(r.getResultString()));
         System.out.println(res);

@@ -2,7 +2,6 @@ package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
-import lombok.Value;
 
 import java.util.List;
 import java.util.Map;
@@ -25,27 +24,6 @@ public interface RollBuilder {
         r.ifPresent(builder::addAll);
     }
 
-    static RollsAndIndex getFirstNonEmptyRolls(List<RollBuilder> rollBuilders, Map<String, Roll> variableMap) throws ExpressionException {
-        Optional<List<Roll>> firstNonEmptyRoll = Optional.empty();
-        int index = 0;
-        while (firstNonEmptyRoll.isEmpty() && index < rollBuilders.size()) {
-            firstNonEmptyRoll = rollBuilders.get(index).extendRoll(variableMap);
-            index++;
-        }
-        return new RollsAndIndex(firstNonEmptyRoll, index - 1);
-    }
-
-    static RollsAndIndex getNextNonEmptyRolls(List<RollBuilder> rollBuilders, int startIndex, Map<String, Roll> variableMap) throws ExpressionException {
-        Optional<List<Roll>> firstNonEmptyRoll = Optional.empty();
-        List<RollBuilder> subList = rollBuilders.subList(startIndex, rollBuilders.size());
-        int index = 0;
-        while (firstNonEmptyRoll.isEmpty() && index < subList.size()) {
-            firstNonEmptyRoll = subList.get(index).extendRoll(variableMap);
-            index++;
-        }
-        return new RollsAndIndex(firstNonEmptyRoll, startIndex + index - 1);
-    }
-
     /**
      * Creates a concrete roll from a roll builder (applies all random function aka throwing the dice).
      * <p>
@@ -54,9 +32,4 @@ public interface RollBuilder {
      */
     @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variableMap) throws ExpressionException;
 
-    @Value
-    class RollsAndIndex {
-        @NonNull Optional<List<Roll>> rolls;
-        int index;
-    }
 }

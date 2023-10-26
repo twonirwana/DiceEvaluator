@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,13 +19,18 @@ public class Value extends Function {
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
         return variables -> {
+            if (arguments.size() < 2) {
+                throw new ExpressionException(String.format("'%s' requires as 2 inputs but was '%s'", getName(), arguments.size()));
+            }
             Map<String, Roll> variableNameMap = new ConcurrentHashMap<>(); //don't replace literals in the first argument of the function, but it can use new variables
-            RollBuilder.RollsAndIndex firstNonEmptyRoll = RollBuilder.getFirstNonEmptyRolls(arguments, variableNameMap);
-
+            Optional<List<Roll>> valNameRoll = arguments.get(0).extendRoll(variableNameMap);
+            if (valNameRoll.isEmpty()) {
+                throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", inputValue));
+            }
             ImmutableList.Builder<Roll> rollBuilder = ImmutableList.<Roll>builder()
-                    .addAll(firstNonEmptyRoll.getRolls().orElse(Collections.emptyList()));
+                    .addAll(valNameRoll.get());
             variables.putAll(variableNameMap);
-            List<RollBuilder> remainingRollBuilder = arguments.subList(firstNonEmptyRoll.getIndex() + 1, arguments.size());
+            List<RollBuilder> remainingRollBuilder = arguments.subList(1, arguments.size());
             List<Roll> rolls = rollBuilder.addAll(RollBuilder.extendAllBuilder(remainingRollBuilder, variables)).build();
 
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
