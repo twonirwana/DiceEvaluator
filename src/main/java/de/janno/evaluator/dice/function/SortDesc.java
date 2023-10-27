@@ -6,6 +6,7 @@ import lombok.NonNull;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -18,18 +19,18 @@ public class SortDesc extends Function {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(arguments, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
             final ImmutableList<RollElement> res = rolls.stream()
                     .flatMap(result -> result.getElements().stream())
                     .sorted(Comparator.reverseOrder())
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.copyOf(rolls)));
+                    ImmutableList.copyOf(rolls))));
         };
     }
 }

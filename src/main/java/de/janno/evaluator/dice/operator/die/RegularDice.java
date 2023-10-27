@@ -6,6 +6,7 @@ import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.DiceHelper.*;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -25,8 +26,8 @@ public final class RegularDice extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(operands, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 1, 2);
 
             final int numberOfDice;
@@ -79,10 +80,10 @@ public final class RegularDice extends Operator {
                         .collect(ImmutableList.toImmutableList()));
             }
 
-            return ImmutableList.of(new Roll(expression,
+            return Optional.of(ImmutableList.of(new Roll(expression,
                     rollElements,
                     randomElements.build(),
-                    childrenRolls));
+                    childrenRolls)));
         };
     }
 }

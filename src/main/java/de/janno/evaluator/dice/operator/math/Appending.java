@@ -6,6 +6,7 @@ import de.janno.evaluator.dice.operator.OperatorOrder;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -17,16 +18,16 @@ public final class Appending extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
-        return constants -> {
+        return variables -> {
 
-            List<Roll> rolls = extendAllBuilder(operands, constants);
+            List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 1, 2);
 
             if (rolls.size() == 1) {
-                return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
+                return Optional.of(ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
                         rolls.get(0).getElements(),
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(rolls.get(0))));
+                        ImmutableList.of(rolls.get(0)))));
             }
 
             Roll left = rolls.get(0);
@@ -35,10 +36,10 @@ public final class Appending extends Operator {
                     .addAll(left.getElements())
                     .addAll(right.getElements())
                     .build();
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 }

@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -17,8 +18,8 @@ public abstract class AbstractIf extends Function {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(arguments, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
             Roll input = rolls.get(0);
 
@@ -31,13 +32,13 @@ public abstract class AbstractIf extends Function {
                 randomElements.add(compareTo.getRandomElementsInRoll());
                 if (compare(input, counter, compareTo, counter + 1)) {
                     randomElements.add(trueResult.getRandomElementsInRoll());
-                    return  ImmutableList.of(new Roll(getExpression(inputValue, rolls),
+                    return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                             trueResult.getElements(),
                             randomElements.build(),
                             ImmutableList.<Roll>builder()
                                     .addAll(input.getChildrenRolls())
                                     .addAll(trueResult.getChildrenRolls())
-                                    .build()));
+                                    .build())));
                 }
                 counter += 2;
             }
@@ -51,13 +52,13 @@ public abstract class AbstractIf extends Function {
                 //if there is no default result, the result is the input
                 result = input;
             }
-            return  ImmutableList.of(new Roll(getExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     result.getElements(),
                     randomElements.build(),
                     ImmutableList.<Roll>builder()
                             .addAll(input.getChildrenRolls())
                             .addAll(result.getChildrenRolls())
-                            .build()));
+                            .build())));
         };
     }
 

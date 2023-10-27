@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -21,8 +22,8 @@ public class Double extends Function {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(arguments, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
             Roll input = rolls.get(0);
             Roll toDuplicate = rolls.get(1);
@@ -37,13 +38,13 @@ public class Double extends Function {
                     })
                     .collect(ImmutableList.toImmutableList());
 
-            return ImmutableList.of(new Roll(getExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     rollElements,
                     UniqueRandomElements.from(rolls),
                     ImmutableList.<Roll>builder()
                             .addAll(input.getChildrenRolls())
                             .addAll(toDuplicate.getChildrenRolls())
-                            .build()));
+                            .build())));
         };
     }
 }

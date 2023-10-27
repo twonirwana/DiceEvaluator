@@ -6,6 +6,7 @@ import lombok.NonNull;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -21,8 +22,8 @@ public class KeepHighest extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(operands, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 2, 2);
 
             Roll left = rolls.get(0);
@@ -44,13 +45,13 @@ public class KeepHighest extends Operator {
                             .limit(rightNumber)
                     )
                     .collect(ImmutableList.toImmutableList());
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     ImmutableList.<RollElement>builder()
                             .addAll(keep)
                             .addAll(otherTagElements)
                             .build(),
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 }

@@ -6,6 +6,7 @@ import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.DiceHelper.explodingDice;
 import static de.janno.evaluator.dice.DiceHelper.toRollElements;
@@ -26,8 +27,8 @@ public final class ExplodingDice extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(operands, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 1, 2);
 
             UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
@@ -44,10 +45,10 @@ public final class ExplodingDice extends Operator {
                         .map(r -> new RandomElement(r, 1, sidesOfDie))
                         .collect(ImmutableList.toImmutableList()));
 
-                return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
+                return Optional.of(ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
                         rollElements,
                         randomElements.build(),
-                        ImmutableList.of(right)));
+                        ImmutableList.of(right))));
             }
 
             final Roll left = rolls.get(0);
@@ -72,10 +73,10 @@ public final class ExplodingDice extends Operator {
             randomElements.addAsRandomElements(rollElements.stream()
                     .map(r -> new RandomElement(r, 1, sidesOfDie))
                     .collect(ImmutableList.toImmutableList()));
-            return ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     rollElements,
                     randomElements.build(),
-                    ImmutableList.of(left, right)));
+                    ImmutableList.of(left, right))));
         };
     }
 }

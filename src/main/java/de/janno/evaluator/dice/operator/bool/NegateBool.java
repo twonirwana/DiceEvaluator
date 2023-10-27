@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -19,8 +20,8 @@ public class NegateBool extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return constants -> {
-            List<Roll> rolls = extendAllBuilder(operands, constants);
+        return variables -> {
+            List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 1, 1);
 
             Roll value = rolls.get(0);
@@ -28,10 +29,10 @@ public class NegateBool extends Operator {
             final boolean boolValue = value.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, value, "right"));
 
             ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf((!boolValue)), RollElement.NO_TAG, RollElement.NO_COLOR));
-            return ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
+            return Optional.of(ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.of(value)));
+                    ImmutableList.of(value))));
         };
     }
 }
