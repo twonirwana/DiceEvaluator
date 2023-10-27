@@ -133,6 +133,18 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('a',3) 4 + 'a'", List.of(), List.of(4, 3)),
                 Arguments.of("val('a',3) val('a',4) 'a'", List.of(), List.of(4)),
                 Arguments.of("val('a',1d6) val('a',2d10) 'a'", List.of(1, 7, 8), List.of(7, 8)),
+                //if val
+                Arguments.of("val('$1', '0') if('true', val('$1', '1')) '$1'", List.of(), List.of(1)),
+                Arguments.of("val('$1', '0') if('false', val('$1', '1')) '$1'", List.of(), List.of(0)),
+                Arguments.of("val('$1', '0') if('true', val('$1', '1'), val('$1', '2')) '$1'", List.of(), List.of(1)),
+                Arguments.of("val('$1', '0') if('false', val('$1', '1'), val('$1', '2')) '$1'", List.of(), List.of(2)),
+                Arguments.of("val('$1', '0') if('true', val('$1', '1'),'true', val('$1', '2')) '$1'", List.of(), List.of(1)),
+                Arguments.of("val('$1', '0') if('false', val('$1', '1'),'true', val('$1', '2')) '$1'", List.of(), List.of(2)),
+                Arguments.of("val('$1', '0') if('false', val('$1', '1'),'false', val('$1', '2')) '$1'", List.of(), List.of(0)),
+                Arguments.of("val('$1', '0') if('false', val('$1', '1'),'true', val('$1', '2'), val('$1', '3')) '$1'", List.of(), List.of(2)),
+                Arguments.of("val('$1', '0') if('false', val('$1', '1'),'false', val('$1', '2'), val('$1', '3')) '$1'", List.of(), List.of(3)),
+
+
                 //repeat list
                 Arguments.of("1rd4", List.of(3), List.of(3)),
                 Arguments.of("2rd4", List.of(3, 2), List.of(3, 2)),
