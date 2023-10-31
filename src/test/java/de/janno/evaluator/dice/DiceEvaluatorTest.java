@@ -211,11 +211,25 @@ public class DiceEvaluatorTest {
                 Arguments.of("ifIn(1d6,2,'2','!2')", List.of(2), List.of("2")),
                 Arguments.of("ifIn(1d6,2,'2')", List.of(5), List.of("5")),
                 Arguments.of("ifIn(1d6,[2/3],'2or3','!2or3')", List.of(4), List.of("!2or3")),
+
+                //replace
                 Arguments.of("replace(8d10, [9/10], 'bonus')", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("bonus", "bonus", "3", "4", "5", "6", "7", "1")),
                 Arguments.of("replace(8d10, [9/10], '')", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("3", "4", "5", "6", "7", "1")),
                 Arguments.of("replace(8d10, [9/10], [])", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("3", "4", "5", "6", "7", "1")),
                 Arguments.of("replace(8d10, [9/10], [a/a])", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("a", "a", "a", "a", "3", "4", "5", "6", "7", "1")),
                 Arguments.of("replace(8d10, [9/10], 'bonus')", List.of(1, 2, 3, 4, 5, 6, 7, 8), List.of("1", "2", "3", "4", "5", "6", "7", "8")),
+                Arguments.of("replace(8d10, [1/2], 'a', [2/3], 'b')", List.of(1, 2, 3, 4, 5, 6, 7, 8), List.of("a", "a", "b", "4", "5", "6", "7", "8")),
+                Arguments.of("replace(8d10, [1/2], 'a', 'a', 'b')", List.of(1, 2, 3, 4, 5, 6, 7, 8), List.of("b", "b", "3", "4", "5", "6", "7", "8")),
+
+                //concat operator
+                Arguments.of("'1'_'1'", List.of(), List.of("11")),
+                Arguments.of("1d6_'1'", List.of(3), List.of("31")),
+                Arguments.of("1d6_' damage'", List.of(3), List.of("3 damage")),
+                Arguments.of("1d6 + 1d8 _' damage'", List.of(3, 7), List.of("3, 7 damage")),
+                Arguments.of("1d6 + 1d8= _' damage'", List.of(3, 7), List.of("10 damage")),
+                Arguments.of(" [] _' damage'", List.of(3, 7), List.of(" damage")),
+                Arguments.of(" 'damage ' _ []", List.of(3, 7), List.of("damage ")),
+
                 Arguments.of("[b/2/a]k2", List.of(), List.of("b", "a")),
                 Arguments.of("[b/2/a]l2", List.of(), List.of("2", "a")),
                 Arguments.of("'3.5'+'2.5'", List.of(), List.of("3.5", "2.5")),
@@ -436,7 +450,6 @@ public class DiceEvaluatorTest {
                 Arguments.of("1000d999999999999999999999999999999", "The number '999999999999999999999999999999' was to big"),
                 Arguments.of("9.99999999999999999999999999999", "The number '9.99999999999999999999999999999' was to big"),
                 Arguments.of("(3x2d6)=", "'=' requires as 1 inputs but was '[[2, 3], [1, 4], [1, 1]]'"),
-
                 Arguments.of("1&&'ab'", "'&&' requires as left input a single boolean but was '[1]'"),
                 Arguments.of("1||'ab'", "'||' requires as left input a single boolean but was '[1]'"),
                 Arguments.of("1<?'ab'", "'<?' requires as right input a single decimal but was '[ab]'"),
@@ -450,6 +463,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("!'ab'", "'!' requires as right input a single boolean but was '[ab]'"),
                 Arguments.of("if('false', 'a','','b') 'a'", "'if' requires as position 3 input a single boolean but was '[]'"),
                 Arguments.of("if('false', val('a',10) '', val('a',-10) '') +'a'", "'if' requires as position 3 input a single boolean but was '[]'"), //the value produce the wrong number of arguments
+                Arguments.of("replace(3d6,'1','2','3')", "'replace' an odd number of arguments but was 4"),
+
                 Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
         );

@@ -1,4 +1,4 @@
-package de.janno.evaluator.dice.operator.math;
+package de.janno.evaluator.dice.operator.list;
 
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
