@@ -13,7 +13,7 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class Replace extends Function {
     public Replace() {
-        super("replace", 3);
+        super("replace", 3, Integer.MAX_VALUE);
     }
 
     @Override
@@ -21,29 +21,33 @@ public class Replace extends Function {
         return variables -> {
             List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
-
+            if (rolls.size() % 2 == 0) {
+                throw new ExpressionException(String.format("'%s' an odd number of arguments but was %d", getName(), arguments.size()));
+            }
             Roll input = rolls.get(0);
-            Roll find = rolls.get(1);
-            Roll replace = rolls.get(2);
-
-            ImmutableList<RollElement> rollElements = input.getElements().stream()
-                    .flatMap(r -> {
-                        if (find.getElements().contains(r)) {
-                            return replace.getElements().stream();
-                        }
-                        return Stream.of(r);
-                    })
-                    .collect(ImmutableList.toImmutableList());
+            ImmutableList<RollElement> rollElements = input.getElements();
+            ImmutableList.Builder<Roll> childrenRollBuilder = ImmutableList.<Roll>builder()
+                    .addAll(input.getChildrenRolls());
+            for (int i = 1; i < rolls.size() - 1; i = i + 2) {
+                Roll find = rolls.get(i);
+                Roll replace = rolls.get(i + 1);
+                childrenRollBuilder.addAll(find.getChildrenRolls())
+                        .addAll(replace.getChildrenRolls());
+                rollElements = rollElements.stream()
+                        .flatMap(r -> {
+                            if (find.getElements().contains(r)) {
+                                return replace.getElements().stream();
+                            }
+                            return Stream.of(r);
+                        })
+                        .collect(ImmutableList.toImmutableList());
+            }
 
 
             return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
                     rollElements,
                     UniqueRandomElements.from(rolls),
-                    ImmutableList.<Roll>builder()
-                            .addAll(input.getChildrenRolls())
-                            .addAll(find.getChildrenRolls())
-                            .addAll(replace.getChildrenRolls())
-                            .build())));
+                    childrenRollBuilder.build())));
         };
     }
 }

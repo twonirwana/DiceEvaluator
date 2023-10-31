@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
-public class Concat extends Function {
-    public Concat() {
+public class ConcatFunction extends Function {
+    public ConcatFunction() {
         super("concat", 2, Integer.MAX_VALUE);
     }
 

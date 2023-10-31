@@ -14,6 +14,7 @@ public final class OperatorOrder {
             ImmutableList.<Class<? extends Operator>>builder()
                     .add(Repeat.class)
                     .add(RepeatList.class)
+                    .add(Concat.class)
                     .add(OrBool.class)
                     .add(AndBool.class)
                     .add(NegateBool.class)

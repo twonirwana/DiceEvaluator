@@ -46,6 +46,7 @@ public class DiceEvaluator {
                         .add(new ExplodingDice(numberSupplier, maxNumberOfDice))
                         .add(new ExplodingAddDice(numberSupplier, maxNumberOfDice))
                         .add(new Appending())
+                        .add(new Concat())
                         .add(new Color())
                         .add(new Tag())
                         .add(new Sum())
@@ -78,7 +79,7 @@ public class DiceEvaluator {
                 .functions(ImmutableList.<Function>builder()
                         .add(new ColorFunction())
                         .add(new Value())
-                        .add(new Concat()) //todo add operator
+                        .add(new ConcatFunction())
                         .add(new SortAsc())
                         .add(new SortDesc())
                         .add(new Min())
