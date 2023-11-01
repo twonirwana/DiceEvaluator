@@ -227,17 +227,21 @@ public class DiceEvaluatorTest {
                 Arguments.of("1d6_' damage'", List.of(3), List.of("3 damage")),
                 Arguments.of("1d6 + 1d8 _' damage'", List.of(3, 7), List.of("3, 7 damage")),
                 Arguments.of("1d6 + 1d8= _' damage'", List.of(3, 7), List.of("10 damage")),
-                Arguments.of(" [] _' damage'", List.of(3, 7), List.of(" damage")),
-                Arguments.of(" 'damage ' _ []", List.of(3, 7), List.of("damage ")),
+                Arguments.of(" [] _' damage'", List.of(), List.of(" damage")),
+                Arguments.of(" 'damage ' _ []", List.of(), List.of("damage ")),
 
-                Arguments.of("[b/2/a]k2", List.of(), List.of("b", "a")),
-                Arguments.of("[b/2/a]l2", List.of(), List.of("2", "a")),
-                Arguments.of("'3.5'+'2.5'", List.of(), List.of("3.5", "2.5")),
+                // concat function
                 Arguments.of("concat('Attack: ', 3d6)", List.of(1, 2, 3), List.of("Attack: 1, 2, 3")),
                 Arguments.of("concat('Attack:', '')", List.of(), List.of("Attack:")),
                 Arguments.of("concat('Attack:', ' ')", List.of(), List.of("Attack: ")),
                 Arguments.of("concat('Attack:', [])", List.of(), List.of("Attack:")),
+                Arguments.of("concat('Attack:')", List.of(), List.of("Attack:")),
+                Arguments.of("concat('')", List.of(), List.of("")),
                 Arguments.of("concat('Attack: ', 1d20, ' Damage: ', 2d10+5=) ", List.of(1, 2, 3), List.of("Attack: 1 Damage: 10")),
+
+                Arguments.of("[b/2/a]k2", List.of(), List.of("b", "a")),
+                Arguments.of("[b/2/a]l2", List.of(), List.of("2", "a")),
+                Arguments.of("'3.5'+'2.5'", List.of(), List.of("3.5", "2.5")),
                 Arguments.of("val(1, ('a'+'b'+'c')) 3d1", List.of(1, 2, 3), List.of("a", "b", "c")),
 
                 Arguments.of("1", List.of(), List.of("1")),
