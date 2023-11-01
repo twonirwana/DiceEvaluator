@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
-import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class ConcatFunction extends Function {
     public ConcatFunction() {
