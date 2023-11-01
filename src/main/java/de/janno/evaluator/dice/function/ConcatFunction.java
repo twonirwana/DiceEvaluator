@@ -13,14 +13,16 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class ConcatFunction extends Function {
     public ConcatFunction() {
-        super("concat", 2, Integer.MAX_VALUE);
+        super("concat", 0, Integer.MAX_VALUE);
     }
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
         return variables -> {
             List<Roll> rolls = extendAllBuilder(arguments, variables);
-            checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
+            if (rolls.isEmpty()) {
+                return Optional.empty();
+            }
             String joined = rolls.stream()
                     .map(Roll::getResultString)
                     .collect(Collectors.joining());

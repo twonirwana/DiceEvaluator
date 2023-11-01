@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.Optional;
 
 @EqualsAndHashCode
 @ToString
@@ -69,16 +70,27 @@ public abstract class Operator {
         return null;
     }
 
+    private static <T> Optional<T> getIndexIfExists(List<T> list, int index) {
+        if (list.size() <= index) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(list.get(index));
+    }
+
     protected static String getBinaryOperatorExpression(String name, List<Roll> operands) {
-        return String.format("%s%s%s", operands.get(0).getExpression(), name, operands.get(1).getExpression());
+        String left = getIndexIfExists(operands, 0).map(Roll::getExpression).orElse("");
+        String right = getIndexIfExists(operands, 1).map(Roll::getExpression).orElse("");
+        return String.format("%s%s%s", left, name, right);
     }
 
     protected static String getLeftUnaryExpression(String name, List<Roll> operands) {
-        return String.format("%s%s", operands.get(0).getExpression(), name);
+        String left = getIndexIfExists(operands, 0).map(Roll::getExpression).orElse("");
+        return String.format("%s%s", left, name);
     }
 
     protected static String getRightUnaryExpression(String name, List<Roll> operands) {
-        return String.format("%s%s", name, operands.get(0).getExpression());
+        String right = getIndexIfExists(operands, 0).map(Roll::getExpression).orElse("");
+        return String.format("%s%s", name, right);
     }
 
     public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException;
