@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v3
         with:
-          java-version: '20'
+          java-version: '21'
           distribution: 'temurin'
       #- name: Validate Gradle wrapper
       #  uses: gradle/wrapper-validation-action@1fca1b1af7c3ed6cb9059346aaa89179c82abf11252837115e546c4da38e8b0c
