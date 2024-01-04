@@ -24,10 +24,10 @@ public class ColorFunction extends Function {
         return variables -> {
             List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
-            Roll p1 = rolls.get(0);
+            Roll p1 = rolls.getFirst();
             Roll p2 = rolls.get(1);
             checkContainsSingleElement(inputValue, p2, "second argument");
-            String color = p2.getElements().get(0).getValue();
+            String color = p2.getElements().getFirst().getValue();
             UniqueRandomElements.Builder builder = new UniqueRandomElements.Builder();
             rolls.forEach(r -> builder.addWithColor(r.getRandomElementsInRoll(), color));
             return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),

@@ -20,21 +20,21 @@ public class Reroll extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return variables -> {
 
-            RollBuilder inputBuilder = operands.get(0);
+            RollBuilder inputBuilder = operands.getFirst();
             List<Roll> compareTos = operands.get(1).extendRoll(variables).orElse(Collections.emptyList());
             checkRollSize(inputValue, compareTos, 1, 1);
-            Roll compareTo = compareTos.get(0);
+            Roll compareTo = compareTos.getFirst();
 
             List<Roll> rolls = inputBuilder.extendRoll(variables).orElse(Collections.emptyList());
             checkRollSize(inputValue, rolls, 1, 1);
-            Roll roll = rolls.get(0);
+            Roll roll = rolls.getFirst();
             UniqueRandomElements.Builder builder = UniqueRandomElements.builder();
             builder.add(roll.getRandomElementsInRoll());
 
-            if (roll.getElements().stream().anyMatch(r -> compareTo.getElements().contains(r))) {
+            if (roll.getElements().stream().anyMatch(compareTo::isElementsContainsElementWithValueAndTag)) {
                 rolls = inputBuilder.extendRoll(variables).orElse(Collections.emptyList());
                 checkRollSize(inputValue, rolls, 1, 1);
-                roll = rolls.get(0);
+                roll = rolls.getFirst();
                 builder.add(roll.getRandomElementsInRoll());
             }
 

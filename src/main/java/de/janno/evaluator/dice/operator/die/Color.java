@@ -23,11 +23,11 @@ public class Color extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 2, 2);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
             checkAllElementsAreSameTag(inputValue, left, right);
             checkContainsSingleElement(inputValue, right, "second argument");
-            String color = right.getElements().get(0).getValue();
+            String color = right.getElements().getFirst().getValue();
             //colors are applied to the random elements, so they can be used for dice images
             UniqueRandomElements.Builder builder = new UniqueRandomElements.Builder();
             rolls.forEach(r -> builder.addWithColor(r.getRandomElementsInRoll(), color));

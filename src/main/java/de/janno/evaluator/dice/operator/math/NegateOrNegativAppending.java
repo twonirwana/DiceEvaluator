@@ -27,7 +27,7 @@ public final class NegateOrNegativAppending extends Operator {
             checkRollSize(inputValue, rolls, 1, 2);
 
             if (rolls.size() == 1) {
-                Roll right = rolls.get(0);
+                Roll right = rolls.getFirst();
                 checkContainsOnlyDecimal(inputValue, right, "right");
                 ImmutableList<RollElement> negated = right.getElements().stream()
                         .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
@@ -38,7 +38,7 @@ public final class NegateOrNegativAppending extends Operator {
                         ImmutableList.of(right))));
             }
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
             checkContainsOnlyDecimal(inputValue, right, "right");
             final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()

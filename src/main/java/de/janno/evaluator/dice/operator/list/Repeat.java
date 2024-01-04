@@ -24,9 +24,9 @@ public class Repeat extends Operator {
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return variables -> {
-            List<Roll> leftRolls = operands.get(0).extendRoll(variables).orElse(Collections.emptyList());
+            List<Roll> leftRolls = operands.getFirst().extendRoll(variables).orElse(Collections.emptyList());
             checkRollSize(inputValue, leftRolls, 1, 1);
-            int left = leftRolls.get(0).asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, leftRolls.get(0), "left"));
+            int left = leftRolls.getFirst().asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, leftRolls.getFirst(), "left"));
             if (left > 10 || left < 1) {
                 throw new ExpressionException(String.format("The number of repeat must between 1-10 but was %d", left));
             }

@@ -25,12 +25,12 @@ public class Double extends Function {
         return variables -> {
             List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
-            Roll input = rolls.get(0);
+            Roll input = rolls.getFirst();
             Roll toDuplicate = rolls.get(1);
 
             ImmutableList<RollElement> rollElements = input.getElements().stream()
                     .flatMap(r -> {
-                        if (toDuplicate.getElements().contains(r)) {
+                        if (toDuplicate.isElementsContainsElementWithValueAndTag(r)) {
                             return ImmutableList.of(r, r).stream();
                         } else {
                             return ImmutableList.of(r).stream();

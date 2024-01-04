@@ -25,12 +25,12 @@ public final class Appending extends Operator {
 
             if (rolls.size() == 1) {
                 return Optional.of(ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
-                        rolls.get(0).getElements(),
+                        rolls.getFirst().getElements(),
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(rolls.get(0)))));
+                        ImmutableList.of(rolls.getFirst()))));
             }
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
             final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()
                     .addAll(left.getElements())

@@ -21,12 +21,14 @@ public class InBool extends Operator {
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return variables -> {
             List<Roll> rolls = extendAllBuilder(operands, variables);
-            checkRollSize(inputValue, rolls, 2,2);
+            checkRollSize(inputValue, rolls, 2, 2);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
 
-            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf(right.getElements().containsAll(left.getElements())), RollElement.NO_TAG, RollElement.NO_COLOR));
+            boolean isTrue = left.getElements().stream().allMatch(right::isElementsContainsElementWithValueAndTag);
+
+            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf(isTrue), RollElement.NO_TAG, RollElement.NO_COLOR));
             return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,
                     UniqueRandomElements.from(rolls),

@@ -23,7 +23,7 @@ public class Value extends Function {
                 throw new ExpressionException(String.format("'%s' requires as 2 inputs but was '%s'", getName(), arguments.size()));
             }
             Map<String, Roll> variableNameMap = new ConcurrentHashMap<>(); //don't replace literals in the first argument of the function, but it can use new variables
-            Optional<List<Roll>> valNameRoll = arguments.get(0).extendRoll(variableNameMap);
+            Optional<List<Roll>> valNameRoll = arguments.getFirst().extendRoll(variableNameMap);
             if (valNameRoll.isEmpty()) {
                 throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", inputValue));
             }
@@ -35,7 +35,7 @@ public class Value extends Function {
 
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
-            String valName = rolls.get(0).getElements().get(0).getValue();
+            String valName = rolls.getFirst().getElements().getFirst().getValue();
 
             String expression = getExpression(inputValue, rolls);
             variables.put(valName, new Roll(expression,

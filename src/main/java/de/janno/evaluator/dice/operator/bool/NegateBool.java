@@ -24,7 +24,7 @@ public class NegateBool extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 1, 1);
 
-            Roll value = rolls.get(0);
+            Roll value = rolls.getFirst();
 
             final boolean boolValue = value.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, value, "right"));
 

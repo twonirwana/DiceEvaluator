@@ -25,7 +25,7 @@ public class If extends Function {
                 throw new ExpressionException(String.format("'%s' requires as 2 inputs but was '%s'", getName(), arguments.size()));
             }
             ImmutableList.Builder<Roll> allRolls = ImmutableList.builder();
-            Optional<List<Roll>> checkIfTrue = arguments.get(0).extendRoll(variables);
+            Optional<List<Roll>> checkIfTrue = arguments.getFirst().extendRoll(variables);
             if (checkIfTrue.isEmpty()) {
                 throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", inputValue));
             }
@@ -36,7 +36,7 @@ public class If extends Function {
             int checkIfTrueIndex = 1;
             while (checkIfTrueIndex < arguments.size()) {
                 checkRollSize(inputValue, checkIfTrue.orElseThrow(), 1, 1);
-                Roll booleanExpression = checkIfTrue.get().get(0);
+                Roll booleanExpression = checkIfTrue.get().getFirst();
                 allRolls.addAll(checkIfTrue.get());
                 allRolls.addAll(returnIfTrue.orElse(Collections.emptyList()));
 

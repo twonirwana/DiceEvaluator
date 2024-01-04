@@ -23,12 +23,12 @@ public final class Multiply extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 2, 2);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
             checkAllElementsAreSameTag(inputValue, left, right);
             final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, left, "left"));
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
-            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.multiply(rightNumber).stripTrailingZeros().toPlainString(), left.getElements().get(0).getTag(), RollElement.NO_COLOR));
+            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.multiply(rightNumber).stripTrailingZeros().toPlainString(), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
 
             return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,

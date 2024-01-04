@@ -33,7 +33,7 @@ public class Sum extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 1, 1);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             checkContainsOnlyDecimal(inputValue, left, "left");
 
             ImmutableList<RollElement> res = left.getElements().stream().collect(Collectors.groupingBy(RollElement::getTag)).entrySet().stream()

@@ -21,7 +21,7 @@ public abstract class AbstractIf extends Function {
         return variables -> {
             List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
-            Roll input = rolls.get(0);
+            Roll input = rolls.getFirst();
 
             int counter = 1;
             UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();

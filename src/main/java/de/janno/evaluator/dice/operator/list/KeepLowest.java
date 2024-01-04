@@ -25,13 +25,13 @@ public class KeepLowest extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 2, 2);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
             final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
             if (rightNumber < 0) {
                 throw new ExpressionException(String.format("The number to keep can not be negativ but was %d", rightNumber));
             }
-            final String rightTag = right.getElements().get(0).getTag();
+            final String rightTag = right.getElements().getFirst().getTag();
             ImmutableList<RollElement> otherTagElements = left.getElements().stream()
                     .filter(r -> !r.getTag().equals(rightTag))
                     .collect(ImmutableList.toImmutableList());

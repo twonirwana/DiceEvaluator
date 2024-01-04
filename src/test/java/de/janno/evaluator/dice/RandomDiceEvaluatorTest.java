@@ -14,9 +14,9 @@ public class RandomDiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("1d6");
 
         assertThat(res.size()).isEqualTo(1);
-        assertThat(res.get(0).getElements().size()).isEqualTo(1);
-        assertThat(res.get(0).getElements().get(0).asInteger().orElseThrow()).isGreaterThanOrEqualTo(1);
-        assertThat(res.get(0).getElements().get(0).asInteger().orElseThrow()).isLessThanOrEqualTo(6);
+        assertThat(res.getFirst().getElements().size()).isEqualTo(1);
+        assertThat(res.getFirst().getElements().getFirst().asInteger().orElseThrow()).isGreaterThanOrEqualTo(1);
+        assertThat(res.getFirst().getElements().getFirst().asInteger().orElseThrow()).isLessThanOrEqualTo(6);
     }
 
 }
