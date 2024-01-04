@@ -3,8 +3,8 @@ package de.janno.evaluator.dice;
 import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 import lombok.Value;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 
 @Value
 public class RandomElement {
