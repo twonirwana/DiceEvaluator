@@ -21,9 +21,9 @@ public class RepeatList extends Operator {
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
         return variables -> {
-            List<Roll> leftRolls = operands.get(0).extendRoll(variables).orElse(Collections.emptyList());
+            List<Roll> leftRolls = operands.getFirst().extendRoll(variables).orElse(Collections.emptyList());
             checkRollSize(inputValue, leftRolls, 1, 1);
-            int left = leftRolls.get(0).asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, leftRolls.get(0), "left"));
+            int left = leftRolls.getFirst().asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, leftRolls.getFirst(), "left"));
             if (left > 10 || left < 0) {
                 throw new ExpressionException(String.format("The number of list repeat must between 0-10 but was %d", left));
             }
@@ -43,7 +43,7 @@ public class RepeatList extends Operator {
             ImmutableList<Roll> rolls = builder.build();
 
 
-            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, ImmutableList.of(leftRolls.get(0), rolls.get(0))),
+            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, ImmutableList.of(leftRolls.getFirst(), rolls.getFirst())),
                     rolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
                     UniqueRandomElements.from(rolls),
                     rolls)));

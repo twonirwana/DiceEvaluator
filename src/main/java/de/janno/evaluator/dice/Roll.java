@@ -23,21 +23,21 @@ public class Roll {
 
     public Optional<Integer> asInteger() {
         if (elements.size() == 1) {
-            return elements.get(0).asInteger();
+            return elements.getFirst().asInteger();
         }
         return Optional.empty();
     }
 
     public Optional<BigDecimal> asDecimal() {
         if (elements.size() == 1) {
-            return elements.get(0).asDecimal();
+            return elements.getFirst().asDecimal();
         }
         return Optional.empty();
     }
 
     public Optional<Boolean> asBoolean() {
         if (elements.size() == 1) {
-            return elements.get(0).asBoolean();
+            return elements.getFirst().asBoolean();
         }
         return Optional.empty();
     }
@@ -66,5 +66,9 @@ public class Roll {
             }
         }
         return true;
+    }
+
+    public boolean isElementsContainsElementWithValueAndTag(RollElement rollElement) {
+        return elements.stream().anyMatch(e -> e.isEqualValueAndTag(rollElement));
     }
 }

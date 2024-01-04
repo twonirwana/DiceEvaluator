@@ -23,13 +23,13 @@ public final class Modulo extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 2, 2);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
             checkAllElementsAreSameTag(inputValue, left, right);
             final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
             final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
 
-            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(leftNumber % rightNumber), left.getElements().get(0).getTag(), RollElement.NO_COLOR));
+            final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(leftNumber % rightNumber), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
             return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     res,
                     UniqueRandomElements.from(rolls),

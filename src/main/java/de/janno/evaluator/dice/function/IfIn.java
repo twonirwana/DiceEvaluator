@@ -13,6 +13,6 @@ public class IfIn extends AbstractIf {
     @Override
     protected boolean compare(Roll input, int inputPosition, Roll compareTo, int compareToPosition) throws ExpressionException {
         checkContainsSingleElement(getName(), input, "%d argument".formatted(inputPosition));
-        return compareTo.getElements().contains(input.getElements().get(0));
+        return compareTo.isElementsContainsElementWithValueAndTag(input.getElements().getFirst());
     }
 }

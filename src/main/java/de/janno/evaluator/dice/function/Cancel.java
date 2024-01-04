@@ -20,18 +20,18 @@ public class Cancel extends Function {
         return variables -> {
             List<Roll> rolls = extendAllBuilder(arguments, variables);
             checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
-            Roll input = rolls.get(0);
+            Roll input = rolls.getFirst();
             Roll typeA = rolls.get(1);
             Roll typeB = rolls.get(2);
 
             List<RollElement> noMatch = input.getElements().stream()
-                    .filter(r -> !typeA.getElements().contains(r) && !typeB.getElements().contains(r))
+                    .filter(r -> !typeA.isElementsContainsElementWithValueAndTag(r) && !typeB.isElementsContainsElementWithValueAndTag(r))
                     .collect(ImmutableList.toImmutableList());
             List<RollElement> typeAMatch = input.getElements().stream()
-                    .filter(r -> typeA.getElements().contains(r))
+                    .filter(typeA::isElementsContainsElementWithValueAndTag)
                     .collect(ImmutableList.toImmutableList());
             List<RollElement> typeBMatch = input.getElements().stream()
-                    .filter(r -> typeB.getElements().contains(r))
+                    .filter(typeB::isElementsContainsElementWithValueAndTag)
                     .collect(ImmutableList.toImmutableList());
 
             ImmutableList.Builder<RollElement> resultBuilder = ImmutableList.<RollElement>builder()

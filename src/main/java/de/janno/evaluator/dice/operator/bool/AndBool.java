@@ -24,7 +24,7 @@ public class AndBool extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 2,2);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
             final boolean leftBoolValue = left.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, left, "left"));
             final boolean rightBoolValue = right.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, right, "right"));

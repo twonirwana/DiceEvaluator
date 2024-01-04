@@ -2,8 +2,8 @@ package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -191,7 +191,7 @@ public class Tokenizer {
             throw new IllegalStateException("More then one operator matched the input %s: %s".formatted(input, maxLengthMatches.stream().map(Match::token).map(Token::toString).toList()));
         }
 
-        return Optional.of(maxLengthMatches.get(0));
+        return Optional.of(maxLengthMatches.getFirst());
     }
 
     private List<Match> getAllMatches(String input) throws ExpressionException {

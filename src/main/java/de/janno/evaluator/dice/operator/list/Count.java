@@ -24,7 +24,7 @@ public class Count extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 1, 1);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
 
             //count of each tag separate
             ImmutableList<RollElement> res;

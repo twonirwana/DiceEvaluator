@@ -24,7 +24,7 @@ public class Replace extends Function {
             if (rolls.size() % 2 == 0) {
                 throw new ExpressionException(String.format("'%s' an odd number of arguments but was %d", getName(), arguments.size()));
             }
-            Roll input = rolls.get(0);
+            Roll input = rolls.getFirst();
             ImmutableList<RollElement> rollElements = input.getElements();
             ImmutableList.Builder<Roll> childrenRollBuilder = ImmutableList.<Roll>builder()
                     .addAll(input.getChildrenRolls());
@@ -35,7 +35,7 @@ public class Replace extends Function {
                         .addAll(replace.getChildrenRolls());
                 rollElements = rollElements.stream()
                         .flatMap(r -> {
-                            if (find.getElements().contains(r)) {
+                            if (find.isElementsContainsElementWithValueAndTag(r)) {
                                 return replace.getElements().stream();
                             }
                             return Stream.of(r);

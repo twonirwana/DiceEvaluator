@@ -23,11 +23,11 @@ public class Tag extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 2, 2);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
             checkAllElementsAreSameTag(inputValue, left, right);
             checkContainsSingleElement(inputValue, right, "second argument");
-            String tag = right.getElements().get(0).getValue();
+            String tag = right.getElements().getFirst().getValue();
 
             return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     left.getElements().stream()

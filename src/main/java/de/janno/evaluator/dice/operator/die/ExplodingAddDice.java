@@ -32,7 +32,7 @@ public final class ExplodingAddDice extends Operator {
 
             UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
             if (rolls.size() == 1) {
-                final Roll right = rolls.get(0);
+                final Roll right = rolls.getFirst();
                 final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
                 if (sidesOfDie < 2) {
                     throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
@@ -47,7 +47,7 @@ public final class ExplodingAddDice extends Operator {
                         ImmutableList.of(right))));
             }
 
-            final Roll left = rolls.get(0);
+            final Roll left = rolls.getFirst();
             final Roll right = rolls.get(1);
             randomElements.add(left.getRandomElementsInRoll());
             randomElements.add(right.getRandomElementsInRoll());

@@ -25,14 +25,14 @@ public class GreaterThanFilter extends Operator {
             List<Roll> rolls = extendAllBuilder(operands, variables);
             checkRollSize(inputValue, rolls, 2, 2);
 
-            Roll left = rolls.get(0);
+            Roll left = rolls.getFirst();
             Roll right = rolls.get(1);
             checkContainsOnlyDecimal(inputValue, left, "left");
             final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
             ImmutableList<RollElement> diceResult = left.getElements().stream()
                     .filter(i -> i.asDecimal().isPresent() && i.asDecimal().get().compareTo(rightNumber) > 0
                             //the filter is only applied to elements with the same tag
-                            || !Objects.equals(i.getTag(), right.getElements().get(0).getTag()))
+                            || !Objects.equals(i.getTag(), right.getElements().getFirst().getTag()))
                     .collect(ImmutableList.toImmutableList());
             return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
                     diceResult,

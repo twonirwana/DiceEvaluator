@@ -36,12 +36,12 @@ public final class RegularDice extends Operator {
             final String expression;
             UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
             if (rolls.size() == 1) {
-                right = rolls.get(0);
+                right = rolls.getFirst();
                 numberOfDice = 1;
                 childrenRolls = ImmutableList.of(right);
                 expression = getRightUnaryExpression(inputValue, rolls);
             } else if (rolls.size() == 2) {
-                Roll left = rolls.get(0);
+                Roll left = rolls.getFirst();
                 right = rolls.get(1);
                 childrenRolls = ImmutableList.of(left, right);
                 numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
