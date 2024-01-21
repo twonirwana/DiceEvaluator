@@ -35,7 +35,10 @@ public class If extends Function {
 
             int checkIfTrueIndex = 1;
             while (checkIfTrueIndex < arguments.size()) {
-                checkRollSize(inputValue, checkIfTrue.orElseThrow(), 1, 1);
+                if (checkIfTrue.isEmpty()) {
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as %s argument", inputValue, checkIfTrueIndex));
+                }
+                checkRollSize(inputValue, checkIfTrue.get(), 1, 1);
                 Roll booleanExpression = checkIfTrue.get().getFirst();
                 allRolls.addAll(checkIfTrue.get());
                 allRolls.addAll(returnIfTrue.orElse(Collections.emptyList()));
