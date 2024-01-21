@@ -479,6 +479,10 @@ public class DiceEvaluatorTest {
                 Arguments.of("if('false', 'a','','b') 'a'", "'if' requires as position 3 input a single boolean but was '[]'"),
                 Arguments.of("if('false', val('a',10) '', val('a',-10) '') +'a'", "'if' requires as position 3 input a single boolean but was '[]'"), //the value produce the wrong number of arguments
                 Arguments.of("replace(3d6,'1','2','3')", "'replace' an odd number of arguments but was 4"),
+                Arguments.of("if([], 'true', 'false')", "'if' requires as position 1 input a single boolean but was '[]'"),
+                Arguments.of("if('false', 'false', [], 'true')", "'if' requires as position 3 input a single boolean but was '[]'"),
+                Arguments.of("if('false', 'false', , 'true')", "A separator can't be followed by another separator or open bracket"),
+                Arguments.of(" if('false', 'false', val('$v',1d6) , 'true')", "'if' requires a non-empty input as 3 argument"),
 
                 Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
