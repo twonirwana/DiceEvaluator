@@ -72,7 +72,7 @@ All operators are case insensitiv.
 |And |`!<boolean>` |`!d6=?5` | Negates the boolean value right from it | 5 |right |  | boolean value
 |Equal |`<left> =? <right>` |`d6=?5` | Compare the left and the right and returns true if equal and false otherwise | 6 |left |one or more elements  | one or more elements
 |Lesser |`<left> <? <right>` |`d6<?5` | Compare the left and the right and returns true if `<left>` is lesser than `<right>` otherwise false | 7 |left |a single number | a single number
-|Lesser Equal |`<left> <=? <right>` |`d6<=?5` | Compare the left and the right and returns true if `<left>` is lesser or equal then `<right>` otherwise false | 8 |left |a single number | a single number
+|Lesser Equal |`<left> \<=? <right>` |`d6\<=?5` | Compare the left and the right and returns true if `<left>` is lesser or equal then `<right>` otherwise false | 8 |left |a single number | a single number
 |Greater |`<left> >? <right>` |`d6>?5` | Compare the left and the right and returns true if `<left>` is greater than `<right>` otherwise false | 9 |left |a single number | a single number
 |Greater Equal |`<left> >=? <right>` |`d6>=?5` | Compare the left and the right and returns true if `<left>` is greater or equal than `<right>` otherwise false | 10 |left |a single number | a single number
 | In |`<left> in <right>` |`d6 in [1/3/5]` | Returns true if every element in left is contained in right otherwise false | 11 |left |a one or more elements | one or more elements
