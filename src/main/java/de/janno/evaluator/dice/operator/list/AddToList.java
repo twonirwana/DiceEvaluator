@@ -11,9 +11,9 @@ import java.util.Optional;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
-public final class Appending extends Operator {
-    public Appending() {
-        super("+", Operator.Associativity.RIGHT, Integer.MAX_VALUE, Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(Appending.class));
+public final class AddToList extends Operator {
+    public AddToList() {
+        super("+", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(AddToList.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(AddToList.class));
     }
 
     @Override

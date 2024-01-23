@@ -13,11 +13,11 @@ import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyDecimal;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
-public final class NegateOrNegativAppending extends Operator {
+public final class NegateOrNegativAddToList extends Operator {
     private final static BigDecimal MINUS_ONE = BigDecimal.valueOf(-1);
 
-    public NegateOrNegativAppending() {
-        super("-", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(NegateOrNegativAppending.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(NegateOrNegativAppending.class));
+    public NegateOrNegativAddToList() {
+        super("-", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(NegateOrNegativAddToList.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(NegateOrNegativAddToList.class));
     }
 
     @Override
