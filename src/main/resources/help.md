@@ -7,9 +7,9 @@
 | Keep Highest         | k          | 3d6k2              |
 | Keep Lowest          | l          | 3d6l2              |
 | Sum                  | =          | 3d6=               |
-| Appending            | +          | 3d6+2d12           |
+| Add to List          | +          | 3d6+2d12           |
 | Concatenate          | _          | 3d6 _ 'dmg'        |
-| Negative Appending   | -          | 3d6-2d12 or -2d6   |
+| Negative add to List | -          | 3d6-2d12 or -2d6   |
 | Decimal Divide       | //         | 2/6                |
 | Divide               | /          | 12/6               |
 | Multiply             | *          | 12*d6              |

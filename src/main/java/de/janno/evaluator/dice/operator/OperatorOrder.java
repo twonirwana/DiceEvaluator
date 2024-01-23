@@ -38,8 +38,8 @@ public final class OperatorOrder {
                     .add(KeepHighest.class)
                     .add(KeepLowest.class)
                     //dice should be first
-                    .add(Appending.class)
-                    .add(NegateOrNegativAppending.class)
+                    .add(AddToList.class)
+                    .add(NegateOrNegativAddToList.class)
                     .add(Reroll.class)
                     .add(Tag.class)
                     .add(Color.class)
