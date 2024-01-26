@@ -28,19 +28,19 @@ public class Tokenizer {
         Stream.concat(parameters.getExpressionBrackets().stream(), parameters.getFunctionBrackets().stream())
                 .distinct() //expression and function brackets are allowed to contain the same elements
                 .forEach(c -> {
-                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getOpen()), s -> Token.openTokenOf(c, s)));
-                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getClose()), s -> Token.closeTokenOf(c, s)));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getOpen()), s -> Token.openTokenOf(c, s), false));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getClose()), s -> Token.closeTokenOf(c, s), false));
                 });
-        parameters.getFunctions().forEach(function -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(function.getName()), s -> Token.of(function, s))));
-        parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), s -> Token.of(operator, s))));
-        builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), Token::separator));
-        parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1), s))));
+        parameters.getFunctions().forEach(function -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(function.getName()), s -> Token.of(function, s), false)));
+        parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), s -> Token.of(operator, s), false)));
+        builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), Token::separator, false));
+        parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1), s), true)));
         builder.add(new TokenBuilder(ALL_NUMBER_REGEX, s -> {
             if (SMALL_NUMBER_PATTERN.matcher(s).matches()) {
                 return Token.of(s, s);
             }
             throw new ExpressionException("The number '%s' was to big".formatted(s));
-        }));
+        }, false));
         tokenBuilders = builder.build();
 
         List<String> duplicateRegex = tokenBuilders.stream().collect(Collectors.groupingBy(TokenBuilder::regex))
@@ -226,8 +226,11 @@ public class Tokenizer {
         }
     }
 
-    private record TokenBuilder(String regex, ToToken toToken) {
+    private record TokenBuilder(String regex, ToToken toToken, boolean multiLine) {
         Pattern pattern() {
+            if (multiLine) {
+                return Pattern.compile("^\\s*%s\\s*".formatted(regex), Pattern.MULTILINE | Pattern.DOTALL);
+            }
             return Pattern.compile("^\\s*%s\\s*".formatted(regex));
         }
     }
