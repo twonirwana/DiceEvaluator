@@ -27,7 +27,7 @@ public class DiceEvaluator {
 
     private static final String SEPARATOR = ",";
     private static final String LEGACY_LIST_SEPARATOR = "/";
-    private static final Pattern LIST_REGEX = Pattern.compile("(.+([%s%s].+)+)".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)); //the brackets are used for the escape and are not part of the literal
+    private static final Pattern LIST_REGEX = Pattern.compile("(.+([%s%s].+)+)".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR), Pattern.MULTILINE | Pattern.DOTALL); //the brackets are used for the escape and are not part of the literal
     private final Tokenizer tokenizer;
     private final Parameters parameters;
 
@@ -112,7 +112,7 @@ public class DiceEvaluator {
     private static List<RollBuilder> reverse(Collection<RollBuilder> collection) {
         List<RollBuilder> result = new ArrayList<>(collection.size());
         for (RollBuilder t : collection) {
-            result.add(0, t);
+            result.addFirst(t);
         }
         return result;
     }
@@ -188,7 +188,7 @@ public class DiceEvaluator {
         // The arguments are in reverse order on the values stack
         List<RollBuilder> result = new ArrayList<>(argumentCount);
         for (int i = 0; i < argumentCount; i++) {
-            result.add(0, values.pop());
+            result.addFirst(values.pop());
         }
         return result;
     }
