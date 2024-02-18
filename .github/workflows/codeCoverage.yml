@@ -38,7 +38,7 @@ jobs:
       with:
         gradle-version: current
         arguments: testCodeCoverageReport
-    - uses: codecov/codecov-action@
+    - uses: codecov/codecov-action@v4
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
