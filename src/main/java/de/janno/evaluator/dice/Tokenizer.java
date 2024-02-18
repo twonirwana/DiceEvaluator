@@ -16,7 +16,8 @@ import java.util.stream.Stream;
 
 public class Tokenizer {
     private final static String ALL_NUMBER_REGEX = "\\d+\\.?\\d*";
-    private final static Pattern SMALL_NUMBER_PATTERN = Pattern.compile("\\d{1,10}\\.?\\d{0,10}");
+    private final static Pattern SMALL_DECIMAL_PATTERN = Pattern.compile("\\d{1,9}\\.\\d{1,9}");
+    private final static Pattern SMALL_INTEGER_PATTERN = Pattern.compile("\\d{1,9}");
     private final ImmutableList<TokenBuilder> tokenBuilders;
     private final String escapeCharacter;
     private final ImmutableList<Pattern> allOperatorAndFunctionNamePatterns;
@@ -36,10 +37,10 @@ public class Tokenizer {
         builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), Token::separator, false));
         parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1), s), true)));
         builder.add(new TokenBuilder(ALL_NUMBER_REGEX, s -> {
-            if (SMALL_NUMBER_PATTERN.matcher(s).matches()) {
+            if (SMALL_INTEGER_PATTERN.matcher(s).matches() || SMALL_DECIMAL_PATTERN.matcher(s).matches()) {
                 return Token.of(s, s);
             }
-            throw new ExpressionException("The number '%s' was to big".formatted(s));
+            throw new ExpressionException("The number '%s' is too big".formatted(s));
         }, false));
         tokenBuilders = builder.build();
 
@@ -229,7 +230,7 @@ public class Tokenizer {
     private record TokenBuilder(String regex, ToToken toToken, boolean multiLine) {
         Pattern pattern() {
             if (multiLine) {
-                return Pattern.compile("^\\s*%s\\s*".formatted(regex), Pattern.MULTILINE | Pattern.DOTALL);
+                return Pattern.compile("^\\s*%s\\s*".formatted(regex), Pattern.DOTALL);
             }
             return Pattern.compile("^\\s*%s\\s*".formatted(regex));
         }

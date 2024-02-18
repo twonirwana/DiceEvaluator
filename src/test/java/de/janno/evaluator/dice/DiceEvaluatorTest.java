@@ -306,8 +306,6 @@ public class DiceEvaluatorTest {
                 Arguments.of("2d6 rr [1/5]", List.of(3, 5, 3, 4), List.of("3", "4")),
                 Arguments.of("1r1d10rr['8, 9, 10']", List.of(1), List.of("1")),
                 Arguments.of("2r1d10rr[8, 9, 10]", List.of(1, 8, 2), List.of("1", "2")),
-                Arguments.of("2147483647+1=", List.of(), List.of("2147483648")),
-                Arguments.of("2147483647*2=", List.of(), List.of("4294967294")),
 
                 //decimal
                 Arguments.of("1/2", List.of(), List.of("0")),
@@ -421,6 +419,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("[a\nb\nc/\nd/e\n]", List.of(0), List.of("a\nb\nc", "d", "e")),
                 Arguments.of("'a\nb\nc,\nd,e\n'", List.of(0), List.of("a\nb\nc", "d", "e")),
                 Arguments.of("'a\nb\nc/\nd/e\n'", List.of(0), List.of("a\nb\nc", "d", "e")),
+                Arguments.of("'test'_'\n'_'test'", List.of(), List.of("test\ntest")),
 
                 //Exalted 3e
                 Arguments.of("val('$1', cancel(double(10d10,10),1,[7/8/9/10])), ifE(('$1'>=7)c,0,ifG(('$1'<=1)c,0,'Botch'))", List.of(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), List.of("0")),
@@ -523,8 +522,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("x(1d6)", "Operator x does not support unary operations"),
                 Arguments.of("(3d[a/b/c])=", "'=' requires as left input only decimals but was '[b, c, a]'"),
                 Arguments.of("color(2,'red')*color(2,'black')", "'*' requires all elements to be the same tag, the tags where '[red, black]'"),
-                Arguments.of("1000d999999999999999999999999999999", "The number '999999999999999999999999999999' was to big"),
-                Arguments.of("9.99999999999999999999999999999", "The number '9.99999999999999999999999999999' was to big"),
+                Arguments.of("1000d9999999999", "The number '9999999999' is too big"),
+                Arguments.of("9.9999999999", "The number '9.9999999999' is too big"),
                 Arguments.of("(3x2d6)=", "'=' requires as 1 inputs but was '[[2, 3], [1, 4], [1, 1]]'"),
                 Arguments.of("1&&'ab'", "'&&' requires as left input a single boolean but was '[1]'"),
                 Arguments.of("1||'ab'", "'||' requires as left input a single boolean but was '[1]'"),
@@ -545,6 +544,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("if('false', 'false', , 'true')", "A separator can't be followed by another separator or open bracket"),
                 Arguments.of(" if('false', 'false', val('$v',1d6) , 'true')", "'if' requires a non-empty input as 3 argument"),
                 Arguments.of("1d+6", "Not enough values, d needs 2"),
+                Arguments.of("concat('test' 'test')", "All brackets need to be closed be for starting a new expression or missing ','"),
 
                 Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
@@ -635,7 +635,7 @@ public class DiceEvaluatorTest {
     void testRegularDieHeap() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
 
-        List<Roll> res = underTest.evaluate("1000d" + (Integer.MAX_VALUE - 1));
+        List<Roll> res = underTest.evaluate("1000d999999999");
 
         assertThat(res.getFirst().getElements()).hasSize(1000);
     }
@@ -653,7 +653,7 @@ public class DiceEvaluatorTest {
     void testExplodingDieMaxHeap() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
 
-        List<Roll> res = underTest.evaluate("1000d!" + (Integer.MAX_VALUE - 1));
+        List<Roll> res = underTest.evaluate("1000d!999999999");
 
         assertThat(res.getFirst().getElements()).hasSize(1000);
     }
@@ -671,7 +671,7 @@ public class DiceEvaluatorTest {
     void testExplodingAddDieMaxHeap() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
 
-        List<Roll> res = underTest.evaluate("1000d!!" + (Integer.MAX_VALUE - 1));
+        List<Roll> res = underTest.evaluate("1000d!!999999999");
 
         assertThat(res.getFirst().getElements()).hasSize(1000);
     }

@@ -27,7 +27,7 @@ public class DiceEvaluator {
 
     private static final String SEPARATOR = ",";
     private static final String LEGACY_LIST_SEPARATOR = "/";
-    private static final Pattern LIST_REGEX = Pattern.compile("(.+([%s%s].+)+)".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR), Pattern.MULTILINE | Pattern.DOTALL); //the brackets are used for the escape and are not part of the literal
+    private static final Pattern LIST_REGEX = Pattern.compile("(.+([%s%s].+)+)".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR), Pattern.DOTALL); //the brackets are used for the escape and are not part of the literal
     private final Tokenizer tokenizer;
     private final Parameters parameters;
 
@@ -345,8 +345,13 @@ public class DiceEvaluator {
             } else if (token.getLiteral().isPresent()) {
                 //if there is a literal following a literal then this is an independent part of the expression
                 //and the left part needs to be processed
+                //TODO only keep this for backward compatibility, new expression parts should always explicit started with a ','
                 if (previous.flatMap(Token::getLiteral).isPresent() && !stack.isEmpty()) {
-                    processTokenToValues(values, stack.pop());
+                    if (!stack.peek().isOpenBracket()) { //no unfinished bracket
+                        processTokenToValues(values, stack.pop());
+                    } else {
+                        throw new ExpressionException("All brackets need to be closed be for starting a new expression or missing ','");
+                    }
                 }
                 // If the token is literal then add its value to the output queue.
                 processTokenToValues(values, token);
