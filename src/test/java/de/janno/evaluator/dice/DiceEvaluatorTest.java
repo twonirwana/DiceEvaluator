@@ -149,6 +149,24 @@ public class DiceEvaluatorTest {
                 Arguments.of("2rd4", List.of(3, 2), List.of(3, 2)),
                 Arguments.of("0rd4", List.of(), List.of()),
 
+                //explode with
+                Arguments.of("exp(d6,6,1)", List.of(1), List.of(1)),
+                Arguments.of("exp(d6,6,1)", List.of(6, 6, 6), List.of(6, 6)),
+                Arguments.of("exp(d6,6,0)", List.of(6, 6, 6), List.of(6)),
+                Arguments.of("exp(d6,6,2)", List.of(6, 6, 6, 6), List.of(6, 6, 6)),
+                Arguments.of("exp(d6,6,2)", List.of(6, 5), List.of(6, 5)),
+                Arguments.of("exp(d[1/2/3],3,2)", List.of(3, 3, 2), List.of(3, 3, 2)),
+                Arguments.of("exp(2d6,6,2)", List.of(6, 5, 3, 4), List.of(6, 5, 3, 4)),
+                Arguments.of("exp(d6+d6,6,2)", List.of(6, 5, 3, 4), List.of(6, 5, 3, 4)),
+                Arguments.of("exp(d6+d6,6,2)", List.of(6, 5, 5, 6, 1, 2), List.of(6, 5, 5, 6, 1, 2)),
+                Arguments.of("exp(d6,6)", List.of(6, 5), List.of(6, 5)),
+                Arguments.of("exp(d6,6)=", List.of(), List.of(606)),
+                Arguments.of("exp(d6,[5/6],2)", List.of(6, 5, 6, 5), List.of(6, 5, 6)),
+
+                //todo create expression is not working
+                //  Arguments.of("6r replace(exp(d[0/0/1/1/'2#'/2],2),'2#','2')", List.of(1, 2, 3, 4, 5, 6, 6, 1), List.of(0, 0, 1, 1, 2, 2, 0)),
+
+
                 //empty
                 Arguments.of("", null, List.of())
 
@@ -197,6 +215,9 @@ public class DiceEvaluatorTest {
                 Arguments.of("+2d6+1", List.of(2, 3), List.of("2", "3", "1")),
                 Arguments.of("1+d6k1", List.of(2), List.of("2")),
                 Arguments.of("1+d6k+1", List.of(2), List.of("2")),
+                Arguments.of("if('false','a') + 'b' ", List.of(), List.of("b")),
+                Arguments.of("'b' + if('false','a') ", List.of(), List.of("b")),
+
 
                 //Add negative to List
                 Arguments.of("1-1", List.of(), List.of("1", "-1")),
@@ -256,6 +277,8 @@ public class DiceEvaluatorTest {
 
                 //replace
                 Arguments.of("replace(8d10, [9/10], 'bonus')", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("bonus", "bonus", "3", "4", "5", "6", "7", "1")),
+                Arguments.of("replace(8d10, [9/10], 2d20)", List.of(9, 10, 3, 4, 5, 6, 7, 1, 19, 18, 17, 16), List.of("19", "18", "17", "16", "3", "4", "5", "6", "7", "1")),
+                Arguments.of("replace(2d6, d6+d4, d10+d12)", List.of(1, 2, 2, 3, 9, 10), List.of("1", "9", "10")),
                 Arguments.of("replace(8d10, [9/10], '')", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("3", "4", "5", "6", "7", "1")),
                 Arguments.of("replace(8d10, [9/10], [])", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("3", "4", "5", "6", "7", "1")),
                 Arguments.of("replace(8d10, [9/10], [a/a])", List.of(9, 10, 3, 4, 5, 6, 7, 1), List.of("a", "a", "a", "a", "3", "4", "5", "6", "7", "1")),
@@ -280,6 +303,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("concat('Attack:')", List.of(), List.of("Attack:")),
                 Arguments.of("concat('')", List.of(), List.of("")),
                 Arguments.of("concat('Attack: ', 1d20, ' Damage: ', 2d10+5=) ", List.of(1, 2, 3), List.of("Attack: 1 Damage: 10")),
+                Arguments.of("concat(if('false','a'), 'only') ", List.of(), List.of("only")),
+                Arguments.of("concat(val('v','a') 'v', ' only') ", List.of(), List.of("a only")),
 
                 Arguments.of("[b/2/a]k2", List.of(), List.of("b", "a")),
                 Arguments.of("[b/2/a]l2", List.of(), List.of("2", "a")),
@@ -421,6 +446,9 @@ public class DiceEvaluatorTest {
                 Arguments.of("'a\nb\nc/\nd/e\n'", List.of(0), List.of("a\nb\nc", "d", "e")),
                 Arguments.of("'test'_'\n'_'test'", List.of(), List.of("test\ntest")),
 
+                //list repeat
+                Arguments.of("2r concat(val('r',2d6) 'r'>5c _ ' ' _ 'r'= )", List.of(3, 6, 1, 2), List.of("1 9", "0 3")),
+
                 //Exalted 3e
                 Arguments.of("val('$1', cancel(double(10d10,10),1,[7/8/9/10])), ifE(('$1'>=7)c,0,ifG(('$1'<=1)c,0,'Botch'))", List.of(3, 2, 3, 1, 5, 9, 6, 6, 6, 6, 6), List.of("0")),
                 Arguments.of("val('$1', cancel(double(10d10,10),1,[7/8/9/10])), ifE(('$1'>=7)c,0,ifG(('$1'<=1)c,0,'Botch'))", List.of(3, 2, 3, 3, 5, 9, 6, 6, 6, 6, 6), List.of("1")),
@@ -538,7 +566,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("!'ab'", "'!' requires as right input a single boolean but was '[ab]'"),
                 Arguments.of("if('false', 'a','','b') 'a'", "'if' requires as position 3 input a single boolean but was '[]'"),
                 Arguments.of("if('false', val('a',10) '', val('a',-10) '') +'a'", "'if' requires as position 3 input a single boolean but was '[]'"), //the value produce the wrong number of arguments
-                Arguments.of("replace(3d6,'1','2','3')", "'replace' an odd number of arguments but was 4"),
+                Arguments.of("replace(3d6,'1','2','3')", "'replace' requires an odd number of arguments but was 4"),
                 Arguments.of("if([], 'true', 'false')", "'if' requires as position 1 input a single boolean but was '[]'"),
                 Arguments.of("if('false', 'false', [], 'true')", "'if' requires as position 3 input a single boolean but was '[]'"),
                 Arguments.of("if('false', 'false', , 'true')", "A separator can't be followed by another separator or open bracket"),
@@ -588,12 +616,13 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 1), 1000);
 
-        List<Roll> res = underTest.evaluate("if(1d6>?4, val('a',10), val('a',-10)) 'a'");
+        List<Roll> res = underTest.evaluate("replace(exp(d[0/0/1/1/'2#'/2],2),'2#','2')");
         System.out.println(res.size());
         res.forEach(r -> System.out.println(r.getResultString()));
         System.out.println(res);
+        System.out.println(res.getFirst().getExpression());
         res.forEach(r -> System.out.println(r.getRandomElementsInRoll()));
         res.forEach(r -> System.out.println(r.getRandomElementsString()));
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
@@ -852,6 +881,85 @@ public class DiceEvaluatorTest {
                         .map(RollElement::getValue)))
                 .containsExactly("5", "10");
 
+    }
+
+
+    @Test
+    void getRandomElements_explode() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 2, 8, 3, 4), 1000);
+        List<Roll> res = underTest.evaluate("exp(2d6,1d8,1d10)");
+
+
+        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("1", "2", "3", "4");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)
+                        .toList()))
+                .containsExactly(List.of("1", "2"), List.of("2"), List.of("8"), List.of("3", "4"));
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
+                .containsExactly(List.of(6, 6), List.of(8), List.of(10), List.of(6, 6));
+    }
+
+    @Test
+    void getRandomElements_replace_no_match() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 5), 1000);
+        List<Roll> res = underTest.evaluate("replace(3d6,[6],2d20)");
+
+
+        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("1", "2", "5");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)
+                        .toList()))
+                .containsExactly(List.of("1", "2", "5"));
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
+                .containsExactly(List.of(6, 6, 6));
+    }
+
+    @Test
+    void getRandomElements_replace() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 5, 19, 18, 17, 16), 1000);
+        List<Roll> res = underTest.evaluate("replace(3d6,[1,5],2d20)");
+
+        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("19", "18", "2", "17", "16");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)
+                        .toList()))
+                .containsExactly(List.of("1", "2", "5"), List.of("19", "18"), List.of("17", "16"));
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
+                .containsExactly(List.of(6, 6, 6), List.of(20, 20), List.of(20, 20));
+    }
+
+    @Test
+    void getRandomElements_replaceRollFind() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 1, 2, 3), 1000);
+        List<Roll> res = underTest.evaluate("replace(1d6, 1d6, 1d6, 1d8, 1d10)");
+
+        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("2");
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream()
+                        .map(RandomElement::getRollElement)
+                        .map(RollElement::getValue)
+                        .toList()))
+                .containsExactly(List.of("1"), List.of("1"), List.of("2"), List.of("3"));
+
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
+                .map(r -> r.getRandomElements().stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
+                .containsExactly(List.of(6), List.of(6), List.of(6), List.of(8));
     }
 
     @Test

@@ -91,6 +91,7 @@ public class DiceEvaluator {
                         .add(new IfGreater())
                         .add(new IfIn())
                         .add(new Replace())
+                        .add(new Explode())
                         .add(new IfLesser())
                         .add(new GroupCount())
                         .build())
