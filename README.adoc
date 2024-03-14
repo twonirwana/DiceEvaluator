@@ -80,7 +80,7 @@ All operators are case insensitiv.
 |Modulo |`<left> mod <right>` |`d6 mod 2` | returns the remainder of the division |13 |left |a single integer number |a single non zero integer number
 |Multiply |`<left> * <right>` |`2 * 6` |Multiplies the right number with the left number |14|left |a single number |a single number
 |Divide |`<left> / <right>` |`4 / 2` |Divides the right number with the left number and rounds down to the next full number |15 |left |a single integer number |a single integer number
-|Decimal Divide |`<left> // <right>` |`4 / 2` |Divides the right number with the left number and provides a decimal number with up to 5 decimal digital |16 |left |a single number |a single number
+|Decimal Divide |`<left> // <right>` |`4 // 3` |Divides the right number with the left number and provides a decimal number with up to 5 decimal digital |16 |left |a single number |a single number
 |Count |`<list> c` |`3d6>3c` |Counts the number of elements in a list |17 |left |a list |-
 |Greater Then Filter |`<list> > <number>` |`3d6>3` |Keeps only the elements of the left list that are bigger as the right number. Applies only to elements with the same tag. |18 |left |one or more numbers |a single number
 |Lesser Then Filter |`<list> < <number>` |`3d6<3` |Keeps only the elements of the left list that are lesser as the right number. Applies only to elements with the same tag. |19 |left |one or more numbers |a single number
