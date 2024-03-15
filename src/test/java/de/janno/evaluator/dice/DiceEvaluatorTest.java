@@ -572,6 +572,11 @@ public class DiceEvaluatorTest {
                 Arguments.of(" if('false', 'false', val('$v',1d6) , 'true')", "'if' requires a non-empty input as 3 argument"),
                 Arguments.of("1d+6", "Not enough values, d needs 2"),
                 Arguments.of("concat('test' 'test')", "All brackets need to be closed be for starting a new expression or missing ','"),
+                Arguments.of("exp(1d6)", "'exp' requires 2 or 3 arguments but was 1"),
+                Arguments.of("exp(1d6, if('false', 1d6), 3)", "'exp' requires a non-empty input as second argument"),
+                Arguments.of("exp(1d6, 3, -1)", "'exp' requires as third argument a number between 0 and 100"),
+                Arguments.of("exp(1d6, 3, if('false', 1d6))", "'exp' requires a non-empty input as third argument"),
+                Arguments.of("exp(1d6, 3, 101)", "'exp' requires as third argument a number between 0 and 100"),
 
                 Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
