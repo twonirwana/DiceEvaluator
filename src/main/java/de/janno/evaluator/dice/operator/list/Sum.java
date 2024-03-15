@@ -6,6 +6,7 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,21 +30,29 @@ public class Sum extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return variables -> {
-            List<Roll> rolls = extendAllBuilder(operands, variables);
-            checkRollSize(inputValue, rolls, 1, 1);
+        return new RollBuilder() {
+            @Override
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, variables);
+                checkRollSize(inputValue, rolls, 1, 1);
 
-            Roll left = rolls.getFirst();
-            checkContainsOnlyDecimal(inputValue, left, "left");
+                Roll left = rolls.getFirst();
+                checkContainsOnlyDecimal(inputValue, left, "left");
 
-            ImmutableList<RollElement> res = left.getElements().stream().collect(Collectors.groupingBy(RollElement::getTag)).entrySet().stream()
-                    .map(e -> new RollElement(sumExact(e.getValue()).stripTrailingZeros().stripTrailingZeros().toPlainString(), e.getKey(), RollElement.NO_COLOR))
-                    .collect(ImmutableList.toImmutableList());
+                ImmutableList<RollElement> res = left.getElements().stream().collect(Collectors.groupingBy(RollElement::getTag)).entrySet().stream()
+                        .map(e -> new RollElement(sumExact(e.getValue()).stripTrailingZeros().stripTrailingZeros().toPlainString(), e.getKey(), RollElement.NO_COLOR))
+                        .collect(ImmutableList.toImmutableList());
 
-            return Optional.of(ImmutableList.of(new Roll(getLeftUnaryExpression(inputValue, rolls),
-                    res,
-                    UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left))));
+                return Optional.of(ImmutableList.of(new Roll(toExpression(),
+                        res,
+                        UniqueRandomElements.from(rolls),
+                        ImmutableList.of(left))));
+            }
+
+            @Override
+            public @NonNull String toExpression() {
+                return getLeftUnaryExpression(inputValue, operands);
+            }
         };
     }
 }

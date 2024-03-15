@@ -163,8 +163,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("exp(d6,6)=", List.of(), List.of(606)),
                 Arguments.of("exp(d6,[5/6],2)", List.of(6, 5, 6, 5), List.of(6, 5, 6)),
 
-                //todo create expression is not working
-                //  Arguments.of("6r replace(exp(d[0/0/1/1/'2#'/2],2),'2#','2')", List.of(1, 2, 3, 4, 5, 6, 6, 1), List.of(0, 0, 1, 1, 2, 2, 0)),
+                Arguments.of("6r replace(exp(d[0/0/1/1/'2#'/2],2),'2#','2')", List.of(1, 2, 3, 4, 5, 6, 6, 1), List.of(0, 0, 1, 1, 2, 2, 0)),
 
 
                 //empty
@@ -779,6 +778,10 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(values(res)).containsExactlyElementsOf(expected);
+        //val is not given in the dice expression because it is on a roll without result
+        if (res.size() == 1 && !diceExpression.contains("val(")) {
+            assertThat(res.getFirst().getExpression().replace(" ", "")).isEqualTo(diceExpression.replace(" ", ""));
+        }
     }
 
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")

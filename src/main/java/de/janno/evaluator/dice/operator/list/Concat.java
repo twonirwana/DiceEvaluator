@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,16 +19,24 @@ public class Concat extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
-        return variables -> {
 
-            List<Roll> rolls = extendAllBuilder(operands, variables);
-            String joined = rolls.stream()
-                    .map(Roll::getResultString)
-                    .collect(Collectors.joining());
-            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
-                    ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
-                    UniqueRandomElements.from(rolls),
-                    ImmutableList.copyOf(rolls))));
+        return new RollBuilder() {
+            @Override
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, variables);
+                String joined = rolls.stream()
+                        .map(Roll::getResultString)
+                        .collect(Collectors.joining());
+                return Optional.of(ImmutableList.of(new Roll(toExpression(),
+                        ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
+                        UniqueRandomElements.from(rolls),
+                        ImmutableList.copyOf(rolls))));
+            }
+
+            @Override
+            public @NonNull String toExpression() {
+                return getBinaryOperatorExpression(inputValue, operands);
+            }
         };
     }
 }

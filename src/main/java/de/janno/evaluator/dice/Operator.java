@@ -77,22 +77,29 @@ public abstract class Operator {
         return Optional.ofNullable(list.get(index));
     }
 
-    protected static String getBinaryOperatorExpression(String name, List<Roll> operands) {
-        String left = getIndexIfExists(operands, 0).map(Roll::getExpression).orElse("");
-        String right = getIndexIfExists(operands, 1).map(Roll::getExpression).orElse("");
+    protected static String getBinaryOperatorExpression(String name, List<RollBuilder> operands) {
+        String left = getIndexIfExists(operands, 0).map(RollBuilder::toExpression).orElse("");
+        String right = getIndexIfExists(operands, 1).map(RollBuilder::toExpression).orElse("");
         return String.format("%s%s%s", left, name, right);
     }
 
-    protected static String getLeftUnaryExpression(String name, List<Roll> operands) {
-        String left = getIndexIfExists(operands, 0).map(Roll::getExpression).orElse("");
+    protected static String getLeftUnaryExpression(String name, List<RollBuilder> operands) {
+        String left = getIndexIfExists(operands, 0).map(RollBuilder::toExpression).orElse("");
         return String.format("%s%s", left, name);
     }
 
-    protected static String getRightUnaryExpression(String name, List<Roll> operands) {
-        String right = getIndexIfExists(operands, 0).map(Roll::getExpression).orElse("");
+    protected static String getRightUnaryExpression(String name, List<RollBuilder> operands) {
+        String right = getIndexIfExists(operands, 0).map(RollBuilder::toExpression).orElse("");
         return String.format("%s%s", name, right);
     }
 
+    /**
+     * Creates a RollBuilder for the arguments
+     *
+     * @param operands   1 or 2 operants
+     * @param inputValue the given input for the operant, is needed the get the used upper/lower case in the result expression
+     * @return the RollBuilder that can be called to get result rolls
+     */
     public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException;
 
     public boolean supportUnaryOperation() {

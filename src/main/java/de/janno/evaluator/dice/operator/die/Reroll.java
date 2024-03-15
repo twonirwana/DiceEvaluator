@@ -6,6 +6,7 @@ import lombok.NonNull;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
@@ -18,34 +19,40 @@ public class Reroll extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return variables -> {
+        return new RollBuilder() {
+            @Override
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                RollBuilder inputBuilder = operands.getFirst();
+                List<Roll> compareTos = operands.get(1).extendRoll(variables).orElse(Collections.emptyList());
+                checkRollSize(inputValue, compareTos, 1, 1);
+                Roll compareTo = compareTos.getFirst();
 
-            RollBuilder inputBuilder = operands.getFirst();
-            List<Roll> compareTos = operands.get(1).extendRoll(variables).orElse(Collections.emptyList());
-            checkRollSize(inputValue, compareTos, 1, 1);
-            Roll compareTo = compareTos.getFirst();
-
-            List<Roll> rolls = inputBuilder.extendRoll(variables).orElse(Collections.emptyList());
-            checkRollSize(inputValue, rolls, 1, 1);
-            Roll roll = rolls.getFirst();
-            UniqueRandomElements.Builder builder = UniqueRandomElements.builder();
-            builder.add(roll.getRandomElementsInRoll());
-
-            if (roll.getElements().stream().anyMatch(compareTo::isElementsContainsElementWithValueAndTag)) {
-                rolls = inputBuilder.extendRoll(variables).orElse(Collections.emptyList());
+                List<Roll> rolls = inputBuilder.extendRoll(variables).orElse(Collections.emptyList());
                 checkRollSize(inputValue, rolls, 1, 1);
-                roll = rolls.getFirst();
+                Roll roll = rolls.getFirst();
+                UniqueRandomElements.Builder builder = UniqueRandomElements.builder();
                 builder.add(roll.getRandomElementsInRoll());
+
+                if (roll.getElements().stream().anyMatch(compareTo::isElementsContainsElementWithValueAndTag)) {
+                    rolls = inputBuilder.extendRoll(variables).orElse(Collections.emptyList());
+                    checkRollSize(inputValue, rolls, 1, 1);
+                    roll = rolls.getFirst();
+                    builder.add(roll.getRandomElementsInRoll());
+                }
+
+                return Optional.of(ImmutableList.of(new Roll(toExpression(),
+                        roll.getElements(),
+                        builder.build(),
+                        ImmutableList.<Roll>builder()
+                                .addAll(compareTo.getChildrenRolls())
+                                .addAll(roll.getChildrenRolls())
+                                .build())));
             }
 
-            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, ImmutableList.of(roll, compareTo)),
-                    roll.getElements(),
-                    builder.build(),
-                    ImmutableList.<Roll>builder()
-                            .addAll(compareTo.getChildrenRolls())
-                            .addAll(roll.getChildrenRolls())
-                            .build())));
-
+            @Override
+            public @NonNull String toExpression() {
+                return getBinaryOperatorExpression(getName(), operands);
+            }
         };
     }
 

@@ -7,6 +7,7 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -22,36 +23,48 @@ public final class NegateOrNegativAddToList extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return variables -> {
-            List<Roll> rolls = extendAllBuilder(operands, variables);
-            checkRollSize(inputValue, rolls, 1, 2);
+        return new RollBuilder() {
+            @Override
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, variables);
+                checkRollSize(inputValue, rolls, 1, 2);
 
-            if (rolls.size() == 1) {
-                Roll right = rolls.getFirst();
+                if (rolls.size() == 1) {
+                    Roll right = rolls.getFirst();
+                    checkContainsOnlyDecimal(inputValue, right, "right");
+                    ImmutableList<RollElement> negated = right.getElements().stream()
+                            .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
+                            .collect(ImmutableList.toImmutableList());
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(),
+                            negated,
+                            UniqueRandomElements.from(rolls),
+                            ImmutableList.of(right))));
+                }
+
+                Roll left = rolls.getFirst();
+                Roll right = rolls.get(1);
                 checkContainsOnlyDecimal(inputValue, right, "right");
-                ImmutableList<RollElement> negated = right.getElements().stream()
-                        .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
-                        .collect(ImmutableList.toImmutableList());
-                return Optional.of(ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
-                        negated,
+                final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()
+                        .addAll(left.getElements())
+                        .addAll(right.getElements().stream()
+                                .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
+                                .toList()
+                        ).build();
+
+                return Optional.of(ImmutableList.of(new Roll(toExpression(),
+                        res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(right))));
+                        ImmutableList.of(left, right))));
             }
 
-            Roll left = rolls.getFirst();
-            Roll right = rolls.get(1);
-            checkContainsOnlyDecimal(inputValue, right, "right");
-            final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()
-                    .addAll(left.getElements())
-                    .addAll(right.getElements().stream()
-                            .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
-                            .toList()
-                    ).build();
+            @Override
+            public @NonNull String toExpression() {
+                if (operands.size() == 1) {
+                    return getRightUnaryExpression(inputValue, operands);
+                }
 
-            return Optional.of(ImmutableList.of(new Roll(getBinaryOperatorExpression(inputValue, rolls),
-                    res,
-                    UniqueRandomElements.from(rolls),
-                    ImmutableList.of(left, right))));
+                return getBinaryOperatorExpression(inputValue, operands);
+            }
         };
     }
 

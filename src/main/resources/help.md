@@ -44,6 +44,7 @@
 | Max                  | max()      | max(3d4, 8)        |
 | Chancel              | chancel()  | chancel(8d10,10,1) |
 | Replace              | replace()  | replace(6d10,1,2)  |
+| Explode              | exp()      | exp(d6,1,2)        |
 | If                   | if()       | if(d6=?6,'Y','N')  |
 | Group Count          | groupC()   | groupC(20d6)       |
 | Concatenate          | concat()   | concat('Att:',d20) |

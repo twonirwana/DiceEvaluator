@@ -65,7 +65,7 @@ All operators are case insensitiv.
 |===
 |Name |Notation |Example |Description |Precedent |Associativity |Left parameter |Right parameter
 |Repeat |`<number>x<expression>` |`3x2d6` |Repeats the expression separately a number of times given in <number>. This should be used outside other expressions and will not work inside most expressions |0 |left |a single integer number between 1-10 | a expression
-|List Repeat |`<number>r<expression>` |`3r(2d6=)` |Repeats the expression a number of times given in <number> and combines the results in one list. |1 |left |a single integer number between 0-10 | a expression
+|List Repeat |`<number>r<expression>` |`3r(2d6=)` |Repeats the expression a number of times given in <number> and combines the results in one list. |1 |left |a single integer number between 0-20 | a expression
 | Concat |`<expression>_<expression>` |`d20_'dmg''` | Combines the result of both expression into on single element |2 |left |one or more elements | one or more elements
 |Or |`<boolean>\|\|<boolean>` |`d6=?5 \|\| d6=?6` | Boolean or operation of the two boolean values | 3 |left | boolean value | boolean value
 |And |`<boolean>&&<boolean>` |`d6=?5 && d6=?6` | Boolean and operation of the two boolean values | 4 |left | boolean value | boolean value

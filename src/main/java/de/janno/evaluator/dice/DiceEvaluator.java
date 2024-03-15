@@ -144,22 +144,40 @@ public class DiceEvaluator {
         Matcher listMatcher = LIST_REGEX.matcher(literal);
         if (listMatcher.find()) {
             List<String> list = Arrays.asList(listMatcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
-            return variables -> Optional.of(ImmutableList.of(new Roll(inputValue, list.stream()
-                    .map(String::trim)
-                    .map(s -> new RollElement(s, RollElement.NO_TAG, RollElement.NO_COLOR))
-                    .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of())));
+            return new RollBuilder() {
+                @Override
+                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variableMap) {
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), list.stream()
+                            .map(String::trim)
+                            .map(s -> new RollElement(s, RollElement.NO_TAG, RollElement.NO_COLOR))
+                            .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of())));
+                }
+
+                @Override
+                public @NonNull String toExpression() {
+                    return inputValue;
+                }
+            };
         }
-        return variables -> {
-            if (variables.containsKey(literal)) {
-                Roll variableValue = variables.get(literal);
-                //set the input as expression
-                Roll replacedValue = new Roll(inputValue, variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls());
-                return Optional.of(ImmutableList.of(replacedValue));
+        return new RollBuilder() {
+            @Override
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) {
+                if (variables.containsKey(literal)) {
+                    Roll variableValue = variables.get(literal);
+                    //set the input as expression
+                    Roll replacedValue = new Roll(toExpression(), variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls());
+                    return Optional.of(ImmutableList.of(replacedValue));
+                }
+                if (literal.isEmpty()) {
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of())));
+                }
+                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
             }
-            if (literal.isEmpty()) {
-                return Optional.of(ImmutableList.of(new Roll(inputValue, ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of())));
+
+            @Override
+            public @NonNull String toExpression() {
+                return inputValue;
             }
-            return Optional.of(ImmutableList.of(new Roll(inputValue, ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
         };
     }
 
