@@ -49,9 +49,16 @@ public abstract class Function {
         this.maxArgumentCount = maxArgumentCount;
     }
 
-    protected static String getExpression(String name, List<Roll> arguments) {
-        return "%s%s".formatted(name, arguments.stream().map(Roll::getExpression).collect(Collectors.joining(",")));
+
+    protected static String getExpression(String name, List<RollBuilder> arguments) {
+        return "%s%s".formatted(name, arguments.stream().map(RollBuilder::toExpression).collect(Collectors.joining(",")));
     }
 
+    /**
+     * Creates a RollBuilder for the arguments
+     * @param arguments all function arguments
+     * @param inputValue the given input for the function name, is needed the get the used upper/lower case in the result expression
+     * @return the RollBuilder that can be called to get result rolls
+     */
     public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException;
 }

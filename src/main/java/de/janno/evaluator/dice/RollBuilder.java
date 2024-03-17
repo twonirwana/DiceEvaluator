@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@FunctionalInterface
 public interface RollBuilder {
     static List<Roll> extendAllBuilder(List<RollBuilder> rollBuilders, Map<String, Roll> variableMap) throws ExpressionException {
         ImmutableList.Builder<Roll> builder = ImmutableList.builder();
@@ -30,6 +29,7 @@ public interface RollBuilder {
      * Some functions or operators (e.g. val repeatList) produces empty results, they musst be filtered out or the argument count in functions are not correct.
      * This is not a problem in operators because there the number of arguments is always correct because val is already pushed on the result stack
      */
-    @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variableMap) throws ExpressionException;
+    @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException;
 
+    @NonNull String toExpression();
 }

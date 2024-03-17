@@ -6,6 +6,7 @@ import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.DiceHelper.*;
@@ -26,64 +27,75 @@ public final class RegularDice extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return variables -> {
-            List<Roll> rolls = extendAllBuilder(operands, variables);
-            checkRollSize(inputValue, rolls, 1, 2);
+        return new RollBuilder() {
+            @Override
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, variables);
+                checkRollSize(inputValue, rolls, 1, 2);
 
-            final int numberOfDice;
-            final Roll right;
-            final ImmutableList<Roll> childrenRolls;
-            final String expression;
-            UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
-            if (rolls.size() == 1) {
-                right = rolls.getFirst();
-                numberOfDice = 1;
-                childrenRolls = ImmutableList.of(right);
-                expression = getRightUnaryExpression(inputValue, rolls);
-            } else if (rolls.size() == 2) {
-                Roll left = rolls.getFirst();
-                right = rolls.get(1);
-                childrenRolls = ImmutableList.of(left, right);
-                numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
-                expression = getBinaryOperatorExpression(inputValue, rolls);
-                randomElements.add(left.getRandomElementsInRoll());
+                final int numberOfDice;
+                final Roll right;
+                final ImmutableList<Roll> childrenRolls;
+                final String expression;
+                UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
+                if (rolls.size() == 1) {
+                    right = rolls.getFirst();
+                    numberOfDice = 1;
+                    childrenRolls = ImmutableList.of(right);
+                    expression = toExpression();
+                } else if (rolls.size() == 2) {
+                    Roll left = rolls.getFirst();
+                    right = rolls.get(1);
+                    childrenRolls = ImmutableList.of(left, right);
+                    numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
+                    expression = toExpression();
+                    randomElements.add(left.getRandomElementsInRoll());
 
-            } else {
-                throw new IllegalStateException("More then two operands for " + inputValue);
-            }
-            randomElements.add(right.getRandomElementsInRoll());
-
-            if (numberOfDice > maxNumberOfDice) {
-                throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
-            }
-            if (numberOfDice < 0) {
-                throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
-            }
-            final ImmutableList<RollElement> rollElements;
-            if (right.asInteger().isPresent()) {
-                int sidesOfDie = right.asInteger().get();
-                rollElements = toRollElements(rollDice(numberOfDice, sidesOfDie, numberSupplier));
-
-                randomElements.addAsRandomElements(rollElements.stream()
-                        .map(r -> new RandomElement(r, 1, sidesOfDie))
-                        .collect(ImmutableList.toImmutableList()));
-            } else {
-                ImmutableList.Builder<RollElement> builder = ImmutableList.builder();
-                for (int i = 0; i < numberOfDice; i++) {
-                    builder.add(pickOneOf(right.getElements(), numberSupplier));
+                } else {
+                    throw new IllegalStateException("More then two operands for " + inputValue);
                 }
-                rollElements = builder.build();
-                randomElements.addAsRandomElements(rollElements.stream()
-                        .map(r -> new RandomElement(r, right.getElements().stream()
-                                .map(RollElement::getValue)
-                                .collect(ImmutableList.toImmutableList())))
-                        .collect(ImmutableList.toImmutableList()));
+                randomElements.add(right.getRandomElementsInRoll());
+
+                if (numberOfDice > maxNumberOfDice) {
+                    throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
+                }
+                if (numberOfDice < 0) {
+                    throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
+                }
+                final ImmutableList<RollElement> rollElements;
+                if (right.asInteger().isPresent()) {
+                    int sidesOfDie = right.asInteger().get();
+                    rollElements = toRollElements(rollDice(numberOfDice, sidesOfDie, numberSupplier));
+
+                    randomElements.addAsRandomElements(rollElements.stream()
+                            .map(r -> new RandomElement(r, 1, sidesOfDie))
+                            .collect(ImmutableList.toImmutableList()));
+                } else {
+                    ImmutableList.Builder<RollElement> builder = ImmutableList.builder();
+                    for (int i = 0; i < numberOfDice; i++) {
+                        builder.add(pickOneOf(right.getElements(), numberSupplier));
+                    }
+                    rollElements = builder.build();
+                    randomElements.addAsRandomElements(rollElements.stream()
+                            .map(r -> new RandomElement(r, right.getElements().stream()
+                                    .map(RollElement::getValue)
+                                    .collect(ImmutableList.toImmutableList())))
+                            .collect(ImmutableList.toImmutableList()));
+                }
+
+                return Optional.of(ImmutableList.of(new Roll(expression,
+                        rollElements,
+                        randomElements.build(),
+                        childrenRolls)));
             }
 
-            return Optional.of(ImmutableList.of(new Roll(expression,
-                    rollElements,
-                    randomElements.build(),
-                    childrenRolls)));
+            @Override
+            public @NonNull String toExpression() {
+                if (operands.size() == 1) {
+                    return getRightUnaryExpression(inputValue, operands);
+                }
+                return getBinaryOperatorExpression(inputValue, operands);
+            }
         };
     }
 }

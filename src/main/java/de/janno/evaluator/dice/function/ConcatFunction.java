@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -17,18 +18,26 @@ public class ConcatFunction extends Function {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
-        return variables -> {
-            List<Roll> rolls = extendAllBuilder(arguments, variables);
-            if (rolls.isEmpty()) {
-                return Optional.empty();
+        return new RollBuilder() {
+            @Override
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(arguments, variables);
+                if (rolls.isEmpty()) {
+                    return Optional.empty();
+                }
+                String joined = rolls.stream()
+                        .map(Roll::getResultString)
+                        .collect(Collectors.joining());
+                return Optional.of(ImmutableList.of(new Roll(toExpression(),
+                        ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
+                        UniqueRandomElements.from(rolls),
+                        ImmutableList.copyOf(rolls))));
             }
-            String joined = rolls.stream()
-                    .map(Roll::getResultString)
-                    .collect(Collectors.joining());
-            return Optional.of(ImmutableList.of(new Roll(getExpression(inputValue, rolls),
-                    ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
-                    UniqueRandomElements.from(rolls),
-                    ImmutableList.copyOf(rolls))));
+
+            @Override
+            public @NonNull String toExpression() {
+                return getExpression(inputValue, arguments);
+            }
         };
     }
 }

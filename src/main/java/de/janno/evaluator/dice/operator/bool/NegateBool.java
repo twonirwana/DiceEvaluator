@@ -5,6 +5,7 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -20,19 +21,27 @@ public class NegateBool extends Operator {
 
     @Override
     public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return variables -> {
-            List<Roll> rolls = extendAllBuilder(operands, variables);
-            checkRollSize(inputValue, rolls, 1, 1);
+        return new RollBuilder() {
+            @Override
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, variables);
+                checkRollSize(inputValue, rolls, 1, 1);
 
-            Roll value = rolls.getFirst();
+                Roll value = rolls.getFirst();
 
-            final boolean boolValue = value.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, value, "right"));
+                final boolean boolValue = value.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, value, "right"));
 
-            ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf((!boolValue)), RollElement.NO_TAG, RollElement.NO_COLOR));
-            return Optional.of(ImmutableList.of(new Roll(getRightUnaryExpression(inputValue, rolls),
-                    diceResult,
-                    UniqueRandomElements.from(rolls),
-                    ImmutableList.of(value))));
+                ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf((!boolValue)), RollElement.NO_TAG, RollElement.NO_COLOR));
+                return Optional.of(ImmutableList.of(new Roll(toExpression(),
+                        diceResult,
+                        UniqueRandomElements.from(rolls),
+                        ImmutableList.of(value))));
+            }
+
+            @Override
+            public @NonNull String toExpression() {
+                return getRightUnaryExpression(getName(), operands);
+            }
         };
     }
 }

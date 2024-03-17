@@ -18,6 +18,7 @@ public class Roll {
     @NonNull
     //all random elements that were involved in this roll, this can be more than the elements, because it includes also filtered elements
     UniqueRandomElements randomElementsInRoll;
+    //all rolls that produced this roll
     @NonNull
     ImmutableList<Roll> childrenRolls;
 
