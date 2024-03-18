@@ -16,8 +16,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public final class DecimalDivide extends Operator {
 
-    public DecimalDivide() {
-        super("//", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(DecimalDivide.class));
+    public DecimalDivide(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("//", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(DecimalDivide.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -38,7 +38,8 @@ public final class DecimalDivide extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

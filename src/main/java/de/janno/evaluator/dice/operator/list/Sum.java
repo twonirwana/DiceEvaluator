@@ -17,8 +17,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Sum extends Operator {
 
-    public Sum() {
-        super("=", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, getOderNumberOf(Sum.class));
+    public Sum(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("=", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, getOderNumberOf(Sum.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     private static BigDecimal sumExact(List<RollElement> elements) {
@@ -46,7 +46,8 @@ public class Sum extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left))));
+                        ImmutableList.of(left),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

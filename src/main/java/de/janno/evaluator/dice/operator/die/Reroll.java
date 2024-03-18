@@ -13,8 +13,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Reroll extends Operator {
-    public Reroll() {
-        super("rr", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(Reroll.class));
+    public Reroll(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("rr", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(Reroll.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -46,7 +46,9 @@ public class Reroll extends Operator {
                         ImmutableList.<Roll>builder()
                                 .addAll(compareTo.getChildrenRolls())
                                 .addAll(roll.getChildrenRolls())
-                                .build())));
+                                .build(),
+                        maxNumberOfElements,
+                        keepChildrenRolls)));
             }
 
             @Override

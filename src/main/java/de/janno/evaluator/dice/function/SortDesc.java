@@ -14,8 +14,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class SortDesc extends Function {
 
-    public SortDesc() {
-        super("desc", 1, Integer.MAX_VALUE);
+    public SortDesc(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("desc", 1, Integer.MAX_VALUE, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -33,7 +33,8 @@ public class SortDesc extends Function {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.copyOf(rolls))));
+                        ImmutableList.copyOf(rolls),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

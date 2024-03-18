@@ -15,8 +15,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class RepeatList extends Operator {
 
-    public RepeatList() {
-        super("r", null, null, Associativity.LEFT, getOderNumberOf(RepeatList.class));
+    public RepeatList(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("r", null, null, Associativity.LEFT, getOderNumberOf(RepeatList.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -49,7 +49,8 @@ public class RepeatList extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
                         UniqueRandomElements.from(rolls),
-                        rolls)));
+                        rolls,
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

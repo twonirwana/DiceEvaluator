@@ -13,8 +13,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.*;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Color extends Operator {
-    public Color() {
-        super("col", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(Color.class));
+    public Color(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("col", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(Color.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -38,7 +38,8 @@ public class Color extends Operator {
                                 .map(r -> new RollElement(r.getValue(), r.getTag(), color))
                                 .collect(ImmutableList.toImmutableList()),
                         builder.build(),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

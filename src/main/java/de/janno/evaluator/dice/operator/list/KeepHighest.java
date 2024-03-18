@@ -17,8 +17,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class KeepHighest extends Operator {
 
-    public KeepHighest() {
-        super("k", null, null, Operator.Associativity.LEFT, getOderNumberOf(KeepHighest.class));
+    public KeepHighest(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("k", null, null, Operator.Associativity.LEFT, getOderNumberOf(KeepHighest.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -54,7 +54,8 @@ public class KeepHighest extends Operator {
                                 .addAll(otherTagElements)
                                 .build(),
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

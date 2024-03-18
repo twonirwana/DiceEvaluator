@@ -18,8 +18,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 @Deprecated
 public class ColorFunction extends Function {
 
-    public ColorFunction() {
-        super("color", 2);
+    public ColorFunction(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("color", 2, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ColorFunction extends Function {
                                 .map(r -> new RollElement(r.getValue(), color, color))
                                 .collect(ImmutableList.toImmutableList()),
                         builder.build(),
-                        p1.getChildrenRolls())));
+                        p1.getChildrenRolls(), maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

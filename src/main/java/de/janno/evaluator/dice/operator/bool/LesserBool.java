@@ -16,8 +16,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class LesserBool extends Operator {
 
-    public LesserBool() {
-        super("<?", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(LesserBool.class));
+    public LesserBool(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("<?", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(LesserBool.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -37,7 +37,8 @@ public class LesserBool extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

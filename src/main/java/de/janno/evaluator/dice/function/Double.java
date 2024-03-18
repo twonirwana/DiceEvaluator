@@ -17,8 +17,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 @Deprecated
 public class Double extends Function {
 
-    public Double() {
-        super("double", 2);
+    public Double(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("double", 2, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class Double extends Function {
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(toDuplicate.getChildrenRolls())
-                                .build())));
+                                .build(), maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

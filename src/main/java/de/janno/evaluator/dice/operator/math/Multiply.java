@@ -14,8 +14,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.*;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public final class Multiply extends Operator {
-    public Multiply() {
-        super("*", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(Multiply.class));
+    public Multiply(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("*", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(Multiply.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -36,7 +36,8 @@ public final class Multiply extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

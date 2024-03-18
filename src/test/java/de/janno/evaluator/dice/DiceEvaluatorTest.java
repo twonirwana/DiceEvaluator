@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.AbstractCollection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -620,7 +621,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 1), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 1), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("replace(exp(d[0/0/1/1/'2#'/2],2),'2#','2')");
         System.out.println(res.size());
@@ -634,7 +635,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void valRandomElementsInCorrectOrder() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("val('$r',color(1d9,'blue')) val('$h',color(1d10,'purple_dark')) val('$s',('$r'+'$h')>=6c) val('$rt','$r'==10c) val('$ht','$h'==10c) val('$ho','$h'==1c) val('$2s',((('$rt'+'$ht'=))/2)*2) val('$ts',('$s'+'$2s'=)) concat('successes: ', '$ts', ifE('$ts',0,ifG('$ho',1,' bestial failure' , ''),''), ifE('$rt' mod 2, 1, ifE('$ht' mod 2, 1, ' messy critical', ''), ''))");
 
@@ -647,7 +648,7 @@ public class DiceEvaluatorTest {
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
     @MethodSource("resultSizeDate")
     void resultSize(String expression, int size) throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate(expression);
 
@@ -656,7 +657,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void testColDontCopyUniqueRandomElements() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("val('1',1d6) if('1' =? 1,  '1' col 'red', '1')");
 
@@ -666,7 +667,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void testRegularDieHeap() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("1000d999999999");
 
@@ -674,8 +675,51 @@ public class DiceEvaluatorTest {
     }
 
     @Test
+    void disableRollChildren() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0), 1000, 10_000, false);
+
+        List<Roll> res = underTest.evaluate("(2d6=)d(2d6=)");
+        assertThat(res.getFirst().getElements()).hasSize(5);
+        assertThat(res.getFirst().getRandomElementsInRoll().getRandomElements().stream().map(RandomElements::getRandomElements).mapToLong(AbstractCollection::size).sum()).isEqualTo(9);
+        assertThat(res.getFirst().getChildrenRolls().stream().mapToLong(this::getNumberOfChildrenRolls).sum()).isEqualTo(0);
+    }
+
+    @Test
+    void enableRollChildren() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0), 1000, 10_000, true);
+
+        List<Roll> res = underTest.evaluate("(2d6=)d(2d6=)");
+        assertThat(res.getFirst().getElements()).hasSize(5);
+        assertThat(res.getFirst().getRandomElementsInRoll().getRandomElements().stream().map(RandomElements::getRandomElements).mapToLong(AbstractCollection::size).sum()).isEqualTo(9);
+        assertThat(res.getFirst().getChildrenRolls().stream().mapToLong(this::getNumberOfChildrenRolls).sum()).isEqualTo(6);
+    }
+
+
+    @Test
+    void testMaxResultElements() {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10, false);
+
+        assertThatThrownBy(() -> underTest.evaluate("10d10 + 5"))
+                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
+                .hasMessage("To many elements in roll '10d10+5', max is 10 but there where 11");
+    }
+
+    @Test
+    void testMaxRandomElements() {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10, false);
+
+        assertThatThrownBy(() -> underTest.evaluate("(6d6k1)+(6d6k1)"))
+                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
+                .hasMessage("To many random elements in roll '(6d6k1)+(6d6k1)', max is 10 but there where 12");
+    }
+
+    private long getNumberOfChildrenRolls(Roll roll) {
+        return roll.getChildrenRolls().size() + roll.getChildrenRolls().stream().mapToLong(this::getNumberOfChildrenRolls).sum();
+    }
+
+    @Test
     void testCustomDieHeap() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("1000d[" + IntStream.range(0, 1000).mapToObj(i -> "1").collect(Collectors.joining("/")) + "]");
 
@@ -684,7 +728,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void testExplodingDieMaxHeap() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("1000d!999999999");
 
@@ -693,7 +737,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void testExplodingDieTwoHeap() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("1000d!2");
 
@@ -702,7 +746,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void testExplodingAddDieMaxHeap() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("1000d!!999999999");
 
@@ -711,7 +755,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void testExplodingAddDieTwoHeap() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("1000d!!2");
 
@@ -721,7 +765,7 @@ public class DiceEvaluatorTest {
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
     @MethodSource("generateData")
     void rollExpression(String diceExpression, List<Integer> diceNumbers, List<Integer> expected) throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(res.stream().flatMap(r -> r.getElements().stream()).flatMap(e -> e.asInteger().stream())).containsExactlyElementsOf(expected);
@@ -733,7 +777,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void sortAsc() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("asc(4d20)");
 
@@ -742,7 +786,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void sortDesc() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("desc(4d20)");
 
@@ -751,7 +795,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void sortAlphaAsc() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("asc(4d20 + '5a' +'b')");
 
@@ -760,7 +804,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void sortAlphaDesc() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 20, 1, 12), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("desc(4d20 + '5a' + 'b')");
 
@@ -769,7 +813,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void groupCount() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("groupC(4d20 + 10d10 + 3d6 + 10 + color(3d6,'red')+color(3d4,'black'))");
 
@@ -779,7 +823,7 @@ public class DiceEvaluatorTest {
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
     @MethodSource("generateStringDiceData")
     void rollStringDiceExpression(String diceExpression, List<Integer> diceNumbers, List<String> expected) throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(values(res)).containsExactlyElementsOf(expected);
@@ -792,7 +836,7 @@ public class DiceEvaluatorTest {
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
     @MethodSource("generateStringDiceDataColor")
     void rollStringDiceExpressionColor(String diceExpression, List<Integer> diceNumbers, List<String> expected, String expectedColor) throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(values(res)).containsExactlyElementsOf(expected);
@@ -807,7 +851,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void integerDevide_NotSingleIntegerException() {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate("2d6 / 3"))
                 .isInstanceOf(ExpressionException.class)
                 .hasMessage("'/' requires as left input a single integer but was '[4, 1]'. Try to sum the numbers together like (2d6=)");
@@ -815,7 +859,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void decimalDevide_NotSingleDecimalException() {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate("2d6 // 3"))
                 .isInstanceOf(ExpressionException.class)
                 .hasMessage("'//' requires as left input a single decimal but was '[4, 1]'. Try to sum the numbers together like (2d6=)");
@@ -823,7 +867,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void divisorZero() {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate("10 / 0"))
                 .isInstanceOf(ArithmeticException.class)
                 .hasMessage("/ by zero");
@@ -832,7 +876,7 @@ public class DiceEvaluatorTest {
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
     @MethodSource("generateRandomDiceData")
     void getRandomElements(String expression, List<Integer> diceThrows, List<List<String>> expectedRandomElements) throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceThrows), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceThrows), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate(expression);
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
@@ -844,7 +888,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_regularDice() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("(2d4=)d6");
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
@@ -861,7 +905,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_customDice() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("(2d4=)d[a/b/c/d/e/f]");
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().getRandomElements().stream())
@@ -877,7 +921,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_value() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 10, 10), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 10, 10), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("val('$1',d100) ifG('$1', 95, (d100 + '$1'=), ifL('$1', 6, ('$1' - d100=)))");
 
         assertThat(res).hasSize(1);
@@ -894,7 +938,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_explode() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 2, 8, 3, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 2, 8, 3, 4), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("exp(2d6,1d8,1d10)");
 
 
@@ -914,7 +958,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_replace_no_match() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 5), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 5), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("replace(3d6,[6],2d20)");
 
 
@@ -934,7 +978,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_replace() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 5, 19, 18, 17, 16), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 5, 19, 18, 17, 16), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("replace(3d6,[1,5],2d20)");
 
         assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("19", "18", "2", "17", "16");
@@ -953,7 +997,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_replaceRollFind() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 1, 2, 3), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 1, 2, 3), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("replace(1d6, 1d6, 1d6, 1d8, 1d10)");
 
         assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("2");
@@ -972,7 +1016,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void separatorTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("1d6,1d8");
 
         assertThat(res).hasSize(2);
@@ -990,7 +1034,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void spaceSeparatorTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("1d6 1d8");
 
         assertThat(res).hasSize(2);
@@ -1008,7 +1052,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_Repeat() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("5x1d6");
 
         assertThat(res).hasSize(5);
@@ -1029,7 +1073,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_ListRepeat() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("5r1d6");
 
         assertThat(res).hasSize(1);
@@ -1047,7 +1091,7 @@ public class DiceEvaluatorTest {
     void getRandomElements_reroll() throws ExpressionException {
         //roll 4d6, reroll 1s once, drop lowest, rolled three times
 
-        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("3x4d6rr1k3");
 
         assertThat(res).hasSize(3);
@@ -1065,7 +1109,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_explodingDice() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 1, 4, 6, 6, 1, 5), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 1, 4, 6, 6, 1, 5), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("(1d!2=)d!6");
 
         assertThat(res).hasSize(1);
@@ -1083,7 +1127,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void getRandomElements_explodingAddDice() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 1, 4, 6, 6, 1, 5), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 1, 4, 6, 6, 1, 5), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("(1d!!2=)d!!6");
 
         assertThat(res).hasSize(1);
@@ -1102,7 +1146,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void toStringTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("1d6 + 3d20 + 10 +min(2d6,3d4)");
 
         assertThat(res).hasSize(1);
@@ -1113,7 +1157,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void toStringBracketTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("3d(20 + 10=)");
 
         assertThat(res).hasSize(1);
@@ -1124,7 +1168,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void toStringColorTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("color(1d6,'red') + color(3d20,'blue')");
 
         assertThat(res).hasSize(1);
@@ -1136,7 +1180,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void colTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("1d6 col 'red' +  3d20 col 'blue'");
 
         assertThat(res).hasSize(1);
@@ -1156,7 +1200,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void tagTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("1d6 tag 'red' +  3d20 tag 'blue'");
 
         assertThat(res).hasSize(1);
@@ -1176,7 +1220,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void toStringValColorTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("val('$r', 1d6) color('$r','red') + color('$r','blue')");
 
         assertThat(res).hasSize(1);
@@ -1188,7 +1232,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void toStringValTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("val('$r', 1d6) '$r' + '$r'");
 
         assertThat(res).hasSize(1);
@@ -1200,7 +1244,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void ifBoolTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("val('$r',1d6) if('$r'=?1,'a','$r'=?2,'b','c')");
 
         assertThat(res).hasSize(1);
@@ -1212,7 +1256,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void toStringMultiExpressionTest() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate("1d6 + 3d20, 10 +min(2d6,3d4)");
 
         assertThat(res).hasSize(2);
@@ -1226,7 +1270,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void maxDice() {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
 
         assertThatThrownBy(() -> underTest.evaluate("1001d6"))
                 .isInstanceOf(ExpressionException.class)
@@ -1235,7 +1279,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void maxNegativeDice() {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate("-1001d6"))
                 .isInstanceOf(ExpressionException.class)
                 .hasMessage("The number of dice must be less or equal then 1000 but was 1001");
@@ -1244,7 +1288,7 @@ public class DiceEvaluatorTest {
     @ParameterizedTest(name = "{index} {0} -> {1}")
     @MethodSource("generateErrorData")
     void testError(String input, String expectedMessage) {
-        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate(input))
                 .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
                 .hasMessage(expectedMessage);
@@ -1252,7 +1296,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void rollTwice_1d6() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000, 10_000, true);
 
         Roller res = underTest.buildRollSupplier("1d6");
 
@@ -1262,7 +1306,7 @@ public class DiceEvaluatorTest {
 
     @Test
     void rollTwice_value() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 2, 3, 4), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 2, 3, 4), 1000, 10_000, true);
 
         Roller res = underTest.buildRollSupplier("val('$1', 3d6), (('$1')=) + (('$1'>2)c)");
 
@@ -1280,7 +1324,7 @@ public class DiceEvaluatorTest {
     @ParameterizedTest(name = "{index} expression:{0} -> {1}")
     @MethodSource("generateHasOperatorOrFunction")
     void resultSize(String expression, boolean hasOperatorOrFunction) {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
 
         assertThat(underTest.expressionContainsOperatorOrFunction(expression)).isEqualTo(hasOperatorOrFunction);
     }

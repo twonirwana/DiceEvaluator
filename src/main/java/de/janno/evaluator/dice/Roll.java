@@ -1,14 +1,18 @@
 package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.AbstractCollection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Value
+@Getter
+@ToString
+@EqualsAndHashCode
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class Roll {
 
     @NonNull
@@ -21,6 +25,25 @@ public class Roll {
     //all rolls that produced this roll
     @NonNull
     ImmutableList<Roll> childrenRolls;
+
+    public Roll(@NonNull String expression,
+                @NonNull ImmutableList<RollElement> elements,
+                @NonNull UniqueRandomElements randomElementsInRoll,
+                @NonNull ImmutableList<Roll> childrenRolls,
+                int maxNumberOfElements,
+                boolean keepChildRolls) throws ExpressionException {
+        this.expression = expression;
+        this.elements = elements;
+        this.randomElementsInRoll = randomElementsInRoll;
+        this.childrenRolls = keepChildRolls ? childrenRolls : ImmutableList.of();
+        if (elements.size() > maxNumberOfElements) {
+            throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, elements.size()));
+        }
+        long numberOfRandomElementsInRoll = randomElementsInRoll.getRandomElements().stream().map(RandomElements::getRandomElements).mapToLong(AbstractCollection::size).sum();
+        if (numberOfRandomElementsInRoll > maxNumberOfElements) {
+            throw new ExpressionException("To many random elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, numberOfRandomElementsInRoll));
+        }
+    }
 
     public Optional<Integer> asInteger() {
         if (elements.size() == 1) {

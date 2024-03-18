@@ -10,6 +10,8 @@ import java.util.Optional;
 @EqualsAndHashCode
 @ToString
 public abstract class Operator {
+    protected final int maxNumberOfElements;
+    protected final boolean keepChildrenRolls;
     @NonNull
     private final String name;
     private final Integer unaryPrecedence;
@@ -18,11 +20,13 @@ public abstract class Operator {
     private final Associativity unaryAssociativity;
     private final Associativity binaryAssociativity;
 
-    public Operator(@NonNull String name, OperatorType operatorType, @NonNull Associativity associativity, int precedence) {
+    public Operator(@NonNull String name, OperatorType operatorType, @NonNull Associativity associativity, int precedence, int maxNumberOfElements, boolean keepChildrenRolls) {
         this(name, getUnaryAssociativity(operatorType, associativity),
                 getUnaryPrecedence(operatorType, precedence),
                 getBinaryAssociativity(operatorType, associativity),
-                getBinaryPrecedence(operatorType, precedence));
+                getBinaryPrecedence(operatorType, precedence),
+                maxNumberOfElements,
+                keepChildrenRolls);
     }
 
     /**
@@ -31,7 +35,7 @@ public abstract class Operator {
      * Example : In "1+3*4" * has a higher precedence than +, so the expression is interpreted as 1+(3*4).
      * An operator's <a href="http://en.wikipedia.org/wiki/Operator_associativity">associativity</a> define how operators of the same precedence are grouped.
      */
-    public Operator(@NonNull String name, Associativity unaryAssociativity, Integer unaryPrecedence, Associativity binaryAssociativity, Integer binaryPrecedence) {
+    public Operator(@NonNull String name, Associativity unaryAssociativity, Integer unaryPrecedence, Associativity binaryAssociativity, Integer binaryPrecedence, int maxNumberOfElements, boolean keepChildrenRolls) {
         if (unaryAssociativity == null && binaryAssociativity == null) {
             throw new IllegalArgumentException("The operant %s need at least on associativity".formatted(name));
         }
@@ -40,6 +44,8 @@ public abstract class Operator {
         this.binaryAssociativity = binaryAssociativity;
         this.unaryPrecedence = unaryPrecedence;
         this.binaryPrecedence = binaryPrecedence;
+        this.maxNumberOfElements = maxNumberOfElements;
+        this.keepChildrenRolls = keepChildrenRolls;
     }
 
     private static Associativity getUnaryAssociativity(OperatorType operatorType, @NonNull Associativity associativity) {

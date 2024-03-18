@@ -15,8 +15,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class OrBool extends Operator {
 
-    public OrBool() {
-        super("||", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(OrBool.class));
+    public OrBool(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("||", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(OrBool.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -37,7 +37,8 @@ public class OrBool extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

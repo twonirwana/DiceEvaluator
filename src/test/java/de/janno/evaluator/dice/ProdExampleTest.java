@@ -24,7 +24,7 @@ public class ProdExampleTest {
     @ParameterizedTest
     @CsvFileSource(resources = "/expressionsAndResults.csv", delimiter = '|', maxCharsPerColumn = 100_000)
     void csvFileSourceTest(String expression, String expected) throws ExpressionException, IOException {
-        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000);
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
         List<Roll> res = underTest.evaluate(expression);
         //    write(expression, res.toString());
 

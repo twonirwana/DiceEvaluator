@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode
 @ToString
 public abstract class Function {
+    protected final int maxNumberOfElements;
+    protected final boolean keepChildrenRolls;
     @NonNull
     private final String name;
     private final int minArgumentCount;
@@ -28,8 +30,8 @@ public abstract class Function {
      * @param argumentCount The function's argument count.
      * @throws IllegalArgumentException if argumentCount is lower than 0 or if the function name is null or empty.
      */
-    public Function(@NonNull String name, int argumentCount) {
-        this(name, argumentCount, argumentCount);
+    public Function(@NonNull String name, int argumentCount, int maxNumberOfElements, boolean keepChildrenRolls) {
+        this(name, argumentCount, argumentCount, maxNumberOfElements, keepChildrenRolls);
     }
 
     /**
@@ -40,13 +42,15 @@ public abstract class Function {
      * @param maxArgumentCount The function's maximum argument count (Integer.MAX_VALUE to specify no upper limit).
      * @throws IllegalArgumentException if minArgumentCount is less than 0 or greater than maxArgumentCount or if the function name is null or empty.
      */
-    public Function(@NonNull String name, int minArgumentCount, int maxArgumentCount) {
+    public Function(@NonNull String name, int minArgumentCount, int maxArgumentCount, int maxNumberOfElements, boolean keepChildrenRolls) {
         if ((minArgumentCount < 0) || (minArgumentCount > maxArgumentCount)) {
             throw new IllegalArgumentException("Invalid argument count");
         }
         this.name = name;
         this.minArgumentCount = minArgumentCount;
         this.maxArgumentCount = maxArgumentCount;
+        this.maxNumberOfElements = maxNumberOfElements;
+        this.keepChildrenRolls = keepChildrenRolls;
     }
 
 
@@ -56,7 +60,8 @@ public abstract class Function {
 
     /**
      * Creates a RollBuilder for the arguments
-     * @param arguments all function arguments
+     *
+     * @param arguments  all function arguments
      * @param inputValue the given input for the function name, is needed the get the used upper/lower case in the result expression
      * @return the RollBuilder that can be called to get result rolls
      */

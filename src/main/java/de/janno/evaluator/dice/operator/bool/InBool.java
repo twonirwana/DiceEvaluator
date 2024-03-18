@@ -14,8 +14,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class InBool extends Operator {
 
-    public InBool() {
-        super("in", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(InBool.class));
+    public InBool(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("in", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(InBool.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -35,7 +35,8 @@ public class InBool extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

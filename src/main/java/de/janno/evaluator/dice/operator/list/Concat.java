@@ -13,8 +13,8 @@ import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Concat extends Operator {
-    public Concat() {
-        super("_", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(Concat.class));
+    public Concat(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("_", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(Concat.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -30,7 +30,8 @@ public class Concat extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.copyOf(rolls))));
+                        ImmutableList.copyOf(rolls),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

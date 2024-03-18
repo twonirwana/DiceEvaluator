@@ -12,8 +12,8 @@ import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class Min extends Function {
-    public Min() {
-        super("min", 1, Integer.MAX_VALUE);
+    public Min(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("min", 1, Integer.MAX_VALUE, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -35,7 +35,8 @@ public class Min extends Function {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.copyOf(rolls))));
+                        ImmutableList.copyOf(rolls),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

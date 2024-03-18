@@ -13,8 +13,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
 
 public class Explode extends Function {
-    public Explode() {
-        super("exp", 2, 3);
+    public Explode(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("exp", 2, 3, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -70,7 +70,11 @@ public class Explode extends Function {
                     rerolls++;
                 }
                 final ImmutableList<Roll> allResultRolls = allResultRollsBuilder.build();
-                return Optional.of(ImmutableList.of(new Roll(toExpression(), allResultRolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()), UniqueRandomElements.from(allChildrenRollBuilder.build()), allChildrenRollBuilder.build())));
+                return Optional.of(ImmutableList.of(new Roll(toExpression(),
+                        allResultRolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
+                        UniqueRandomElements.from(allChildrenRollBuilder.build()), allChildrenRollBuilder.build(),
+                        maxNumberOfElements,
+                        keepChildrenRolls)));
             }
 
             @Override

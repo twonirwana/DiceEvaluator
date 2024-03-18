@@ -13,8 +13,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class SortAsc extends Function {
 
-    public SortAsc() {
-        super("asc", 1, Integer.MAX_VALUE);
+    public SortAsc(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("asc", 1, Integer.MAX_VALUE, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -31,7 +31,9 @@ public class SortAsc extends Function {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.copyOf(rolls))));            }
+                        ImmutableList.copyOf(rolls),
+                        maxNumberOfElements, keepChildrenRolls)));
+            }
 
             @Override
             public @NonNull String toExpression() {

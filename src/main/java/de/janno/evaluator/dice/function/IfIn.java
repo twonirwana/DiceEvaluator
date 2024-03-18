@@ -6,8 +6,8 @@ import de.janno.evaluator.dice.Roll;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
 
 public class IfIn extends AbstractIf {
-    public IfIn() {
-        super("ifIn");
+    public IfIn(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("ifIn", maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override

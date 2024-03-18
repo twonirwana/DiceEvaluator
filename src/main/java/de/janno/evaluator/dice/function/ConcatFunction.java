@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 
 public class ConcatFunction extends Function {
-    public ConcatFunction() {
-        super("concat", 0, Integer.MAX_VALUE);
+    public ConcatFunction(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("concat", 0, Integer.MAX_VALUE, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class ConcatFunction extends Function {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.copyOf(rolls))));
+                        ImmutableList.copyOf(rolls), maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
