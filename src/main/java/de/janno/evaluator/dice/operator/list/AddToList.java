@@ -13,8 +13,8 @@ import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public final class AddToList extends Operator {
-    public AddToList() {
-        super("+", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(AddToList.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(AddToList.class));
+    public AddToList(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("+", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(AddToList.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(AddToList.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -29,7 +29,8 @@ public final class AddToList extends Operator {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),
                             rolls.getFirst().getElements(),
                             UniqueRandomElements.from(rolls),
-                            ImmutableList.of(rolls.getFirst()))));
+                            ImmutableList.of(rolls.getFirst()),
+                            maxNumberOfElements, keepChildrenRolls)));
                 }
 
                 Roll left = rolls.getFirst();
@@ -41,7 +42,8 @@ public final class AddToList extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

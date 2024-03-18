@@ -15,8 +15,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Count extends Operator {
 
-    public Count() {
-        super("c", Operator.Associativity.LEFT, getOderNumberOf(Count.class), null, null);
+    public Count(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("c", OperatorType.UNARY, Operator.Associativity.LEFT, getOderNumberOf(Count.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -42,7 +42,8 @@ public class Count extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left))));
+                        ImmutableList.of(left),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

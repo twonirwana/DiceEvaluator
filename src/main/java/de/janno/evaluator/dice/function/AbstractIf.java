@@ -13,8 +13,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public abstract class AbstractIf extends Function {
 
-    public AbstractIf(@NonNull String name) {
-        super(name, 3, Integer.MAX_VALUE);
+    public AbstractIf(@NonNull String name, int maxNumberOfElements, boolean keepChildrenRolls) {
+        super(name, 3, Integer.MAX_VALUE, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -42,7 +42,7 @@ public abstract class AbstractIf extends Function {
                                 ImmutableList.<Roll>builder()
                                         .addAll(input.getChildrenRolls())
                                         .addAll(trueResult.getChildrenRolls())
-                                        .build())));
+                                        .build(), maxNumberOfElements, keepChildrenRolls)));
                     }
                     counter += 2;
                 }
@@ -62,7 +62,7 @@ public abstract class AbstractIf extends Function {
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(result.getChildrenRolls())
-                                .build())));
+                                .build(), maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

@@ -20,8 +20,8 @@ public final class ExplodingDice extends Operator {
     private final NumberSupplier numberSupplier;
     private final int maxNumberOfDice;
 
-    public ExplodingDice(NumberSupplier numberSupplier, int maxNumberOfDice) {
-        super("d!", Operator.Associativity.RIGHT, getOderNumberOf(ExplodingDice.class), Operator.Associativity.LEFT, getOderNumberOf(ExplodingDice.class));
+    public ExplodingDice(NumberSupplier numberSupplier, int maxNumberOfDice, int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("d!", Operator.Associativity.RIGHT, getOderNumberOf(ExplodingDice.class), Operator.Associativity.LEFT, getOderNumberOf(ExplodingDice.class), maxNumberOfElements, keepChildrenRolls);
         this.numberSupplier = numberSupplier;
         this.maxNumberOfDice = maxNumberOfDice;
     }
@@ -51,7 +51,8 @@ public final class ExplodingDice extends Operator {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),
                             rollElements,
                             randomElements.build(),
-                            ImmutableList.of(right))));
+                            ImmutableList.of(right),
+                            maxNumberOfElements, keepChildrenRolls)));
                 }
 
                 final Roll left = rolls.getFirst();
@@ -79,7 +80,8 @@ public final class ExplodingDice extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
                         randomElements.build(),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

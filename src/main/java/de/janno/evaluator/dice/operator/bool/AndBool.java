@@ -15,8 +15,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class AndBool extends Operator {
 
-    public AndBool() {
-        super("&&", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(AndBool.class));
+    public AndBool(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("&&", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(AndBool.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -38,7 +38,8 @@ public class AndBool extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

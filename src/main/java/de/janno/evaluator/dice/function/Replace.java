@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class Replace extends Function {
-    public Replace() {
-        super("replace", 3, Integer.MAX_VALUE);
+    public Replace(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("replace", 3, Integer.MAX_VALUE, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -61,7 +61,8 @@ public class Replace extends Function {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
                         UniqueRandomElements.from(allRolls.build()),
-                        childrenRollBuilder.build())));
+                        childrenRollBuilder.build(),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

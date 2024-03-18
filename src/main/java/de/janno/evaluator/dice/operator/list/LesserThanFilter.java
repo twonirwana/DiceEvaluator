@@ -16,8 +16,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class LesserThanFilter extends Operator {
 
-    public LesserThanFilter() {
-        super("<", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(LesserThanFilter.class));
+    public LesserThanFilter(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("<", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, getOderNumberOf(LesserThanFilter.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -41,7 +41,8 @@ public class LesserThanFilter extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

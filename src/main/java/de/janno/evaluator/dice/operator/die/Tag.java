@@ -13,8 +13,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.*;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Tag extends Operator {
-    public Tag() {
-        super("tag", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(Tag.class));
+    public Tag(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("tag", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(Tag.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -38,7 +38,8 @@ public class Tag extends Operator {
                                 .collect(ImmutableList.toImmutableList()),
                         //tags are not applied to the random elements
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

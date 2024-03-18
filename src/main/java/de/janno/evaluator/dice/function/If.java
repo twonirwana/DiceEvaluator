@@ -14,8 +14,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotBoolean;
 
 public class If extends Function {
-    public If() {
-        super("if", 1, Integer.MAX_VALUE);
+    public If(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("if", 1, Integer.MAX_VALUE, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -54,17 +54,20 @@ public class If extends Function {
                         List<Roll> trueResult = returnIfTrue.orElse(Collections.emptyList());
                         variables.putAll(trueVariable); //only the variable of the true result are added
                         UniqueRandomElements allBooleanRandomElements = booleanRandomElements.build();
-                        return Optional.of(trueResult.stream()
-                                .map(r -> new Roll(toExpression(), r.getElements(),
-                                        UniqueRandomElements.builder()
-                                                .add(allBooleanRandomElements)
-                                                .add(r.getRandomElementsInRoll())
-                                                .build(),
-                                        ImmutableList.<Roll>builder()
-                                                .addAll(booleanExpression.getChildrenRolls())
-                                                .addAll(r.getChildrenRolls())
-                                                .build()))
-                                .collect(ImmutableList.toImmutableList()));
+                        ImmutableList.Builder<Roll> resultBuilder = ImmutableList.builder();
+                        for (Roll r : trueResult) {
+                            resultBuilder.add(new Roll(toExpression(), r.getElements(),
+                                    UniqueRandomElements.builder()
+                                            .add(allBooleanRandomElements)
+                                            .add(r.getRandomElementsInRoll())
+                                            .build(),
+                                    ImmutableList.<Roll>builder()
+                                            .addAll(booleanExpression.getChildrenRolls())
+                                            .addAll(r.getChildrenRolls())
+                                            .build(),
+                                    maxNumberOfElements, keepChildrenRolls));
+                        }
+                        return Optional.of(resultBuilder.build());
                     }
                     checkIfTrueIndex = checkIfTrueIndex + 2;
                     if (checkIfTrueIndex < arguments.size()) {
@@ -84,13 +87,17 @@ public class If extends Function {
                     Optional<List<Roll>> defaultResult = arguments.get(checkIfTrueIndex - 1).extendRoll(variables);
                     if (defaultResult.isPresent()) {
                         allRolls.addAll(defaultResult.get());
-                        return Optional.of(defaultResult.get().stream()
-                                .map(r -> new Roll(toExpression(), r.getElements(),
-                                        UniqueRandomElements.builder()
-                                                .add(booleanRandomElements.build())
-                                                .add(r.getRandomElementsInRoll())
-                                                .build(), r.getChildrenRolls()))
-                                .collect(ImmutableList.toImmutableList()));
+
+                        ImmutableList.Builder<Roll> resultBuilder = ImmutableList.builder();
+                        for (Roll r : defaultResult.get()) {
+                            resultBuilder.add(new Roll(toExpression(), r.getElements(),
+                                    UniqueRandomElements.builder()
+                                            .add(booleanRandomElements.build())
+                                            .add(r.getRandomElementsInRoll())
+                                            .build(), r.getChildrenRolls(),
+                                    maxNumberOfElements, keepChildrenRolls));
+                        }
+                        return Optional.of(resultBuilder.build());
                     }
                 }
 

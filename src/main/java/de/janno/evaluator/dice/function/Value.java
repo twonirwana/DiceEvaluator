@@ -12,8 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class Value extends Function {
-    public Value() {
-        super("val", 2);
+    public Value(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("val", 2, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -43,7 +43,8 @@ public class Value extends Function {
                 variables.put(valName, new Roll(expression,
                         rolls.get(1).getElements(),
                         UniqueRandomElements.from(rolls),
-                        rolls.get(1).getChildrenRolls()));
+                        rolls.get(1).getChildrenRolls(),
+                        maxNumberOfElements, keepChildrenRolls));
 
                 return Optional.empty();
             }

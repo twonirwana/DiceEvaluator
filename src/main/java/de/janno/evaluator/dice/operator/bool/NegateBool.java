@@ -15,8 +15,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class NegateBool extends Operator {
 
-    public NegateBool() {
-        super("!", OperatorType.UNARY, Associativity.RIGHT, getOderNumberOf(NegateBool.class));
+    public NegateBool(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("!", OperatorType.UNARY, Associativity.RIGHT, getOderNumberOf(NegateBool.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -35,7 +35,8 @@ public class NegateBool extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(value))));
+                        ImmutableList.of(value),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

@@ -13,14 +13,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TokenizerTest {
 
-    Operator d = new Operator("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 1) {
+    Operator d = new Operator("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 1, 10_000, true) {
 
         @Override
         public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
             return new RollBuilder() {
                 @Override
-                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("dice", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
+                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("dice", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
                 }
 
                 @Override
@@ -30,13 +30,13 @@ class TokenizerTest {
             };
         }
     };
-    Operator plus = new Operator("+", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 2) {
+    Operator plus = new Operator("+", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 2, 10_000, true) {
         @Override
         public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
             return new RollBuilder() {
                 @Override
-                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("plus", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
+                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("plus", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
                 }
 
                 @Override
@@ -46,30 +46,13 @@ class TokenizerTest {
             };
         }
     };
-    Operator aRightLeft = new Operator("a", Operator.Associativity.RIGHT, 1, Operator.Associativity.LEFT, 1) {
+    Operator aRightLeft = new Operator("a", Operator.Associativity.RIGHT, 1, Operator.Associativity.LEFT, 1, 10_000, true) {
         @Override
         public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
             return new RollBuilder() {
                 @Override
-                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
-                }
-
-                @Override
-                public @NonNull String toExpression() {
-                    return operands.toString();
-                }
-            };
-        }
-    };
-
-    Operator aLeft = new Operator("a", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 1) {
-        @Override
-        public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
-            return new RollBuilder() {
-                @Override
-                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
+                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
                 }
 
                 @Override
@@ -80,13 +63,30 @@ class TokenizerTest {
         }
     };
 
-    Operator aRight = new Operator("a", Operator.OperatorType.UNARY, Operator.Associativity.RIGHT, 1) {
+    Operator aLeft = new Operator("a", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 1, 10_000, true) {
         @Override
         public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
             return new RollBuilder() {
                 @Override
-                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
+                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
+                }
+
+                @Override
+                public @NonNull String toExpression() {
+                    return operands.toString();
+                }
+            };
+        }
+    };
+
+    Operator aRight = new Operator("a", Operator.OperatorType.UNARY, Operator.Associativity.RIGHT, 1, 10_000, true) {
+        @Override
+        public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
+            return new RollBuilder() {
+                @Override
+                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
                 }
 
                 @Override
@@ -154,13 +154,13 @@ class TokenizerTest {
 
     @Test
     void validate() {
-        Operator d = new Operator("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 20) {
+        Operator d = new Operator("d", Operator.OperatorType.BINARY, Operator.Associativity.LEFT, 20, 10_000, true) {
             @Override
             public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
                 return new RollBuilder() {
                     @Override
-                    public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) {
-                        return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("null", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
+                    public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                        return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("null", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
                     }
 
                     @Override
@@ -170,13 +170,13 @@ class TokenizerTest {
                 };
             }
         };
-        Operator d2 = new Operator("d", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 15) {
+        Operator d2 = new Operator("d", Operator.OperatorType.UNARY, Operator.Associativity.LEFT, 15, 10_000, true) {
             @Override
             public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
                 return new RollBuilder() {
                     @Override
-                    public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) {
-                        return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("null", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
+                    public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+                        return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("null", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
                     }
 
                     @Override

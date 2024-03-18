@@ -16,8 +16,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class GreaterBool extends Operator {
 
-    public GreaterBool() {
-        super(">?", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(GreaterBool.class));
+    public GreaterBool(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super(">?", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(GreaterBool.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -37,7 +37,8 @@ public class GreaterBool extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

@@ -14,8 +14,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public final class Modulo extends Operator {
 
-    public Modulo() {
-        super("mod", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(Modulo.class));
+    public Modulo(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("mod", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(Modulo.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -36,7 +36,8 @@ public final class Modulo extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));            }
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));            }
 
             @Override
             public @NonNull String toExpression() {

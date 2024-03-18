@@ -14,8 +14,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class EqualBool extends Operator {
 
-    public EqualBool() {
-        super("=?", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(EqualBool.class));
+    public EqualBool(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("=?", OperatorType.BINARY, Associativity.LEFT, getOderNumberOf(EqualBool.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -34,7 +34,8 @@ public class EqualBool extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

@@ -6,8 +6,8 @@ import de.janno.evaluator.dice.Roll;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
 
 public class IfLesser extends AbstractIf {
-    public IfLesser() {
-        super("ifL");
+    public IfLesser(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("ifL", maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override

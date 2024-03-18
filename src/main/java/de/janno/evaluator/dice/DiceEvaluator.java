@@ -24,76 +24,82 @@ import java.util.stream.Collectors;
 public class DiceEvaluator {
 
     private static final int DEFAULT_MAX_NUMBER_OF_DICE = 1000;
+    private static final int DEFAULT_MAX_NUMBER_OF_ELEMENTS = 10_000;
+    private static final boolean DEFAULT_KEEP_CHILDREN_ROLLS = true;
 
     private static final String SEPARATOR = ",";
     private static final String LEGACY_LIST_SEPARATOR = "/";
     private static final Pattern LIST_REGEX = Pattern.compile("(.+([%s%s].+)+)".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR), Pattern.DOTALL); //the brackets are used for the escape and are not part of the literal
     private final Tokenizer tokenizer;
     private final Parameters parameters;
+    private final int maxNumberOfElements;
+    private final boolean keepChildrenRolls;
 
     public DiceEvaluator() {
-        this(new RandomNumberSupplier(), DEFAULT_MAX_NUMBER_OF_DICE);
+        this(new RandomNumberSupplier(), DEFAULT_MAX_NUMBER_OF_DICE, DEFAULT_MAX_NUMBER_OF_ELEMENTS, DEFAULT_KEEP_CHILDREN_ROLLS);
     }
 
-    public DiceEvaluator(@NonNull NumberSupplier numberSupplier, int maxNumberOfDice) {
+    public DiceEvaluator(@NonNull NumberSupplier numberSupplier, int maxNumberOfDice, int maxNumberOfElements, boolean keepChildrenRolls) {
+        this.maxNumberOfElements = maxNumberOfElements;
+        this.keepChildrenRolls = keepChildrenRolls;
         parameters = Parameters.builder()
                 .expressionBracket(BracketPair.PARENTHESES)
                 .functionBracket(BracketPair.PARENTHESES)
                 .escapeBracket(BracketPair.APOSTROPHE)
                 .escapeBracket(BracketPair.BRACKETS)
                 .operators(ImmutableList.<Operator>builder()
-                        .add(new RegularDice(numberSupplier, maxNumberOfDice))
-                        .add(new ExplodingDice(numberSupplier, maxNumberOfDice))
-                        .add(new ExplodingAddDice(numberSupplier, maxNumberOfDice))
-                        .add(new AddToList())
-                        .add(new Concat())
-                        .add(new Color())
-                        .add(new Tag())
-                        .add(new Sum())
-                        .add(new Repeat())
-                        .add(new RepeatList())
-                        .add(new NegateOrNegativAddToList())
-                        .add(new IntegerDivide())
-                        .add(new DecimalDivide())
-                        .add(new Multiply())
-                        .add(new Modulo())
-                        .add(new KeepHighest())
-                        .add(new KeepLowest())
-                        .add(new GreaterThanFilter())
-                        .add(new LesserThanFilter())
-                        .add(new GreaterEqualThanFilter())
-                        .add(new LesserEqualThanFilter())
-                        .add(new EqualFilter())
-                        .add(new Count())
-                        .add(new Reroll())
-                        .add(new EqualBool())
-                        .add(new GreaterBool())
-                        .add(new GreaterEqualBool())
-                        .add(new LesserBool())
-                        .add(new LesserEqualBool())
-                        .add(new InBool())
-                        .add(new AndBool())
-                        .add(new OrBool())
-                        .add(new NegateBool())
+                        .add(new RegularDice(numberSupplier, maxNumberOfDice, maxNumberOfElements, keepChildrenRolls))
+                        .add(new ExplodingDice(numberSupplier, maxNumberOfDice, maxNumberOfElements, keepChildrenRolls))
+                        .add(new ExplodingAddDice(numberSupplier, maxNumberOfDice, maxNumberOfElements, keepChildrenRolls))
+                        .add(new AddToList(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Concat(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Color(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Tag(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Sum(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Repeat(maxNumberOfElements, keepChildrenRolls))
+                        .add(new RepeatList(maxNumberOfElements, keepChildrenRolls))
+                        .add(new NegateOrNegativAddToList(maxNumberOfElements, keepChildrenRolls))
+                        .add(new IntegerDivide(maxNumberOfElements, keepChildrenRolls))
+                        .add(new DecimalDivide(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Multiply(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Modulo(maxNumberOfElements, keepChildrenRolls))
+                        .add(new KeepHighest(maxNumberOfElements, keepChildrenRolls))
+                        .add(new KeepLowest(maxNumberOfElements, keepChildrenRolls))
+                        .add(new GreaterThanFilter(maxNumberOfElements, keepChildrenRolls))
+                        .add(new LesserThanFilter(maxNumberOfElements, keepChildrenRolls))
+                        .add(new GreaterEqualThanFilter(maxNumberOfElements, keepChildrenRolls))
+                        .add(new LesserEqualThanFilter(maxNumberOfElements, keepChildrenRolls))
+                        .add(new EqualFilter(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Count(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Reroll(maxNumberOfElements, keepChildrenRolls))
+                        .add(new EqualBool(maxNumberOfElements, keepChildrenRolls))
+                        .add(new GreaterBool(maxNumberOfElements, keepChildrenRolls))
+                        .add(new GreaterEqualBool(maxNumberOfElements, keepChildrenRolls))
+                        .add(new LesserBool(maxNumberOfElements, keepChildrenRolls))
+                        .add(new LesserEqualBool(maxNumberOfElements, keepChildrenRolls))
+                        .add(new InBool(maxNumberOfElements, keepChildrenRolls))
+                        .add(new AndBool(maxNumberOfElements, keepChildrenRolls))
+                        .add(new OrBool(maxNumberOfElements, keepChildrenRolls))
+                        .add(new NegateBool(maxNumberOfElements, keepChildrenRolls))
                         .build())
                 .functions(ImmutableList.<Function>builder()
-                        .add(new ColorFunction())
-                        .add(new Value())
-                        .add(new ConcatFunction())
-                        .add(new SortAsc())
-                        .add(new SortDesc())
-                        .add(new Min())
-                        .add(new Max())
-                        .add(new Cancel())
-                        .add(new Double())
-                        .add(new IfEqual())
-                        .add(new If())
-                        .add(new IfGreater())
-                        .add(new IfIn())
-                        .add(new Replace())
-                        .add(new Explode())
-                        .add(new IfLesser())
-                        .add(new GroupCount())
+                        .add(new ColorFunction(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Value(maxNumberOfElements, keepChildrenRolls))
+                        .add(new ConcatFunction(maxNumberOfElements, keepChildrenRolls))
+                        .add(new SortAsc(maxNumberOfElements, keepChildrenRolls))
+                        .add(new SortDesc(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Min(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Max(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Cancel(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Double(maxNumberOfElements, keepChildrenRolls))
+                        .add(new IfEqual(maxNumberOfElements, keepChildrenRolls))
+                        .add(new If(maxNumberOfElements, keepChildrenRolls))
+                        .add(new IfGreater(maxNumberOfElements, keepChildrenRolls))
+                        .add(new IfIn(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Replace(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Explode(maxNumberOfElements, keepChildrenRolls))
+                        .add(new IfLesser(maxNumberOfElements, keepChildrenRolls))
+                        .add(new GroupCount(maxNumberOfElements, keepChildrenRolls))
                         .build())
                 .separator(SEPARATOR)
                 .build();
@@ -125,16 +131,18 @@ public class DiceEvaluator {
                 (currentToken.getOperatorPrecedence().orElseThrow() < stackToken.getOperatorPrecedence().orElseThrow()));
     }
 
-    public static Roller createRollSupplier(List<RollBuilder> rollBuilders) {
+    public Roller createRollSupplier(List<RollBuilder> rollBuilders) {
         return () -> {
             Map<String, Roll> variableMap = new HashMap<>();
             List<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, variableMap);
             if (!variableMap.isEmpty()) {
                 //we need to add the val expression in front of the expression
                 String variablestring = variableMap.values().stream().map(Roll::getExpression).collect(Collectors.joining(", "));
-                rolls = rolls.stream()
-                        .map(r -> new Roll("%s, %s".formatted(variablestring, r.getExpression()), r.getElements(), r.getRandomElementsInRoll(), r.getChildrenRolls()))
-                        .collect(Collectors.toList());
+                ImmutableList.Builder<Roll> rollBuilder = ImmutableList.builder();
+                for (Roll r : rolls) {
+                    rollBuilder.add(new Roll("%s, %s".formatted(variablestring, r.getExpression()), r.getElements(), r.getRandomElementsInRoll(), r.getChildrenRolls(), maxNumberOfElements, keepChildrenRolls));
+                }
+                rolls = rollBuilder.build();
             }
             return rolls;
         };
@@ -146,11 +154,12 @@ public class DiceEvaluator {
             List<String> list = Arrays.asList(listMatcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
             return new RollBuilder() {
                 @Override
-                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variableMap) {
+                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variableMap) throws ExpressionException {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(), list.stream()
                             .map(String::trim)
                             .map(s -> new RollElement(s, RollElement.NO_TAG, RollElement.NO_COLOR))
-                            .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of())));
+                            .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of(),
+                            maxNumberOfElements, keepChildrenRolls)));
                 }
 
                 @Override
@@ -161,17 +170,17 @@ public class DiceEvaluator {
         }
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) {
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
                 if (variables.containsKey(literal)) {
                     Roll variableValue = variables.get(literal);
                     //set the input as expression
-                    Roll replacedValue = new Roll(toExpression(), variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls());
+                    Roll replacedValue = new Roll(toExpression(), variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls(), maxNumberOfElements, keepChildrenRolls);
                     return Optional.of(ImmutableList.of(replacedValue));
                 }
                 if (literal.isEmpty()) {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of())));
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of(), maxNumberOfElements, keepChildrenRolls)));
                 }
-                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of())));
+                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

@@ -12,8 +12,8 @@ import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class Cancel extends Function {
-    public Cancel() {
-        super("cancel", 3);
+    public Cancel(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("cancel", 3, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class Cancel extends Function {
                                 .addAll(input.getChildrenRolls())
                                 .addAll(typeA.getChildrenRolls())
                                 .addAll(typeB.getChildrenRolls())
-                                .build())));
+                                .build(), maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

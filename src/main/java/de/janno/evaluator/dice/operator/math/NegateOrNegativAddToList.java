@@ -17,8 +17,8 @@ import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 public final class NegateOrNegativAddToList extends Operator {
     private final static BigDecimal MINUS_ONE = BigDecimal.valueOf(-1);
 
-    public NegateOrNegativAddToList() {
-        super("-", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(NegateOrNegativAddToList.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(NegateOrNegativAddToList.class));
+    public NegateOrNegativAddToList(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("-", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(NegateOrNegativAddToList.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(NegateOrNegativAddToList.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -38,7 +38,8 @@ public final class NegateOrNegativAddToList extends Operator {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),
                             negated,
                             UniqueRandomElements.from(rolls),
-                            ImmutableList.of(right))));
+                            ImmutableList.of(right),
+                            maxNumberOfElements, keepChildrenRolls)));
                 }
 
                 Roll left = rolls.getFirst();
@@ -54,7 +55,8 @@ public final class NegateOrNegativAddToList extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.of(left, right))));
+                        ImmutableList.of(left, right),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

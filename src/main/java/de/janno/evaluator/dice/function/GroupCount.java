@@ -15,8 +15,8 @@ import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
 public class GroupCount extends de.janno.evaluator.dice.Function {
-    public GroupCount() {
-        super("groupC", 1, Integer.MAX_VALUE);
+    public GroupCount(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("groupC", 1, Integer.MAX_VALUE, maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class GroupCount extends de.janno.evaluator.dice.Function {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         UniqueRandomElements.from(rolls),
-                        ImmutableList.copyOf(rolls))));
+                        ImmutableList.copyOf(rolls), maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

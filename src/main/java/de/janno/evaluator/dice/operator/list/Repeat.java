@@ -18,8 +18,8 @@ import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public class Repeat extends Operator {
 
-    public Repeat() {
-        super("x", null, null, Associativity.LEFT, getOderNumberOf(Repeat.class));
+    public Repeat(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("x", null, null, Associativity.LEFT, getOderNumberOf(Repeat.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override

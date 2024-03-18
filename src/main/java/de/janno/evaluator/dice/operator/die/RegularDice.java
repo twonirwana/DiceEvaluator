@@ -19,8 +19,8 @@ public final class RegularDice extends Operator {
     private final NumberSupplier numberSupplier;
     private final int maxNumberOfDice;
 
-    public RegularDice(NumberSupplier numberSupplier, int maxNumberOfDice) {
-        super("d", Operator.Associativity.RIGHT, getOderNumberOf(RegularDice.class), Operator.Associativity.LEFT, getOderNumberOf(RegularDice.class));
+    public RegularDice(NumberSupplier numberSupplier, int maxNumberOfDice, int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("d", Operator.Associativity.RIGHT, getOderNumberOf(RegularDice.class), Operator.Associativity.LEFT, getOderNumberOf(RegularDice.class), maxNumberOfElements, keepChildrenRolls);
         this.numberSupplier = numberSupplier;
         this.maxNumberOfDice = maxNumberOfDice;
     }
@@ -86,7 +86,9 @@ public final class RegularDice extends Operator {
                 return Optional.of(ImmutableList.of(new Roll(expression,
                         rollElements,
                         randomElements.build(),
-                        childrenRolls)));
+                        childrenRolls,
+                        maxNumberOfElements,
+                        keepChildrenRolls)));
             }
 
             @Override
