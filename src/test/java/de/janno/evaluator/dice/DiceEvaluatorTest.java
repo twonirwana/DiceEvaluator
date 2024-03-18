@@ -708,9 +708,9 @@ public class DiceEvaluatorTest {
     void testMaxRandomElements() {
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10, false);
 
-        assertThatThrownBy(() -> underTest.evaluate("(11d6)k1"))
+        assertThatThrownBy(() -> underTest.evaluate("(6d6k1)+(6d6k1)"))
                 .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
-                .hasMessage("To many elements in roll '(11d6)', max is 10 but there where 11");
+                .hasMessage("To many random elements in roll '(6d6k1)+(6d6k1)', max is 10 but there where 12");
     }
 
     private long getNumberOfChildrenRolls(Roll roll) {
