@@ -39,9 +39,16 @@ public class Sum extends Operator {
                 Roll left = rolls.getFirst();
                 checkContainsOnlyDecimal(inputValue, left, "left");
 
-                ImmutableList<RollElement> res = left.getElements().stream().collect(Collectors.groupingBy(RollElement::getTag)).entrySet().stream()
-                        .map(e -> new RollElement(sumExact(e.getValue()).stripTrailingZeros().stripTrailingZeros().toPlainString(), e.getKey(), RollElement.NO_COLOR))
-                        .collect(ImmutableList.toImmutableList());
+
+                final ImmutableList<RollElement> res;
+                if (left.getElements().isEmpty()) {
+                    res = ImmutableList.of(new RollElement("0", RollElement.NO_TAG, RollElement.NO_COLOR));
+                } else {
+                    res = left.getElements().stream().collect(Collectors.groupingBy(RollElement::getTag)).entrySet().stream()
+                            .map(e -> new RollElement(sumExact(e.getValue()).stripTrailingZeros().toPlainString(), e.getKey(), RollElement.NO_COLOR))
+                            .collect(ImmutableList.toImmutableList());
+                }
+
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,

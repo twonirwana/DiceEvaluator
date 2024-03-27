@@ -197,6 +197,12 @@ public class DiceEvaluatorTest {
                 Arguments.of("+1d[a/b/c]", List.of(2), List.of("b")),
                 Arguments.of("1d[a/b/c]", List.of(2), List.of("b")),
 
+                //sum
+                Arguments.of("[1/2]=", List.of(), List.of("3")),
+                Arguments.of("[1/-2]=", List.of(), List.of("-1")),
+                Arguments.of("[]=", List.of(), List.of("0")),
+
+
                 //Add to List
                 Arguments.of("1+1", List.of(), List.of("1", "1")),
                 Arguments.of("1++1", List.of(), List.of("1", "1")),
@@ -220,7 +226,7 @@ public class DiceEvaluatorTest {
 
 
                 //Add negative to List
-                Arguments.of("1-1", List.of(), List.of("1", "-1")),
+                Arguments.of("1-1", List.of(), List.of()),
                 Arguments.of("1--1", List.of(), List.of("1", "1")),
                 Arguments.of("--1", List.of(), List.of("1")),
                 Arguments.of("-d6", List.of(1), List.of("-1")),
@@ -237,6 +243,13 @@ public class DiceEvaluatorTest {
                 Arguments.of("-2d6-1", List.of(2, 3), List.of("-2", "-3", "-1")),
                 Arguments.of("1-d6k1", List.of(2), List.of("1")),
                 Arguments.of("1-d6l1", List.of(2), List.of("-2")),
+                Arguments.of("[a/b/a]-'a'", List.of(), List.of("b", "a")),
+                Arguments.of("[a/b/a]-[b/a]", List.of(), List.of("a")),
+                Arguments.of("[a/b/a]-1", List.of(), List.of("a", "b", "a", "-1")),
+                Arguments.of("[1/2/1]-1", List.of(), List.of("2", "1")),
+                Arguments.of("[1/2/1]-[2/1]", List.of(), List.of("1")),
+                Arguments.of("[1/3/1]-[2/1]", List.of(), List.of("3", "1", "-2")),
+
 
                 Arguments.of("1d6 + 'a' + 1", List.of(3), List.of("3", "a", "1")),
                 Arguments.of("1d6 + [x/y] + 1", List.of(3), List.of("3", "x", "y", "1")),
@@ -578,6 +591,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("exp(1d6, 3, -1)", "'exp' requires as third argument a number between 0 and 100"),
                 Arguments.of("exp(1d6, 3, if('false', 1d6))", "'exp' requires a non-empty input as third argument"),
                 Arguments.of("exp(1d6, 3, 101)", "'exp' requires as third argument a number between 0 and 100"),
+                Arguments.of("1 - [a]", "'-' requires as right input only decimals or elements that are on the left side '[1]' but was '[a]'"),
+                Arguments.of("1 - [3/a]", "'-' requires as right input only decimals or elements that are on the left side '[1]' but was '[3, a]'"),
 
                 Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
@@ -623,7 +638,7 @@ public class DiceEvaluatorTest {
     void debug() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 1), 1000, 10_000, true);
 
-        List<Roll> res = underTest.evaluate("replace(exp(d[0/0/1/1/'2#'/2],2),'2#','2')");
+        List<Roll> res = underTest.evaluate("[]=");
         System.out.println(res.size());
         res.forEach(r -> System.out.println(r.getResultString()));
         System.out.println(res);

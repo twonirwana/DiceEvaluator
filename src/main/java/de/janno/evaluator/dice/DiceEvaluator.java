@@ -58,7 +58,7 @@ public class DiceEvaluator {
                         .add(new Sum(maxNumberOfElements, keepChildrenRolls))
                         .add(new Repeat(maxNumberOfElements, keepChildrenRolls))
                         .add(new RepeatList(maxNumberOfElements, keepChildrenRolls))
-                        .add(new NegateOrNegativAddToList(maxNumberOfElements, keepChildrenRolls))
+                        .add(new NegateAddRemove(maxNumberOfElements, keepChildrenRolls))
                         .add(new IntegerDivide(maxNumberOfElements, keepChildrenRolls))
                         .add(new DecimalDivide(maxNumberOfElements, keepChildrenRolls))
                         .add(new Multiply(maxNumberOfElements, keepChildrenRolls))

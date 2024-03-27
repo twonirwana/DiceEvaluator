@@ -6,19 +6,17 @@ import de.janno.evaluator.dice.operator.OperatorOrder;
 import lombok.NonNull;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsOnlyDecimal;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 
-public final class NegateOrNegativAddToList extends Operator {
+public final class NegateAddRemove extends Operator {
     private final static BigDecimal MINUS_ONE = BigDecimal.valueOf(-1);
 
-    public NegateOrNegativAddToList(int maxNumberOfElements, boolean keepChildrenRolls) {
-        super("-", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(NegateOrNegativAddToList.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(NegateOrNegativAddToList.class), maxNumberOfElements, keepChildrenRolls);
+    public NegateAddRemove(int maxNumberOfElements, boolean keepChildrenRolls) {
+        super("-", Operator.Associativity.RIGHT, OperatorOrder.getOderNumberOf(NegateAddRemove.class), Operator.Associativity.LEFT, OperatorOrder.getOderNumberOf(NegateAddRemove.class), maxNumberOfElements, keepChildrenRolls);
     }
 
     @Override
@@ -44,16 +42,35 @@ public final class NegateOrNegativAddToList extends Operator {
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkContainsOnlyDecimal(inputValue, right, "right");
-                final ImmutableList<RollElement> res = ImmutableList.<RollElement>builder()
-                        .addAll(left.getElements())
-                        .addAll(right.getElements().stream()
-                                .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
-                                .toList()
-                        ).build();
+
+
+                ImmutableList.Builder<RollElement> resultBuilder = ImmutableList.builder();
+
+                List<RollElement> toRemove = new ArrayList<>(right.getElements());
+                for (RollElement rollElement : left.getElements()) {
+                    Optional<RollElement> matchingElement = toRemove.stream()
+                            .filter((r -> r.isEqualValueAndTag(rollElement)))
+                            .findFirst();
+                    if (matchingElement.isPresent()) {
+                        toRemove.remove(matchingElement.get());
+                    } else {
+                        resultBuilder.add(rollElement);
+                    }
+                }
+
+                if (toRemove.stream().anyMatch(r -> r.asDecimal().isEmpty())) {
+                    throw new ExpressionException(String.format("'%s' requires as right input only decimals or elements that are on the left side '%s' but was '%s'",
+                            inputValue,
+                            left.getElements().stream().map(RollElement::getValue).toList(),
+                            right.getElements().stream().map(RollElement::getValue).toList()));
+                }
+
+                resultBuilder.addAll(toRemove.stream()
+                        .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
+                        .toList());
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
-                        res,
+                        resultBuilder.build(),
                         UniqueRandomElements.from(rolls),
                         ImmutableList.of(left, right),
                         maxNumberOfElements, keepChildrenRolls)));
