@@ -17,12 +17,12 @@ public class Min extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(arguments, variables);
-                checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(arguments, rollContext);
+                checkRollSize(expressionPosition.value(), rolls, getMinArgumentCount(), getMaxArgumentCount());
 
                 final RollElement min = rolls.stream()
                         .flatMap(result -> result.getElements().stream())
@@ -41,7 +41,7 @@ public class Min extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(inputValue, arguments);
+                return getExpression(expressionPosition.value(), arguments);
             }
         };
     }

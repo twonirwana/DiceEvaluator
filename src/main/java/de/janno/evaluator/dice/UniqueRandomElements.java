@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 @EqualsAndHashCode
 @Getter
+//todo remove
 public class UniqueRandomElements {
     private final ImmutableList<RandomElements> randomElements;
 
@@ -29,16 +30,16 @@ public class UniqueRandomElements {
             return randomElements;
         }
         //add the new one if there is none with the same uuid
-        if (randomElements.stream().noneMatch(re -> toAdd.getUuid().equals(re.getUuid()))) {
+        if (randomElements.stream().noneMatch(re -> toAdd.getRollId().equals(re.getRollId()))) {
             return ImmutableList.<RandomElements>builder()
                     .addAll(randomElements)
                     .add(toAdd)
                     .build();
         }
-        //if there is one with the same uuid, it gets replaced (relevant for not changing the color of the random elements)
+        //if there is one with the same uuid, it gets replaced (relevant for correctly changing the color of the random elements)
         return randomElements.stream()
                 .map(re -> {
-                    if (toAdd.getUuid().equals(re.getUuid())) {
+                    if (toAdd.getRollId().equals(re.getRollId())) {
                         return toAdd;
                     }
                     return re;
@@ -73,8 +74,8 @@ public class UniqueRandomElements {
             return this;
         }
 
-        public Builder addAsRandomElements(@NonNull Collection<RandomElement> randomElements) {
-            this.randomElements.add(new RandomElements(ImmutableList.copyOf(randomElements)));
+        public Builder addAsRandomElements(@NonNull Collection<RandomElement> randomElements, @NonNull RollId rollId) {
+            this.randomElements.add(new RandomElements(ImmutableList.copyOf(randomElements), rollId));
             return this;
         }
 

@@ -18,12 +18,12 @@ public class Concat extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) {
 
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
                 String joined = rolls.stream()
                         .map(Roll::getResultString)
                         .collect(Collectors.joining());
@@ -36,7 +36,7 @@ public class Concat extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition.value(), operands);
             }
         };
     }

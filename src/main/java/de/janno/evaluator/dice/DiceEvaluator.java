@@ -131,16 +131,17 @@ public class DiceEvaluator {
                 (currentToken.getOperatorPrecedence().orElseThrow() < stackToken.getOperatorPrecedence().orElseThrow()));
     }
 
-    public Roller createRollSupplier(List<RollBuilder> rollBuilders) {
+    private Roller createRollSupplier(List<RollBuilder> rollBuilders) {
         return () -> {
-            Map<String, Roll> variableMap = new HashMap<>();
-            List<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, variableMap);
-            if (!variableMap.isEmpty()) {
+            RollContext rollContext = new RollContext();
+            List<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, rollContext);
+            if (!rollContext.getVariables().isEmpty()) {
                 //we need to add the val expression in front of the expression
-                String variablestring = variableMap.values().stream().map(Roll::getExpression).collect(Collectors.joining(", "));
+                //todo move into context?
+                String variableString = rollContext.getVariables().values().stream().map(Roll::getExpression).collect(Collectors.joining(", "));
                 ImmutableList.Builder<Roll> rollBuilder = ImmutableList.builder();
                 for (Roll r : rolls) {
-                    rollBuilder.add(new Roll("%s, %s".formatted(variablestring, r.getExpression()), r.getElements(), r.getRandomElementsInRoll(), r.getChildrenRolls(), maxNumberOfElements, keepChildrenRolls));
+                    rollBuilder.add(new Roll("%s, %s".formatted(variableString, r.getExpression()), r.getElements(), r.getRandomElementsInRoll(), r.getChildrenRolls(), maxNumberOfElements, keepChildrenRolls));
                 }
                 rolls = rollBuilder.build();
             }
@@ -148,13 +149,13 @@ public class DiceEvaluator {
         };
     }
 
-    private @NonNull RollBuilder toValue(@NonNull String literal, @NonNull String inputValue) {
+    private @NonNull RollBuilder toValue(@NonNull String literal, @NonNull ExpressionPosition expressionPosition) {
         Matcher listMatcher = LIST_REGEX.matcher(literal);
         if (listMatcher.find()) {
             List<String> list = Arrays.asList(listMatcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
             return new RollBuilder() {
                 @Override
-                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variableMap) throws ExpressionException {
+                public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(), list.stream()
                             .map(String::trim)
                             .map(s -> new RollElement(s, RollElement.NO_TAG, RollElement.NO_COLOR))
@@ -164,15 +165,15 @@ public class DiceEvaluator {
 
                 @Override
                 public @NonNull String toExpression() {
-                    return inputValue;
+                    return expressionPosition.value();
                 }
             };
         }
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                if (variables.containsKey(literal)) {
-                    Roll variableValue = variables.get(literal);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                if (rollContext.getVariables().containsKey(literal)) {
+                    Roll variableValue = rollContext.getVariables().get(literal);
                     //set the input as expression
                     Roll replacedValue = new Roll(toExpression(), variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls(), maxNumberOfElements, keepChildrenRolls);
                     return Optional.of(ImmutableList.of(replacedValue));
@@ -185,7 +186,7 @@ public class DiceEvaluator {
 
             @Override
             public @NonNull String toExpression() {
-                return inputValue;
+                return expressionPosition.value();
             }
         };
     }
@@ -193,7 +194,7 @@ public class DiceEvaluator {
     private void processTokenToValues(Deque<RollBuilder> values, Token token) throws ExpressionException {
         if (token.getLiteral().isPresent()) { // If the token is a literal, a constant, or a variable name
             String literal = token.getLiteral().get();
-            values.push(toValue(literal, token.getInputValue()));
+            values.push(toValue(literal, token.getExpressionPosition()));
 
         } else if (token.getOperator().isPresent()) { // If the token is an operator
             Operator operator = token.getOperator().get();
@@ -201,14 +202,14 @@ public class DiceEvaluator {
             if (values.size() < argumentCount) {
                 throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getName(), argumentCount));
             }
-            values.push(operator.evaluate(getArguments(values, argumentCount), token.getInputValue()));
+            values.push(operator.evaluate(getArguments(values, argumentCount), token.getExpressionPosition()));
         } else {
             throw new ExpressionException(token.toString());
         }
     }
 
-    private void doFunction(Deque<RollBuilder> values, Function function, int argumentCount, String inputValue) throws ExpressionException {
-        final RollBuilder res = function.evaluate(getArguments(values, argumentCount), inputValue);
+    private void doFunction(Deque<RollBuilder> values, Function function, int argumentCount, ExpressionPosition  expressionPosition) throws ExpressionException {
+        final RollBuilder res = function.evaluate(getArguments(values, argumentCount), expressionPosition);
         values.push(res);
     }
 
@@ -323,7 +324,7 @@ public class DiceEvaluator {
                     // onto the output queue.
                     int argumentCount = values.size() - previousValuesSize.pop();
                     final Token functionToken = stack.pop();
-                    doFunction(values, functionToken.getFunction().orElseThrow(), argumentCount, functionToken.getInputValue());
+                    doFunction(values, functionToken.getFunction().orElseThrow(), argumentCount, functionToken.getExpressionPosition());
                 }
             } else if (token.isSeparator()) {
                 if (previous.isEmpty()) {

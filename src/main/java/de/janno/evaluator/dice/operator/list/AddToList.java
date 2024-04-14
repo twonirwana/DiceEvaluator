@@ -18,12 +18,12 @@ public final class AddToList extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 1, 2);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition.value(), rolls, 1, 2);
 
                 if (rolls.size() == 1) {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),
@@ -49,9 +49,9 @@ public final class AddToList extends Operator {
             @Override
             public @NonNull String toExpression() {
                 if (operands.size() == 1) {
-                    return getRightUnaryExpression(inputValue, operands);
+                    return getRightUnaryExpression(expressionPosition.value(), operands);
                 }
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition.value(), operands);
             }
         };
     }

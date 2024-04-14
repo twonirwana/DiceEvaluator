@@ -62,8 +62,8 @@ public abstract class Function {
      * Creates a RollBuilder for the arguments
      *
      * @param arguments  all function arguments
-     * @param inputValue the given input for the function name, is needed the get the used upper/lower case in the result expression
+     * @param expressionPosition the part of the expression for this function, is needed the get the used upper/lower case in the result expression
      * @return the RollBuilder that can be called to get result rolls
      */
-    public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException;
+    public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull ExpressionPosition expressionPosition) throws ExpressionException;
 }

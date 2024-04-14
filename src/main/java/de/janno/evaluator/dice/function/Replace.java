@@ -14,16 +14,16 @@ public class Replace extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 if (arguments.size() % 2 == 0) {
                     throw new ExpressionException(String.format("'%s' requires an odd number of arguments but was %d", getName(), arguments.size()));
                 }
-                Optional<List<Roll>> input = arguments.getFirst().extendRoll(variables);
+                Optional<List<Roll>> input = arguments.getFirst().extendRoll(rollContext);
                 if (input.isEmpty()) {
-                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", inputValue));
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.value()));
                 }
                 ImmutableList.Builder<Roll> allRolls = ImmutableList.builder();
                 ImmutableList.Builder<Roll> rollExpression = ImmutableList.builder();
@@ -33,7 +33,7 @@ public class Replace extends Function {
                 ImmutableList.Builder<Roll> childrenRollBuilder = ImmutableList.<Roll>builder()
                         .addAll(input.get());
                 for (int i = 1; i < arguments.size() - 1; i = i + 2) {
-                    Optional<List<Roll>> find = arguments.get(i).extendRoll(variables);
+                    Optional<List<Roll>> find = arguments.get(i).extendRoll(rollContext);
                     find.ifPresent(allRolls::addAll);
                     if (find.isPresent() && rollElements.stream().anyMatch(r -> find.get().stream().anyMatch(f -> f.isElementsContainsElementWithValueAndTag(r)))) {
                         childrenRollBuilder.addAll(find.get());
@@ -41,7 +41,7 @@ public class Replace extends Function {
                         ImmutableList.Builder<RollElement> newRollElementsList = ImmutableList.builder();
                         for (RollElement r : rollElements) {
                             if (find.get().stream().anyMatch(f -> f.isElementsContainsElementWithValueAndTag(r))) {
-                                Optional<List<Roll>> replace = replaceArgument.extendRoll(variables);
+                                Optional<List<Roll>> replace = replaceArgument.extendRoll(rollContext);
                                 replace.ifPresent(allRolls::addAll);
                                 if (replace.isPresent()) {
                                     childrenRollBuilder.addAll(replace.get());
@@ -67,7 +67,7 @@ public class Replace extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(inputValue, arguments);
+                return getExpression(expressionPosition.value(), arguments);
             }
         };
     }

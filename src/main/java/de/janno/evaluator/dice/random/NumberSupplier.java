@@ -1,6 +1,9 @@
 package de.janno.evaluator.dice.random;
 
+import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
+
+import javax.annotation.Nullable;
 
 /**
  * Provides a number between minExcl and maxIncl.
@@ -15,5 +18,5 @@ public interface NumberSupplier {
      * @param maxIncl the maximum value (inclusive)
      * @return a number between minExcl and maxIncl
      */
-    int get(int minExcl, int maxIncl) throws ExpressionException;
+    int get(int minExcl, int maxIncl, @Nullable DieId rollAndDieId) throws ExpressionException;
 }

@@ -4,20 +4,19 @@ import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface RollBuilder {
-    static List<Roll> extendAllBuilder(List<RollBuilder> rollBuilders, Map<String, Roll> variableMap) throws ExpressionException {
+    static List<Roll> extendAllBuilder(@NonNull List<RollBuilder> rollBuilders, @NonNull RollContext rollContext) throws ExpressionException {
         ImmutableList.Builder<Roll> builder = ImmutableList.builder();
         for (RollBuilder rs : rollBuilders) {
-            extendRollBuilder(variableMap, rs, builder);
+            extendRollBuilder(rollContext, rs, builder);
         }
         return builder.build();
     }
 
-    static void extendRollBuilder(@NonNull Map<String, Roll> variableMap, RollBuilder rs, ImmutableList.Builder<Roll> builder) throws ExpressionException {
-        Optional<List<Roll>> r = rs.extendRoll(variableMap);
+    static void extendRollBuilder(@NonNull RollContext rollContext, @NonNull RollBuilder rs, @NonNull ImmutableList.Builder<Roll> builder) throws ExpressionException {
+        Optional<List<Roll>> r = rs.extendRoll(rollContext);
         //don't add empty rolls, they are the result from the value function and change the number of rolls (and then the operator/function
         //uses the roll with the wrong index
         r.ifPresent(builder::addAll);
@@ -29,7 +28,9 @@ public interface RollBuilder {
      * Some functions or operators (e.g. val repeatList) produces empty results, they musst be filtered out or the argument count in functions are not correct.
      * This is not a problem in operators because there the number of arguments is always correct because val is already pushed on the result stack
      */
-    @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException;
+    @NonNull
+    Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException;
 
-    @NonNull String toExpression();
+    @NonNull
+    String toExpression();
 }

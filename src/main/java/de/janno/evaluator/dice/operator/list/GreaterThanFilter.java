@@ -21,17 +21,17 @@ public class GreaterThanFilter extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 2, 2);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition.value(), rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkContainsOnlyDecimal(inputValue, left, "left");
-                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
+                checkContainsOnlyDecimal(expressionPosition.value(), left, "left");
+                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition.value(), right, "right"));
                 ImmutableList<RollElement> diceResult = left.getElements().stream()
                         .filter(i -> i.asDecimal().isPresent() && i.asDecimal().get().compareTo(rightNumber) > 0
                                 //the filter is only applied to elements with the same tag
@@ -46,7 +46,7 @@ public class GreaterThanFilter extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition.value(), operands);
             }
         };
     }

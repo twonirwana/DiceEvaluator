@@ -1,5 +1,7 @@
 package de.janno.evaluator.dice;
 
+import com.google.common.collect.ImmutableMap;
+import de.janno.evaluator.dice.random.GiveDiceNumberSupplier;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
 import org.junit.jupiter.api.Test;
@@ -636,16 +638,48 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 1), 1000, 10_000, true);
+        DiceEvaluator underTest = new DiceEvaluator(new GiveDiceNumberSupplier(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 1), ImmutableMap.of(
+                DieId.of(1, 1, "d", 0, 2, 0), 4,
+                DieId.of(9, 9, "d", 1, 1, 0), 1)
+        ), 1000, 10_000, true);
 
-        List<Roll> res = underTest.evaluate("[]=");
+        List<Roll> res = underTest.evaluate("3d6+(2r(2d8))");
         System.out.println(res.size());
         res.forEach(r -> System.out.println(r.getResultString()));
         System.out.println(res);
         System.out.println(res.getFirst().getExpression());
+        System.out.println(res.stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.getRandomElements().stream()).flatMap(r -> r.getRandomElements().stream()
+                        .map(re -> re.getDieId()))
+                .map(DieId::toString)
+                .collect(Collectors.joining(", ")));
         res.forEach(r -> System.out.println(r.getRandomElementsInRoll()));
         res.forEach(r -> System.out.println(r.getRandomElementsString()));
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
+    }
+
+    @Test
+    void giveDiceNumber() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GiveDiceNumberSupplier(new GivenNumberSupplier(), ImmutableMap.of(
+                DieId.of(1, 1, "d", 0, 2, 0), 4,
+                DieId.of(9, 9, "d", 1, 1, 0), 1)
+        ), 1000, 10_000, true);
+
+        List<Roll> res = underTest.evaluate("3d6+(2r(2d8))");
+
+        assertThat(res.size()).isEqualTo(1);
+        assertThat(values(res)).containsExactly("6", "6", "4", "8", "8", "8", "1");
+        assertThat(res.getFirst().getRandomElementsInRoll().getRandomElements().toString())
+                .isEqualTo("[[6∈[1...6], 6∈[1...6], 4∈[1...6]], [8∈[1...8], 8∈[1...8]], [8∈[1...8], 1∈[1...8]]]");
+        assertThat(res.getFirst().getRandomElementsString()).isEqualTo("[6, 6, 4] [8, 8] [8, 1]");
+    }
+
+    @Test
+    void rollerRollIdentical() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 5), 1000, 10_000, true);
+
+        Roller roller = underTest.buildRollSupplier("1d6");
+
+        assertThat(roller.roll()).isEqualTo(roller.roll());
     }
 
     @Test

@@ -20,12 +20,12 @@ public class Count extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 1, 1);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition.value(), rolls, 1, 1);
 
                 Roll left = rolls.getFirst();
 
@@ -48,7 +48,7 @@ public class Count extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getLeftUnaryExpression(inputValue, operands);
+                return getLeftUnaryExpression(expressionPosition.value(), operands);
             }
         };
     }

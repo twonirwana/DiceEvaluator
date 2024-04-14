@@ -23,16 +23,16 @@ public class ColorFunction extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
 
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(arguments, variables);
-                checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(arguments, rollContext);
+                checkRollSize(expressionPosition.value(), rolls, getMinArgumentCount(), getMaxArgumentCount());
                 Roll p1 = rolls.getFirst();
                 Roll p2 = rolls.get(1);
-                checkContainsSingleElement(inputValue, p2, "second argument");
+                checkContainsSingleElement(expressionPosition.value(), p2, "second argument");
                 String color = p2.getElements().getFirst().getValue();
                 UniqueRandomElements.Builder builder = new UniqueRandomElements.Builder();
                 rolls.forEach(r -> builder.addWithColor(r.getRandomElementsInRoll(), color));
@@ -46,7 +46,7 @@ public class ColorFunction extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(inputValue, arguments);
+                return getExpression(expressionPosition.value(), arguments);
             }
         };
     }

@@ -6,11 +6,9 @@ import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.DiceHelper.explodingDice;
-import static de.janno.evaluator.dice.DiceHelper.toRollElements;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -27,26 +25,27 @@ public final class ExplodingDice extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
+
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 1, 2);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition.value(), rolls, 1, 2);
 
                 UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
+                final RollId rollId = RollId.of(expressionPosition, rollContext.getNextReEvaluationNumber(expressionPosition));
+
+                //todo combine rolls size 1 and more than 1
                 if (rolls.size() == 1) {
                     final Roll right = rolls.getFirst();
-                    final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
+                    final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), right, "right"));
                     if (sidesOfDie < 2) {
                         throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
                     }
-                    final ImmutableList<RollElement> rollElements = toRollElements(explodingDice(1, sidesOfDie, numberSupplier));
-                    randomElements.add(right.getRandomElementsInRoll());
-
-                    randomElements.addAsRandomElements(rollElements.stream()
-                            .map(r -> new RandomElement(r, 1, sidesOfDie))
-                            .collect(ImmutableList.toImmutableList()));
+                    final ImmutableList<RandomElement> roll = explodingDice(1, sidesOfDie, numberSupplier, rollId);
+                    final ImmutableList<RollElement> rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());
+                    randomElements.addAsRandomElements(roll, rollId);
 
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),
                             rollElements,
@@ -58,25 +57,24 @@ public final class ExplodingDice extends Operator {
                 final Roll left = rolls.getFirst();
                 final Roll right = rolls.get(1);
                 randomElements.add(left.getRandomElementsInRoll());
-
                 randomElements.add(right.getRandomElementsInRoll());
 
-                final int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
+                final int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), left, "left"));
                 if (numberOfDice > maxNumberOfDice) {
                     throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
                 }
                 if (numberOfDice < 0) {
                     throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
                 }
-                final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
+                final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), right, "right"));
                 if (sidesOfDie < 2) {
                     throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
                 }
-                final ImmutableList<RollElement> rollElements = toRollElements(explodingDice(numberOfDice, sidesOfDie, numberSupplier));
 
-                randomElements.addAsRandomElements(rollElements.stream()
-                        .map(r -> new RandomElement(r, 1, sidesOfDie))
-                        .collect(ImmutableList.toImmutableList()));
+                final ImmutableList<RandomElement> roll = explodingDice(numberOfDice, sidesOfDie, numberSupplier, rollId);
+                final ImmutableList<RollElement> rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());
+                randomElements.addAsRandomElements(roll, rollId);
+
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
                         randomElements.build(),
@@ -87,9 +85,9 @@ public final class ExplodingDice extends Operator {
             @Override
             public @NonNull String toExpression() {
                 if (operands.size() == 1) {
-                    return getRightUnaryExpression(inputValue, operands);
+                    return getRightUnaryExpression(expressionPosition.value(), operands);
                 }
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition.value(), operands);
             }
         };
     }

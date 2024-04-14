@@ -102,11 +102,11 @@ public abstract class Operator {
     /**
      * Creates a RollBuilder for the arguments
      *
-     * @param operands   1 or 2 operants
-     * @param inputValue the given input for the operant, is needed the get the used upper/lower case in the result expression
+     * @param operands           1 or 2 operants
+     * @param expressionPosition the part of the expression for this operant, is needed the get the used upper/lower case in the result expression
      * @return the RollBuilder that can be called to get result rolls
      */
-    public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException;
+    public abstract @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException;
 
     public boolean supportUnaryOperation() {
         return unaryAssociativity != null;

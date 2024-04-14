@@ -19,7 +19,7 @@ class RandomNumberSupplierTest {
         List<Integer> res = new ArrayList<>(testSize);
 
         for (int i = 0; i < testSize; i++) {
-            res.add(underTest.get(0, 6));
+            res.add(underTest.get(0, 6, null));
         }
 
         assertThat(res).allMatch(i -> i >= 1 && i <= 6);
@@ -34,7 +34,7 @@ class RandomNumberSupplierTest {
         List<Integer> res = new ArrayList<>(testSize);
 
         for (int i = 0; i < testSize; i++) {
-            res.add(underTest.get(9, 100));
+            res.add(underTest.get(9, 100, null));
         }
 
         assertThat(res).allMatch(i -> i >= 10 && i <= 100);
@@ -49,7 +49,7 @@ class RandomNumberSupplierTest {
         List<Integer> res = new ArrayList<>(testSize);
 
         for (int i = 0; i < testSize; i++) {
-            res.add(underTest.get(-4, 3));
+            res.add(underTest.get(-4, 3, null));
         }
 
         assertThat(res).allMatch(i -> i >= -3 && i <= 3);
@@ -64,7 +64,7 @@ class RandomNumberSupplierTest {
         List<Integer> res = new ArrayList<>(testSize);
 
         for (int i = 0; i < testSize; i++) {
-            res.add(underTest.get(-7, -1));
+            res.add(underTest.get(-7, -1, null));
         }
 
         assertThat(res).allMatch(i -> i >= -6 && i <= -1);

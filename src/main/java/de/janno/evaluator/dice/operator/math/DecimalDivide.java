@@ -21,18 +21,18 @@ public final class DecimalDivide extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 2, 2);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition.value(), rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkAllElementsAreSameTag(inputValue, left, right);
-                final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, left, "left"));
-                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(inputValue, right, "right"));
+                checkAllElementsAreSameTag(expressionPosition.value(), left, right);
+                final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition.value(), left, "left"));
+                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition.value(), right, "right"));
 
                 final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.divide(rightNumber, 5, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString(), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
@@ -44,7 +44,7 @@ public final class DecimalDivide extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition.value(), operands);
             }
         };
     }
