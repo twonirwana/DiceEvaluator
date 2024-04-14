@@ -649,7 +649,7 @@ public class DiceEvaluatorTest {
         System.out.println(res);
         System.out.println(res.getFirst().getExpression());
         System.out.println(res.stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.getRandomElements().stream()).flatMap(r -> r.getRandomElements().stream()
-                        .map(re -> re.getDieId()))
+                        .map(RandomElement::getDieId))
                 .map(DieId::toString)
                 .collect(Collectors.joining(", ")));
         res.forEach(r -> System.out.println(r.getRandomElementsInRoll()));

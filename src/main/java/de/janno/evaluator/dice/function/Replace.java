@@ -5,7 +5,6 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class Replace extends Function {

@@ -5,7 +5,6 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -54,7 +53,8 @@ public class KeepLowest extends Operator {
                                 .build(),
                         UniqueRandomElements.from(rolls),
                         ImmutableList.of(left, right),
-                        maxNumberOfElements, keepChildrenRolls)));            }
+                        maxNumberOfElements, keepChildrenRolls)));
+            }
 
             @Override
             public @NonNull String toExpression() {

@@ -22,8 +22,9 @@ public class GiveDiceNumberSupplier implements NumberSupplier {
     }
 
     @Override
-    public int get(int minExcl, int maxIncl,  DieId dieId) throws ExpressionException {
+    public int get(int minExcl, int maxIncl, DieId dieId) throws ExpressionException {
         if (givenDiceNumbers.get(dieId) != null) {
+            //todo
             return givenDiceNumbers.get(dieId);
         }
         return numberSupplier.get(minExcl, maxIncl, dieId);

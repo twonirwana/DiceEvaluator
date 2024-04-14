@@ -5,7 +5,6 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -24,7 +23,7 @@ public final class IntegerDivide extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 2,2);
+                checkRollSize(expressionPosition.value(), rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
@@ -37,7 +36,8 @@ public final class IntegerDivide extends Operator {
                         res,
                         UniqueRandomElements.from(rolls),
                         ImmutableList.of(left, right),
-                        maxNumberOfElements, keepChildrenRolls)));            }
+                        maxNumberOfElements, keepChildrenRolls)));
+            }
 
             @Override
             public @NonNull String toExpression() {

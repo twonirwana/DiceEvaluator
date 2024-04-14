@@ -7,9 +7,9 @@ import lombok.NonNull;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static de.janno.evaluator.dice.DiceHelper.*;
+import static de.janno.evaluator.dice.DiceHelper.pickOneOf;
+import static de.janno.evaluator.dice.DiceHelper.rollDice;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -76,7 +76,7 @@ public final class RegularDice extends Operator {
                     for (int i = 0; i < numberOfDice; i++) {
                         rollBuilder.add(pickOneOf(right.getElements(), numberSupplier, DieId.of(rollId, i, 0)));
                     }
-                    List<RandomElement> roll =  rollBuilder.build();
+                    List<RandomElement> roll = rollBuilder.build();
                     rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());
                     randomElements.addAsRandomElements(roll, rollId);
                 }
