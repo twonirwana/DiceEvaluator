@@ -31,7 +31,6 @@ public class If extends Function {
                     throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.value()));
                 }
                 UniqueRandomElements.Builder booleanRandomElements = UniqueRandomElements.builder();
-                //todo why?
                 RollContext trueContext = rollContext.copy();
                 Optional<List<Roll>> returnIfTrue = arguments.get(1).extendRoll(trueContext);
 

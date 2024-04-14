@@ -3,7 +3,6 @@ package de.janno.evaluator.dice.random;
 import com.google.common.annotations.VisibleForTesting;
 import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
-import lombok.NonNull;
 
 import javax.annotation.Nullable;
 import java.util.random.RandomGenerator;

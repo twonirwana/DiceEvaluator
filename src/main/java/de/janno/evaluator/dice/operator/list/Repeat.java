@@ -36,7 +36,6 @@ public class Repeat extends Operator {
                     checkRollSize(expressionPosition.value(), rightRoll, 1, 1);
                     builder.addAll(rightRoll);
                 }
-                //todo correct? why no new roll
                 return Optional.of(builder.build());
             }
 
