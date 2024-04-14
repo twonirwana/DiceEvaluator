@@ -638,30 +638,33 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GiveDiceNumberSupplier(new GivenNumberSupplier(1, 2, 3, 4, 5, 6, 6, 1), ImmutableMap.of(
-                DieId.of(1, 1, "d", 0, 2, 0), 4,
-                DieId.of(9, 9, "d", 1, 1, 0), 1)
-        ), 1000, 10_000, true);
+        GiveDiceNumberSupplier numberSupplier = new GiveDiceNumberSupplier(new GivenNumberSupplier(6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), ImmutableMap.of(
+                DieId.of(1, "d!", 0, 0, 1), 4,
+                DieId.of(1, "d!", 0, 1, 2), 4,
+                DieId.of(1, "d!", 0, 2, 0), 4,
+                DieId.of(10, "d", 1, 1, 0), 1)
+        );
+        DiceEvaluator underTest = new DiceEvaluator(numberSupplier, 1000, 10_000, true);
 
-        List<Roll> res = underTest.evaluate("3d6+(2r(2d8))");
+        List<Roll> res = underTest.evaluate("3d!6+(2r(2d8))");
         System.out.println(res.size());
         res.forEach(r -> System.out.println(r.getResultString()));
         System.out.println(res);
         System.out.println(res.getFirst().getExpression());
         System.out.println(res.stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.getRandomElements().stream()).flatMap(r -> r.getRandomElements().stream()
-                        .map(RandomElement::getDieId))
-                .map(DieId::toString)
+                        .map(re -> re.getDieId() + "=" + re.getRollElement().getValue()))
                 .collect(Collectors.joining(", ")));
         res.forEach(r -> System.out.println(r.getRandomElementsInRoll()));
         res.forEach(r -> System.out.println(r.getRandomElementsString()));
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
+        assertThat(numberSupplier.allStoredDiceUsed()).isTrue();
     }
 
     @Test
     void giveDiceNumber() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GiveDiceNumberSupplier(new GivenNumberSupplier(), ImmutableMap.of(
-                DieId.of(1, 1, "d", 0, 2, 0), 4,
-                DieId.of(9, 9, "d", 1, 1, 0), 1)
+                DieId.of(1, "d", 0, 2, 0), 4,
+                DieId.of(9, "d", 1, 1, 0), 1)
         ), 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("3d6+(2r(2d8))");
@@ -670,8 +673,19 @@ public class DiceEvaluatorTest {
         assertThat(values(res)).containsExactly("6", "6", "4", "8", "8", "8", "1");
         assertThat(res.getFirst().getRandomElementsInRoll().getRandomElements().toString())
                 .isEqualTo("[[6∈[1...6], 6∈[1...6], 4∈[1...6]], [8∈[1...8], 8∈[1...8]], [8∈[1...8], 1∈[1...8]]]");
+        assertThat((res.stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.getRandomElements().stream()).flatMap(r -> r.getRandomElements().stream()
+                .map(re -> re.getDieId() + "=" + re.getRollElement().getValue())))).containsExactly(
+                "1de0i0r0=6",
+                "1de0i1r0=6",
+                "1de0i2r0=4",
+                "9de0i0r0=8",
+                "9de0i1r0=8",
+                "9de1i0r0=8",
+                "9de1i1r0=1");
         assertThat(res.getFirst().getRandomElementsString()).isEqualTo("[6, 6, 4] [8, 8] [8, 1]");
     }
+
+    //todo dieId test with exp(), r, x, d!, d!!, val(), tag, color
 
     @Test
     void rollerRollIdentical() throws ExpressionException {

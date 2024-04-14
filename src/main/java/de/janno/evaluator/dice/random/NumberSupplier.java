@@ -2,6 +2,7 @@ package de.janno.evaluator.dice.random;
 
 import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
+import lombok.NonNull;
 
 import javax.annotation.Nullable;
 
@@ -16,7 +17,8 @@ public interface NumberSupplier {
      *
      * @param minExcl the minimum value (exclusive)
      * @param maxIncl the maximum value (inclusive)
+     * @param dieId the id of the die in the expression that is rolled
      * @return a number between minExcl and maxIncl
      */
-    int get(int minExcl, int maxIncl, @Nullable DieId rollAndDieId) throws ExpressionException;
+    int get(int minExcl, int maxIncl, @Nullable DieId dieId) throws ExpressionException;
 }

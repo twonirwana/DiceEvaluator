@@ -212,7 +212,7 @@ public class Tokenizer {
         Matcher matcher = tokenBuilder.pattern().matcher(input);
         if (matcher.find()) {
             String matchGroup = matcher.group().trim();
-            return Optional.of(tokenBuilder.toToken().apply(ExpressionPosition.of(position, position + matchGroup.length() - 1, matchGroup)));
+            return Optional.of(tokenBuilder.toToken().apply(ExpressionPosition.of(position, matchGroup)));
         }
         return Optional.empty();
     }

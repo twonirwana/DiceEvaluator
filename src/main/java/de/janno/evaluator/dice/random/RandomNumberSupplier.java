@@ -3,7 +3,9 @@ package de.janno.evaluator.dice.random;
 import com.google.common.annotations.VisibleForTesting;
 import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
+import lombok.NonNull;
 
+import javax.annotation.Nullable;
 import java.util.random.RandomGenerator;
 
 /**
@@ -21,7 +23,7 @@ public class RandomNumberSupplier implements NumberSupplier {
         randomSource = new Sfc64Random(seed);
     }
 
-    public int get(int minExcl, int maxIncl, DieId dieId) throws ExpressionException {
+    public int get(int minExcl, int maxIncl, @Nullable DieId dieId) throws ExpressionException {
         if (minExcl == Integer.MAX_VALUE) {
             throw new ExpressionException("Cannot give a random number for minExcl =%d".formatted(Integer.MAX_VALUE));
         }

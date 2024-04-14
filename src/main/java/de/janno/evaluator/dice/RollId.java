@@ -7,5 +7,8 @@ public record RollId(@NonNull ExpressionPosition expressionPosition, int reevalu
         return new RollId(expressionPosition, reevaluate);
     }
 
-    //todo to string
+    @Override
+    public String toString(){
+        return expressionPosition + "e" + reevaluate;
+    }
 }

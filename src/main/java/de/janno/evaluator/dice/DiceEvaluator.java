@@ -137,7 +137,6 @@ public class DiceEvaluator {
             List<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, rollContext);
             if (!rollContext.getVariables().isEmpty()) {
                 //we need to add the val expression in front of the expression
-                //todo move into context?
                 String variableString = rollContext.getVariables().values().stream().map(Roll::getExpression).collect(Collectors.joining(", "));
                 ImmutableList.Builder<Roll> rollBuilder = ImmutableList.builder();
                 for (Roll r : rolls) {
