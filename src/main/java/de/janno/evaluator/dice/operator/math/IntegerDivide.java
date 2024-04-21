@@ -23,25 +23,25 @@ public final class IntegerDivide extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 2, 2);
+                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkAllElementsAreSameTag(expressionPosition.value(), left, right);
-                final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), left, "left"));
-                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), right, "right"));
+                checkAllElementsAreSameTag(expressionPosition.getValue(), left, right);
+                final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), left, "left"));
+                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), right, "right"));
 
                 final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(Math.divideExact(leftNumber, rightNumber)), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }

@@ -22,7 +22,7 @@ public class Replace extends Function {
                 }
                 Optional<List<Roll>> input = arguments.getFirst().extendRoll(rollContext);
                 if (input.isEmpty()) {
-                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.value()));
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()));
                 }
                 ImmutableList.Builder<Roll> allRolls = ImmutableList.builder();
                 ImmutableList.Builder<Roll> rollExpression = ImmutableList.builder();
@@ -59,14 +59,14 @@ public class Replace extends Function {
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
-                        UniqueRandomElements.from(allRolls.build()),
+                        RandomElementsBuilder.fromRolls(allRolls.build()),
                         childrenRollBuilder.build(),
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.value(), arguments);
+                return getExpression(expressionPosition.getValue(), arguments);
             }
         };
     }

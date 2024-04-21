@@ -31,7 +31,7 @@ public final class ExplodingAddDice extends Operator {
 
         return new RollBuilder() {
             private static ImmutableList<RollElement> sumRerollsTogether(List<RandomElement> randomElements) {
-                return randomElements.stream().collect(Collectors.groupingBy(r -> r.getDieId().dieIndex()))
+                return randomElements.stream().collect(Collectors.groupingBy(r -> r.getDieId().getDieIndex()))
                         .values().stream()
                         .map(r -> new RollElement(r.stream()
                                 .map(RandomElement::getRollElement)
@@ -46,66 +46,57 @@ public final class ExplodingAddDice extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 1, 2);
+                checkRollSize(expressionPosition.getValue(), rolls, 1, 2);
 
-                UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
+                RandomElementsBuilder randomElements = RandomElementsBuilder.empty();
                 final RollId rollId = RollId.of(expressionPosition, rollContext.getNextReEvaluationNumber(expressionPosition));
 
-                //todo combine rolls size 1 and more than 1
+                final int numberOfDice;
+                final int sidesOfDie;
+                final ImmutableList<Roll> childrenRolls;
                 if (rolls.size() == 1) {
+                    numberOfDice = 1;
                     final Roll right = rolls.getFirst();
-                    final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), right, "right"));
-                    if (sidesOfDie < 2) {
-                        throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
-                    }
-
-                    randomElements.add(right.getRandomElementsInRoll());
-                    final ImmutableList<RandomElement> roll = explodingDice(1, sidesOfDie, numberSupplier, rollId);
-                    final ImmutableList<RollElement> rollElements = sumRerollsTogether(roll);
-                    randomElements.addAsRandomElements(roll, rollId);
-
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(),
-                            rollElements,
-                            randomElements.build(),
-                            ImmutableList.of(right),
-                            maxNumberOfElements, keepChildrenRolls)));
+                    randomElements.addRoll(right);
+                    sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), right, "right"));
+                    childrenRolls = ImmutableList.of(right);
+                } else {
+                    final Roll left = rolls.getFirst();
+                    final Roll right = rolls.get(1);
+                    randomElements.addRoll(left);
+                    randomElements.addRoll(right);
+                    numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), left, "left"));
+                    sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), right, "right"));
+                    childrenRolls = ImmutableList.of(left, right);
                 }
 
-                final Roll left = rolls.getFirst();
-                final Roll right = rolls.get(1);
-
-                final int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), left, "left"));
                 if (numberOfDice > maxNumberOfDice) {
                     throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
                 }
                 if (numberOfDice < 0) {
                     throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
                 }
-                final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), right, "right"));
                 if (sidesOfDie < 2) {
                     throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
                 }
-
-                randomElements.add(left.getRandomElementsInRoll());
-                randomElements.add(right.getRandomElementsInRoll());
                 final ImmutableList<RandomElement> roll = explodingDice(numberOfDice, sidesOfDie, numberSupplier, rollId);
                 final ImmutableList<RollElement> rollElements = sumRerollsTogether(roll);
-                randomElements.addAsRandomElements(roll, rollId);
-
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
-                        randomElements.build(),
-                        ImmutableList.of(left, right),
+                        randomElements
+                                .addRandomElements(roll)
+                                .build(),
+                        childrenRolls,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
                 if (operands.size() == 1) {
-                    return getRightUnaryExpression(expressionPosition.value(), operands);
+                    return getRightUnaryExpression(expressionPosition.getValue(), operands);
                 }
 
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }

@@ -23,21 +23,20 @@ public abstract class AbstractIf extends Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(arguments, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+                checkRollSize(expressionPosition.getValue(), rolls, getMinArgumentCount(), getMaxArgumentCount());
                 Roll input = rolls.getFirst();
 
                 int counter = 1;
-                UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
-                randomElements.add(input.getRandomElementsInRoll());
+                RandomElementsBuilder randomElementsBuilder = RandomElementsBuilder.ofRoll(input);
                 while (counter < rolls.size() - 1) {
                     Roll compareTo = rolls.get(counter);
                     Roll trueResult = rolls.get(counter + 1);
-                    randomElements.add(compareTo.getRandomElementsInRoll());
+                    randomElementsBuilder.addRoll(compareTo);
                     if (compare(input, counter, compareTo, counter + 1)) {
-                        randomElements.add(trueResult.getRandomElementsInRoll());
+                        randomElementsBuilder.addRoll(trueResult);
                         return Optional.of(ImmutableList.of(new Roll(toExpression(),
                                 trueResult.getElements(),
-                                randomElements.build(),
+                                randomElementsBuilder.build(),
                                 ImmutableList.<Roll>builder()
                                         .addAll(input.getChildrenRolls())
                                         .addAll(trueResult.getChildrenRolls())
@@ -50,14 +49,14 @@ public abstract class AbstractIf extends Function {
                 //there is a last element in the arguments, which is the default result
                 if (counter != rolls.size()) {
                     result = rolls.getLast();
-                    randomElements.add(result.getRandomElementsInRoll());
+                    randomElementsBuilder.addRoll(result);
                 } else {
                     //if there is no default result, the result is the input
                     result = input;
                 }
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         result.getElements(),
-                        randomElements.build(),
+                        randomElementsBuilder.build(),
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(result.getChildrenRolls())
@@ -66,7 +65,7 @@ public abstract class AbstractIf extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.value(), arguments);
+                return getExpression(expressionPosition.getValue(), arguments);
             }
         };
     }

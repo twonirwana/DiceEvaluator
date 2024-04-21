@@ -23,20 +23,19 @@ public class Reroll extends Operator {
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 RollBuilder inputBuilder = operands.getFirst();
                 List<Roll> compareTos = operands.get(1).extendRoll(rollContext).orElse(Collections.emptyList());
-                checkRollSize(expressionPosition.value(), compareTos, 1, 1);
+                checkRollSize(expressionPosition.getValue(), compareTos, 1, 1);
                 Roll compareTo = compareTos.getFirst();
 
                 List<Roll> rolls = inputBuilder.extendRoll(rollContext).orElse(Collections.emptyList());
-                checkRollSize(expressionPosition.value(), rolls, 1, 1);
+                checkRollSize(expressionPosition.getValue(), rolls, 1, 1);
                 Roll roll = rolls.getFirst();
-                UniqueRandomElements.Builder builder = UniqueRandomElements.builder();
-                builder.add(roll.getRandomElementsInRoll());
+                RandomElementsBuilder builder = RandomElementsBuilder.ofRoll(roll);
 
                 if (roll.getElements().stream().anyMatch(compareTo::isElementsContainsElementWithValueAndTag)) {
                     rolls = inputBuilder.extendRoll(rollContext).orElse(Collections.emptyList());
-                    checkRollSize(expressionPosition.value(), rolls, 1, 1);
+                    checkRollSize(expressionPosition.getValue(), rolls, 1, 1);
                     roll = rolls.getFirst();
-                    builder.add(roll.getRandomElementsInRoll());
+                    builder.addRoll(roll);
                 }
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),

@@ -24,25 +24,25 @@ public class EqualFilter extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 2, 2);
+                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkContainsSingleElement(expressionPosition.value(), right, "right");
+                checkContainsSingleElement(expressionPosition.getValue(), right, "right");
 
                 ImmutableList<RollElement> diceResult = left.getElements().stream()
                         .filter(re -> right.getElements().getFirst().isEqualValueAndTag(re))
                         .collect(ImmutableList.toImmutableList());
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }

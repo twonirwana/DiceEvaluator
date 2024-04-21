@@ -24,8 +24,8 @@ public class Repeat extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> leftRolls = operands.getFirst().extendRoll(rollContext).orElse(Collections.emptyList());
-                checkRollSize(expressionPosition.value(), leftRolls, 1, 1);
-                int left = leftRolls.getFirst().asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), leftRolls.getFirst(), "left"));
+                checkRollSize(expressionPosition.getValue(), leftRolls, 1, 1);
+                int left = leftRolls.getFirst().asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), leftRolls.getFirst(), "left"));
                 if (left > 10 || left < 1) {
                     throw new ExpressionException(String.format("The number of repeat must between 1-10 but was %d", left));
                 }
@@ -33,7 +33,7 @@ public class Repeat extends Operator {
                 ImmutableList.Builder<Roll> builder = ImmutableList.builder();
                 for (int i = 0; i < left; i++) {
                     List<Roll> rightRoll = right.extendRoll(rollContext).orElse(Collections.emptyList());
-                    checkRollSize(expressionPosition.value(), rightRoll, 1, 1);
+                    checkRollSize(expressionPosition.getValue(), rightRoll, 1, 1);
                     builder.addAll(rightRoll);
                 }
                 return Optional.of(builder.build());
@@ -41,7 +41,7 @@ public class Repeat extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }

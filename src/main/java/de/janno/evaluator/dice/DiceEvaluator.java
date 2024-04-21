@@ -158,13 +158,13 @@ public class DiceEvaluator {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(), list.stream()
                             .map(String::trim)
                             .map(s -> new RollElement(s, RollElement.NO_TAG, RollElement.NO_COLOR))
-                            .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of(),
+                            .collect(ImmutableList.toImmutableList()), ImmutableList.of(), ImmutableList.of(),
                             maxNumberOfElements, keepChildrenRolls)));
                 }
 
                 @Override
                 public @NonNull String toExpression() {
-                    return expressionPosition.value();
+                    return expressionPosition.getValue();
                 }
             };
         }
@@ -178,14 +178,14 @@ public class DiceEvaluator {
                     return Optional.of(ImmutableList.of(replacedValue));
                 }
                 if (literal.isEmpty()) {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of(), maxNumberOfElements, keepChildrenRolls)));
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), maxNumberOfElements, keepChildrenRolls)));
                 }
-                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), maxNumberOfElements, keepChildrenRolls)));
+                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return expressionPosition.value();
+                return expressionPosition.getValue();
             }
         };
     }
@@ -207,7 +207,7 @@ public class DiceEvaluator {
         }
     }
 
-    private void doFunction(Deque<RollBuilder> values, Function function, int argumentCount, ExpressionPosition  expressionPosition) throws ExpressionException {
+    private void doFunction(Deque<RollBuilder> values, Function function, int argumentCount, ExpressionPosition expressionPosition) throws ExpressionException {
         final RollBuilder res = function.evaluate(getArguments(values, argumentCount), expressionPosition);
         values.push(res);
     }

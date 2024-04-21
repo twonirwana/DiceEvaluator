@@ -21,7 +21,7 @@ public class Cancel extends Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(arguments, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+                checkRollSize(expressionPosition.getValue(), rolls, getMinArgumentCount(), getMaxArgumentCount());
                 Roll input = rolls.getFirst();
                 Roll typeA = rolls.get(1);
                 Roll typeB = rolls.get(2);
@@ -46,7 +46,7 @@ public class Cancel extends Function {
                 }
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         resultBuilder.build(),
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(typeA.getChildrenRolls())
@@ -56,7 +56,7 @@ public class Cancel extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.value(), arguments);
+                return getExpression(expressionPosition.getValue(), arguments);
             }
         };
     }

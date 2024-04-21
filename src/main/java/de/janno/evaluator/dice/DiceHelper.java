@@ -15,7 +15,7 @@ public final class DiceHelper {
             throw new ExpressionException("Sides of dice to roll must be positive");
         }
         ImmutableList.Builder<RandomElement> resultBuilder = ImmutableList.builder();
-        //todo ggf die reihenfolge ändern, erst alle wüfeln und dann alle nachwürfeln zusammen
+        //order of the exploded dice is not relevant, the random elements get sorted later
         for (int i = 0; i < number; i++) {
             resultBuilder.addAll(rollExplodingDie(sides, numberSupplier, rollId, i));
         }

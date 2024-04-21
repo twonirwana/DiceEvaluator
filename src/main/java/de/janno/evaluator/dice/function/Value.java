@@ -25,7 +25,7 @@ public class Value extends Function {
                 RollContext nameContext = rollContext.copyWithEmptyVariables(); //don't replace literals in the first argument of the function, but it can use new variables
                 Optional<List<Roll>> valNameRoll = arguments.getFirst().extendRoll(nameContext);
                 if (valNameRoll.isEmpty()) {
-                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.value()));
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()));
                 }
                 ImmutableList.Builder<Roll> rollBuilder = ImmutableList.<Roll>builder()
                         .addAll(valNameRoll.get());
@@ -33,14 +33,14 @@ public class Value extends Function {
                 List<RollBuilder> remainingRollBuilder = arguments.subList(1, arguments.size());
                 List<Roll> rolls = rollBuilder.addAll(RollBuilder.extendAllBuilder(remainingRollBuilder, rollContext)).build();
 
-                checkRollSize(expressionPosition.value(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+                checkRollSize(expressionPosition.getValue(), rolls, getMinArgumentCount(), getMaxArgumentCount());
 
                 String valName = rolls.getFirst().getElements().getFirst().getValue();
 
                 String expression = toExpression();
                 rollContext.getVariables().put(valName, new Roll(expression,
                         rolls.get(1).getElements(),
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         rolls.get(1).getChildrenRolls(),
                         maxNumberOfElements, keepChildrenRolls));
 
@@ -49,7 +49,7 @@ public class Value extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.value(), arguments);
+                return getExpression(expressionPosition.getValue(), arguments);
             }
         };
     }

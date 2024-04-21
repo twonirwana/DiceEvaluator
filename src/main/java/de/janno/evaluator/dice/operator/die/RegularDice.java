@@ -32,7 +32,7 @@ public final class RegularDice extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 1, 2);
+                checkRollSize(expressionPosition.getValue(), rolls, 1, 2);
 
                 final int numberOfDice;
                 final Roll right;
@@ -40,9 +40,10 @@ public final class RegularDice extends Operator {
                 final String expression;
                 final RollId rollId = RollId.of(expressionPosition, rollContext.getNextReEvaluationNumber(expressionPosition));
 
-                UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
+                RandomElementsBuilder randomElements = RandomElementsBuilder.empty();
                 if (rolls.size() == 1) {
                     right = rolls.getFirst();
+                    randomElements.addRoll(right);
                     numberOfDice = 1;
                     childrenRolls = ImmutableList.of(right);
                     expression = toExpression();
@@ -50,14 +51,14 @@ public final class RegularDice extends Operator {
                     Roll left = rolls.getFirst();
                     right = rolls.get(1);
                     childrenRolls = ImmutableList.of(left, right);
-                    numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), left, "left"));
+                    numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), left, "left"));
                     expression = toExpression();
-                    randomElements.add(left.getRandomElementsInRoll());
+                    randomElements.addRoll(left);
+                    randomElements.addRoll(right);
 
                 } else {
-                    throw new IllegalStateException("More then two operands for " + expressionPosition.value());
+                    throw new IllegalStateException("More then two operands for " + expressionPosition.getValue());
                 }
-                randomElements.add(right.getRandomElementsInRoll());
 
                 if (numberOfDice > maxNumberOfDice) {
                     throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
@@ -70,7 +71,7 @@ public final class RegularDice extends Operator {
                     int sidesOfDie = right.asInteger().get();
                     List<RandomElement> roll = rollDice(numberOfDice, sidesOfDie, numberSupplier, rollId);
                     rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());
-                    randomElements.addAsRandomElements(roll, rollId);
+                    randomElements.addRandomElements(roll);
                 } else {
                     ImmutableList.Builder<RandomElement> rollBuilder = ImmutableList.builder();
                     for (int i = 0; i < numberOfDice; i++) {
@@ -78,7 +79,7 @@ public final class RegularDice extends Operator {
                     }
                     List<RandomElement> roll = rollBuilder.build();
                     rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());
-                    randomElements.addAsRandomElements(roll, rollId);
+                    randomElements.addRandomElements(roll);
                 }
 
                 return Optional.of(ImmutableList.of(new Roll(expression,
@@ -92,9 +93,9 @@ public final class RegularDice extends Operator {
             @Override
             public @NonNull String toExpression() {
                 if (operands.size() == 1) {
-                    return getRightUnaryExpression(expressionPosition.value(), operands);
+                    return getRightUnaryExpression(expressionPosition.getValue(), operands);
                 }
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }

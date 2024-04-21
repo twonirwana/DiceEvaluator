@@ -51,9 +51,9 @@ public class RandomElement {
 
     public String toString() {
         if (randomSelectedFrom != null) {
-            return "%s∈%s".formatted(rollElement.toString(), randomSelectedFrom);
+            return "%s=%s∈%s".formatted(dieId, rollElement.toString(), randomSelectedFrom);
         } else {
-            return "%s∈[%d...%d]".formatted(rollElement.toString(), minInc, maxInc);
+            return "%s=%s∈[%d...%d]".formatted(dieId, rollElement.toString(), minInc, maxInc);
         }
     }
 }

@@ -35,12 +35,12 @@ public class Tokenizer {
         parameters.getFunctions().forEach(function -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(function.getName()), expressionPosition -> Token.of(function, expressionPosition), false)));
         parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), expressionPosition -> Token.of(operator, expressionPosition), false)));
         builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), Token::separator, false));
-        parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), expressionPosition -> Token.of(expressionPosition.value().substring(1, expressionPosition.value().length() - 1), expressionPosition), true)));
+        parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), expressionPosition -> Token.of(expressionPosition.getValue().substring(1, expressionPosition.getValue().length() - 1), expressionPosition), true)));
         builder.add(new TokenBuilder(ALL_NUMBER_REGEX, expressionPosition -> {
-            if (SMALL_INTEGER_PATTERN.matcher(expressionPosition.value()).matches() || SMALL_DECIMAL_PATTERN.matcher(expressionPosition.value()).matches()) {
-                return Token.of(expressionPosition.value(), expressionPosition);
+            if (SMALL_INTEGER_PATTERN.matcher(expressionPosition.getValue()).matches() || SMALL_DECIMAL_PATTERN.matcher(expressionPosition.getValue()).matches()) {
+                return Token.of(expressionPosition.getValue(), expressionPosition);
             }
-            throw new ExpressionException("The number '%s' is too big".formatted(expressionPosition.value()));
+            throw new ExpressionException("The number '%s' is too big".formatted(expressionPosition.getValue()));
         }, false));
         tokenBuilders = builder.build();
 
@@ -78,7 +78,7 @@ public class Tokenizer {
             if (currentMatch.isPresent()) {
                 Token token = currentMatch.get();
                 preTokens.add(token);
-                int matchLength = token.getExpressionPosition().value().length();
+                int matchLength = token.getExpressionPosition().getValue().length();
                 current = current.substring(matchLength).trim();
                 currentPosition += matchLength;
             }
@@ -182,12 +182,12 @@ public class Tokenizer {
         List<Token> allMatches = getAllMatches(input, position);
         int maxLength = allMatches.stream()
                 .map(Token::getExpressionPosition)
-                .map(ExpressionPosition::value)
+                .map(ExpressionPosition::getValue)
                 .mapToInt(String::length)
                 .max()
                 .orElse(0);
         List<Token> maxLengthMatches = allMatches.stream()
-                .filter(m -> m.getExpressionPosition().value().length() == maxLength)
+                .filter(m -> m.getExpressionPosition().getValue().length() == maxLength)
                 .toList();
         if (maxLengthMatches.isEmpty()) {
             return Optional.empty();

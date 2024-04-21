@@ -26,11 +26,11 @@ public class KeepHighest extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 2, 2);
+                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), right, "right"));
+                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), right, "right"));
                 if (rightNumber < 0) {
                     throw new ExpressionException(String.format("The number to keep can not be negativ but was %d", rightNumber));
                 }
@@ -52,14 +52,14 @@ public class KeepHighest extends Operator {
                                 .addAll(keep)
                                 .addAll(otherTagElements)
                                 .build(),
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }

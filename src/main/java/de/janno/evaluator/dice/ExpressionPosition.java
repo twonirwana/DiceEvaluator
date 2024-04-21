@@ -1,14 +1,14 @@
 package de.janno.evaluator.dice;
 
 import lombok.NonNull;
+import lombok.Value;
 
-public record ExpressionPosition(
-        int startInc,
-        @NonNull String value
-) {
-    public static ExpressionPosition of(final int startInc, final String value) {
-        return new ExpressionPosition(startInc, value);
-    }
+
+@Value(staticConstructor = "of")
+public class ExpressionPosition implements Comparable<ExpressionPosition> {
+    int startInc;
+    @NonNull
+    String value;
 
     public ExpressionPosition extendLeft(final String leftValue) {
         return ExpressionPosition.of(
@@ -25,5 +25,10 @@ public record ExpressionPosition(
     @Override
     public String toString() {
         return startInc + value;
+    }
+
+    @Override
+    public int compareTo(ExpressionPosition o) {
+        return Integer.compare(startInc, o.startInc);
     }
 }

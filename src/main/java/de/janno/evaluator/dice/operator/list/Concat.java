@@ -28,14 +28,14 @@ public class Concat extends Operator {
                         .collect(Collectors.joining());
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.copyOf(rolls),
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }

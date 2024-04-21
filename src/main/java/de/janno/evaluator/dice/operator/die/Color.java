@@ -22,16 +22,16 @@ public class Color extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 2, 2);
+                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkAllElementsAreSameTag(expressionPosition.value(), left, right);
-                checkContainsSingleElement(expressionPosition.value(), right, "second argument");
+                checkAllElementsAreSameTag(expressionPosition.getValue(), left, right);
+                checkContainsSingleElement(expressionPosition.getValue(), right, "second argument");
                 String color = right.getElements().getFirst().getValue();
                 //colors are applied to the random elements, so they can be used for dice images
-                UniqueRandomElements.Builder builder = new UniqueRandomElements.Builder();
-                rolls.forEach(r -> builder.addWithColor(r.getRandomElementsInRoll(), color));
+                RandomElementsBuilder builder = RandomElementsBuilder.empty();
+                rolls.forEach(r -> builder.addWithColor(r, color));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         left.getElements().stream()
                                 .map(r -> new RollElement(r.getValue(), r.getTag(), color))

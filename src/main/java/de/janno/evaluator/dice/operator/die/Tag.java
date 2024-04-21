@@ -23,12 +23,12 @@ public class Tag extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 2, 2);
+                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkAllElementsAreSameTag(expressionPosition.value(), left, right);
-                checkContainsSingleElement(expressionPosition.value(), right, "second argument");
+                checkAllElementsAreSameTag(expressionPosition.getValue(), left, right);
+                checkContainsSingleElement(expressionPosition.getValue(), right, "second argument");
                 String tag = right.getElements().getFirst().getValue();
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
@@ -36,7 +36,7 @@ public class Tag extends Operator {
                                 .map(r -> new RollElement(r.getValue(), tag, r.getColor()))
                                 .collect(ImmutableList.toImmutableList()),
                         //tags are not applied to the random elements
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
                         maxNumberOfElements, keepChildrenRolls)));
             }

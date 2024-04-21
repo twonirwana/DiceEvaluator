@@ -19,7 +19,7 @@ class TokenizerTest {
             return new RollBuilder() {
                 @Override
                 public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("dice", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("dice", RollElement.NO_TAG, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), 10_000, true)));
                 }
 
                 @Override
@@ -35,7 +35,7 @@ class TokenizerTest {
             return new RollBuilder() {
                 @Override
                 public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("plus", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("plus", RollElement.NO_TAG, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), 10_000, true)));
                 }
 
                 @Override
@@ -51,7 +51,7 @@ class TokenizerTest {
             return new RollBuilder() {
                 @Override
                 public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), 10_000, true)));
                 }
 
                 @Override
@@ -68,7 +68,7 @@ class TokenizerTest {
             return new RollBuilder() {
                 @Override
                 public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), 10_000, true)));
                 }
 
                 @Override
@@ -85,7 +85,7 @@ class TokenizerTest {
             return new RollBuilder() {
                 @Override
                 public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("a", RollElement.NO_TAG, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), 10_000, true)));
                 }
 
                 @Override
@@ -159,7 +159,7 @@ class TokenizerTest {
                 return new RollBuilder() {
                     @Override
                     public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
-                        return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("null", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
+                        return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("null", RollElement.NO_TAG, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), 10_000, true)));
                     }
 
                     @Override
@@ -175,7 +175,7 @@ class TokenizerTest {
                 return new RollBuilder() {
                     @Override
                     public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
-                        return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("null", RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), 10_000, true)));
+                        return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement("null", RollElement.NO_TAG, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), 10_000, true)));
                     }
 
                     @Override

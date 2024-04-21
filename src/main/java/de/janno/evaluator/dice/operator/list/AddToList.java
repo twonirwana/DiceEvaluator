@@ -22,12 +22,12 @@ public final class AddToList extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 1, 2);
+                checkRollSize(expressionPosition.getValue(), rolls, 1, 2);
 
                 if (rolls.size() == 1) {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),
                             rolls.getFirst().getElements(),
-                            UniqueRandomElements.from(rolls),
+                            RandomElementsBuilder.fromRolls(rolls),
                             ImmutableList.of(rolls.getFirst()),
                             maxNumberOfElements, keepChildrenRolls)));
                 }
@@ -40,7 +40,7 @@ public final class AddToList extends Operator {
                         .build();
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
                         maxNumberOfElements, keepChildrenRolls)));
             }
@@ -48,9 +48,9 @@ public final class AddToList extends Operator {
             @Override
             public @NonNull String toExpression() {
                 if (operands.size() == 1) {
-                    return getRightUnaryExpression(expressionPosition.value(), operands);
+                    return getRightUnaryExpression(expressionPosition.getValue(), operands);
                 }
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }

@@ -28,36 +28,34 @@ public class If extends Function {
                 ImmutableList.Builder<Roll> allRolls = ImmutableList.builder();
                 Optional<List<Roll>> checkIfTrue = arguments.getFirst().extendRoll(rollContext);
                 if (checkIfTrue.isEmpty()) {
-                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.value()));
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()));
                 }
-                UniqueRandomElements.Builder booleanRandomElements = UniqueRandomElements.builder();
+                RandomElementsBuilder booleanRandomElements = RandomElementsBuilder.empty();
                 RollContext trueContext = rollContext.copy();
                 Optional<List<Roll>> returnIfTrue = arguments.get(1).extendRoll(trueContext);
 
                 int checkIfTrueIndex = 1;
                 while (checkIfTrueIndex < arguments.size()) {
                     if (checkIfTrue.isEmpty()) {
-                        throw new ExpressionException(String.format("'%s' requires a non-empty input as %s argument", expressionPosition.value(), checkIfTrueIndex));
+                        throw new ExpressionException(String.format("'%s' requires a non-empty input as %s argument", expressionPosition.getValue(), checkIfTrueIndex));
                     }
-                    checkRollSize(expressionPosition.value(), checkIfTrue.get(), 1, 1);
+                    checkRollSize(expressionPosition.getValue(), checkIfTrue.get(), 1, 1);
                     Roll booleanExpression = checkIfTrue.get().getFirst();
                     allRolls.addAll(checkIfTrue.get());
                     allRolls.addAll(returnIfTrue.orElse(Collections.emptyList()));
 
                     int booleanArgumentIndex = checkIfTrueIndex;
                     final boolean booleanValue = booleanExpression.asBoolean()
-                            .orElseThrow(() -> throwNotBoolean(expressionPosition.value(), booleanExpression, "position %d".formatted(booleanArgumentIndex)));
-                    booleanRandomElements.add(booleanExpression.getRandomElementsInRoll());
+                            .orElseThrow(() -> throwNotBoolean(expressionPosition.getValue(), booleanExpression, "position %d".formatted(booleanArgumentIndex)));
+                    booleanRandomElements.addRoll(booleanExpression);
                     if (booleanValue) {
                         List<Roll> trueResult = returnIfTrue.orElse(Collections.emptyList());
                         rollContext.merge(trueContext); //only the variable of the true result are added
-                        UniqueRandomElements allBooleanRandomElements = booleanRandomElements.build();
                         ImmutableList.Builder<Roll> resultBuilder = ImmutableList.builder();
                         for (Roll r : trueResult) {
                             resultBuilder.add(new Roll(toExpression(), r.getElements(),
-                                    UniqueRandomElements.builder()
-                                            .add(allBooleanRandomElements)
-                                            .add(r.getRandomElementsInRoll())
+                                    booleanRandomElements
+                                            .addRoll(r)
                                             .build(),
                                     ImmutableList.<Roll>builder()
                                             .addAll(booleanExpression.getChildrenRolls())
@@ -89,10 +87,10 @@ public class If extends Function {
                         ImmutableList.Builder<Roll> resultBuilder = ImmutableList.builder();
                         for (Roll r : defaultResult.get()) {
                             resultBuilder.add(new Roll(toExpression(), r.getElements(),
-                                    UniqueRandomElements.builder()
-                                            .add(booleanRandomElements.build())
-                                            .add(r.getRandomElementsInRoll())
-                                            .build(), r.getChildrenRolls(),
+                                    booleanRandomElements
+                                            .addRoll(r)
+                                            .build(),
+                                    r.getChildrenRolls(),
                                     maxNumberOfElements, keepChildrenRolls));
                         }
                         return Optional.of(resultBuilder.build());
@@ -104,7 +102,7 @@ public class If extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.value(), arguments);
+                return getExpression(expressionPosition.getValue(), arguments);
             }
         };
 

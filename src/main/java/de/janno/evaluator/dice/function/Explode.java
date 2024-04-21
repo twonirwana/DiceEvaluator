@@ -33,9 +33,9 @@ public class Explode extends Function {
 
                 Optional<List<Roll>> compareToRoll = arguments.get(1).extendRoll(rollContext);
                 if (compareToRoll.isEmpty()) {
-                    throw new ExpressionException(String.format("'%s' requires a non-empty input as second argument", expressionPosition.value()));
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as second argument", expressionPosition.getValue()));
                 }
-                checkRollSize(expressionPosition.value(), compareToRoll.get(), 1, 1);
+                checkRollSize(expressionPosition.getValue(), compareToRoll.get(), 1, 1);
                 Roll compareTo = compareToRoll.get().getFirst();
                 allChildrenRollBuilder.add(compareTo);
                 rollExpression.add(compareTo);
@@ -44,13 +44,13 @@ public class Explode extends Function {
                 if (arguments.size() == 3) {
                     Optional<List<Roll>> maxRerollsRoll = arguments.get(2).extendRoll(rollContext);
                     if (maxRerollsRoll.isEmpty()) {
-                        throw new ExpressionException(String.format("'%s' requires a non-empty input as third argument", expressionPosition.value()));
+                        throw new ExpressionException(String.format("'%s' requires a non-empty input as third argument", expressionPosition.getValue()));
                     }
-                    checkRollSize(expressionPosition.value(), maxRerollsRoll.get(), 1, 1);
+                    checkRollSize(expressionPosition.getValue(), maxRerollsRoll.get(), 1, 1);
                     Roll maxNumberOfRerollsRoll = maxRerollsRoll.get().getFirst();
-                    maxNumberOfRerolls = maxNumberOfRerollsRoll.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), maxRerollsRoll.get().getFirst(), "third argument"));
+                    maxNumberOfRerolls = maxNumberOfRerollsRoll.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), maxRerollsRoll.get().getFirst(), "third argument"));
                     if (maxNumberOfRerolls > 100 || maxNumberOfRerolls < 0) {
-                        throw new ExpressionException(String.format("'%s' requires as third argument a number between 0 and 100", expressionPosition.value()));
+                        throw new ExpressionException(String.format("'%s' requires as third argument a number between 0 and 100", expressionPosition.getValue()));
                     }
                     allChildrenRollBuilder.add(maxNumberOfRerollsRoll);
                     rollExpression.add(maxNumberOfRerollsRoll);
@@ -71,14 +71,14 @@ public class Explode extends Function {
                 final ImmutableList<Roll> allResultRolls = allResultRollsBuilder.build();
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         allResultRolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
-                        UniqueRandomElements.from(allChildrenRollBuilder.build()), allChildrenRollBuilder.build(),
+                        RandomElementsBuilder.fromRolls(allChildrenRollBuilder.build()), allChildrenRollBuilder.build(),
                         maxNumberOfElements,
                         keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.value(), arguments);
+                return getExpression(expressionPosition.getValue(), arguments);
             }
         };
 

@@ -26,7 +26,7 @@ public class Double extends Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(arguments, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+                checkRollSize(expressionPosition.getValue(), rolls, getMinArgumentCount(), getMaxArgumentCount());
                 Roll input = rolls.getFirst();
                 Roll toDuplicate = rolls.get(1);
 
@@ -42,7 +42,7 @@ public class Double extends Function {
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(toDuplicate.getChildrenRolls())
@@ -51,7 +51,7 @@ public class Double extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.value(), arguments);
+                return getExpression(expressionPosition.getValue(), arguments);
             }
         };
 

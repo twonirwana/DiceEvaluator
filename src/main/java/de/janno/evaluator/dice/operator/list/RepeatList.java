@@ -24,8 +24,8 @@ public class RepeatList extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> leftRolls = operands.getFirst().extendRoll(rollContext).orElse(Collections.emptyList());
-                checkRollSize(expressionPosition.value(), leftRolls, 1, 1);
-                int left = leftRolls.getFirst().asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.value(), leftRolls.getFirst(), "left"));
+                checkRollSize(expressionPosition.getValue(), leftRolls, 1, 1);
+                int left = leftRolls.getFirst().asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), leftRolls.getFirst(), "left"));
                 if (left > 20 || left < 0) {
                     throw new ExpressionException(String.format("The number of list repeat must between 0-20 but was %d", left));
                 }
@@ -39,7 +39,7 @@ public class RepeatList extends Operator {
                 ImmutableList.Builder<Roll> builder = ImmutableList.builder();
                 for (int i = 0; i < left; i++) {
                     List<Roll> rightRoll = right.extendRoll(rollContext).orElse(Collections.emptyList());
-                    checkRollSize(expressionPosition.value(), rightRoll, 1, 1);
+                    checkRollSize(expressionPosition.getValue(), rightRoll, 1, 1);
                     builder.addAll(rightRoll);
                 }
                 ImmutableList<Roll> rolls = builder.build();
@@ -47,14 +47,14 @@ public class RepeatList extends Operator {
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         rolls,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }

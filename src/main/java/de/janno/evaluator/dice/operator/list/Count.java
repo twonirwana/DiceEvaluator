@@ -24,7 +24,7 @@ public class Count extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 1, 1);
+                checkRollSize(expressionPosition.getValue(), rolls, 1, 1);
 
                 Roll left = rolls.getFirst();
 
@@ -40,14 +40,14 @@ public class Count extends Operator {
                 }
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left),
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getLeftUnaryExpression(expressionPosition.value(), operands);
+                return getLeftUnaryExpression(expressionPosition.getValue(), operands);
             }
         };
     }

@@ -25,12 +25,12 @@ public class LesserThanFilter extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.value(), rolls, 2, 2);
+                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkContainsOnlyDecimal(expressionPosition.value(), left, "left");
-                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition.value(), right, "right"));
+                checkContainsOnlyDecimal(expressionPosition.getValue(), left, "left");
+                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition.getValue(), right, "right"));
                 //todo only filtered by same tag?
                 ImmutableList<RollElement> diceResult = left.getElements().stream()
                         .filter(i -> i.asDecimal().isPresent() && i.asDecimal().get().compareTo(rightNumber) < 0
@@ -39,14 +39,14 @@ public class LesserThanFilter extends Operator {
                         .collect(ImmutableList.toImmutableList());
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(expressionPosition.value(), operands);
+                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
             }
         };
     }
