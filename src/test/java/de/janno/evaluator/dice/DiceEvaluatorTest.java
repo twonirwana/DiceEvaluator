@@ -1,5 +1,6 @@
 package de.janno.evaluator.dice;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import de.janno.evaluator.dice.random.GiveDiceNumberSupplier;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
@@ -671,7 +672,9 @@ public class DiceEvaluatorTest {
 
         assertThat(res.size()).isEqualTo(1);
         assertThat(values(res)).containsExactly("6", "6", "4", "8", "8", "8", "1");
-        assertThat(res.getFirst().getFlatRandomElementsInRoll().toString())
+        assertThat(res.getFirst().getRandomElementsInRoll().stream()
+                .flatMap(Collection::stream)
+                .toList().toString())
                 .isEqualTo("[1de0i0r0=6∈[1...6], 1de0i1r0=6∈[1...6], 1de0i2r0=4∈[1...6], 9de0i0r0=8∈[1...8], 9de0i1r0=8∈[1...8], 9de1i0r0=8∈[1...8], 9de1i1r0=1∈[1...8]]");
         assertThat((res.stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.stream().flatMap(Collection::stream)
                 .map(re -> re.getDieId() + "=" + re.getRollElement().getValue())))).containsExactly(
@@ -743,7 +746,8 @@ public class DiceEvaluatorTest {
 
         List<Roll> res = underTest.evaluate("(2d6=)d(2d6=)");
         assertThat(res.getFirst().getElements()).hasSize(5);
-        assertThat(res.getFirst().getFlatRandomElementsInRoll()).hasSize(9);
+        assertThat(res.getFirst().getRandomElementsInRoll().stream()
+                .flatMap(Collection::stream)).hasSize(9);
         assertThat(res.getFirst().getChildrenRolls().stream().mapToLong(this::getNumberOfChildrenRolls).sum()).isEqualTo(0);
     }
 
@@ -753,7 +757,8 @@ public class DiceEvaluatorTest {
 
         List<Roll> res = underTest.evaluate("(2d6=)d(2d6=)");
         assertThat(res.getFirst().getElements()).hasSize(5);
-        assertThat(res.getFirst().getFlatRandomElementsInRoll()).hasSize(9);
+        assertThat(res.getFirst().getRandomElementsInRoll().stream()
+                .flatMap(Collection::stream)).hasSize(9);
         assertThat(res.getFirst().getChildrenRolls().stream().mapToLong(this::getNumberOfChildrenRolls).sum()).isEqualTo(6);
     }
 
@@ -994,7 +999,8 @@ public class DiceEvaluatorTest {
         assertThat(res).hasSize(1);
         assertThat(res.getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("-5");
 
-        assertThat(res.stream().flatMap(r -> r.getFlatRandomElementsInRoll().stream())
+        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream()
+                        .flatMap(Collection::stream))
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getValue))
                 .containsExactly("5", "10");
@@ -1095,8 +1101,8 @@ public class DiceEvaluatorTest {
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
                 .flatMap(Collection::stream)
-                .map(r -> r.getRollElement())
-                .map(r -> r.getValue()))
+                .map(RandomElement::getRollElement)
+                .map(RollElement::getValue))
                 .containsExactly("1", "2");
         assertThat(res.stream().map(Roll::getExpression))
                 .containsExactly("1d6", "1d8");
@@ -1113,8 +1119,8 @@ public class DiceEvaluatorTest {
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
                 .flatMap(Collection::stream)
-                .map(r -> r.getRollElement())
-                .map(r -> r.getValue()))
+                .map(RandomElement::getRollElement)
+                .map(RollElement::getValue))
                 .containsExactly("1", "2");
         assertThat(res.stream().map(Roll::getExpression))
                 .containsExactly("1d6", "1d8");
@@ -1134,8 +1140,8 @@ public class DiceEvaluatorTest {
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
                 .flatMap(Collection::stream)
-                .map(r -> r.getRollElement())
-                .map(r -> r.getValue()))
+                .map(RandomElement::getRollElement)
+                .map(RollElement::getValue))
                 .containsExactly("1", "2", "3", "4", "5");
         assertThat(res.stream().map(Roll::getExpression))
                 .containsExactly("1d6", "1d6", "1d6", "1d6", "1d6");
@@ -1151,8 +1157,8 @@ public class DiceEvaluatorTest {
 
         assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
                 .flatMap(Collection::stream)
-                .map(r -> r.getRollElement())
-                .map(r -> r.getValue()))
+                .map(RandomElement::getRollElement)
+                .map(RollElement::getValue))
                 .containsExactly("1", "2", "3", "4", "5");
         assertThat(res.getFirst().getExpression()).isEqualTo("5r1d6");
     }

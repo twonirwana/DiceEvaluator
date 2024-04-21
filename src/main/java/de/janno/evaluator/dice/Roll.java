@@ -67,12 +67,6 @@ public class Roll {
         }
     }
 
-    public ImmutableList<RandomElement> getFlatRandomElementsInRoll() {
-        return randomElementsInRoll.stream()
-                .flatMap(Collection::stream)
-                .collect(ImmutableList.toImmutableList());
-    }
-
     public Optional<Integer> asInteger() {
         if (elements.size() == 1) {
             return elements.getFirst().asInteger();
