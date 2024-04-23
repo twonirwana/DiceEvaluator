@@ -97,12 +97,17 @@ public class If extends Function {
                     }
                 }
 
-                return Optional.empty();
+                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(),
+                        booleanRandomElements
+                                .build(),
+                        //todo child rolls?
+                        ImmutableList.of(),
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.getValue(), arguments);
+                return getExpression(expressionPosition, arguments);
             }
         };
 

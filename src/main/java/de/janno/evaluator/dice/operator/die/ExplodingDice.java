@@ -81,9 +81,9 @@ public final class ExplodingDice extends Operator {
             @Override
             public @NonNull String toExpression() {
                 if (operands.size() == 1) {
-                    return getRightUnaryExpression(expressionPosition.getValue(), operands);
+                    return getRightUnaryExpression(expressionPosition, operands);
                 }
-                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

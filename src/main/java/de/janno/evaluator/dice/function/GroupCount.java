@@ -41,7 +41,7 @@ public class GroupCount extends de.janno.evaluator.dice.Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.getValue(), arguments);
+                return getExpression(expressionPosition, arguments);
             }
         };
     }

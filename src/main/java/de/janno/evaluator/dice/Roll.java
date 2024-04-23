@@ -1,5 +1,6 @@
 package de.janno.evaluator.dice;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -96,6 +97,12 @@ public class Roll {
         return elements.stream().map(RollElement::toString).collect(Collectors.joining(", "));
     }
 
+    public String getResultStringWithTagAndColor(){
+        return elements.stream().map(RollElement::toStringWithColorAndTag).collect(Collectors.joining(", "));
+    }
+
+    @VisibleForTesting
+    //todo remove
     public String getRandomElementsString() {
         return randomElementsInRoll.stream()
                 .map(l -> l.stream()
@@ -104,6 +111,13 @@ public class Roll {
                         .toList())
                 .map(List::toString)
                 .collect(Collectors.joining(" "));
+    }
+
+    @VisibleForTesting
+    public String getRandomElementsDetailsString() {
+        return randomElementsInRoll.stream()
+                .flatMap(Collection::stream)
+                .toList().toString();
     }
 
     public boolean equalForValueAndTag(Roll other) {

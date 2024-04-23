@@ -66,7 +66,7 @@ public class Replace extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.getValue(), arguments);
+                return getExpression(expressionPosition, arguments);
             }
         };
     }

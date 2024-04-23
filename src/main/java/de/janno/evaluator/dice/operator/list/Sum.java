@@ -58,7 +58,7 @@ public class Sum extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getLeftUnaryExpression(expressionPosition.getValue(), operands);
+                return getLeftUnaryExpression(expressionPosition, operands);
             }
         };
     }

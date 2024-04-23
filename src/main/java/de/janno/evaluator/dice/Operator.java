@@ -83,20 +83,20 @@ public abstract class Operator {
         return Optional.ofNullable(list.get(index));
     }
 
-    protected static String getBinaryOperatorExpression(String name, List<RollBuilder> operands) {
+    protected static String getBinaryOperatorExpression(ExpressionPosition expressionPosition, List<RollBuilder> operands) {
         String left = getIndexIfExists(operands, 0).map(RollBuilder::toExpression).orElse("");
         String right = getIndexIfExists(operands, 1).map(RollBuilder::toExpression).orElse("");
-        return String.format("%s%s%s", left, name, right);
+        return String.format("%s%s%s", left, expressionPosition.toStringWithExtension(), right);
     }
 
-    protected static String getLeftUnaryExpression(String name, List<RollBuilder> operands) {
+    protected static String getLeftUnaryExpression(ExpressionPosition expressionPosition, List<RollBuilder> operands) {
         String left = getIndexIfExists(operands, 0).map(RollBuilder::toExpression).orElse("");
-        return String.format("%s%s", left, name);
+        return String.format("%s%s", left, expressionPosition.toStringWithExtension());
     }
 
-    protected static String getRightUnaryExpression(String name, List<RollBuilder> operands) {
+    protected static String getRightUnaryExpression(ExpressionPosition expressionPosition, List<RollBuilder> operands) {
         String right = getIndexIfExists(operands, 0).map(RollBuilder::toExpression).orElse("");
-        return String.format("%s%s", name, right);
+        return String.format("%s%s", expressionPosition.toStringWithExtension(), right);
     }
 
     /**

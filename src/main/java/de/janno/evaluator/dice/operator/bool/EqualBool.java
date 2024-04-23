@@ -39,7 +39,7 @@ public class EqualBool extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(getName(), operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

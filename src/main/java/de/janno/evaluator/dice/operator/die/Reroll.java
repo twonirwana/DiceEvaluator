@@ -29,7 +29,7 @@ public class Reroll extends Operator {
                 List<Roll> rolls = inputBuilder.extendRoll(rollContext).orElse(Collections.emptyList());
                 checkRollSize(expressionPosition.getValue(), rolls, 1, 1);
                 Roll roll = rolls.getFirst();
-                RandomElementsBuilder builder = RandomElementsBuilder.ofRoll(roll);
+                RandomElementsBuilder builder = RandomElementsBuilder.ofRoll(roll).addRoll(compareTo);
 
                 if (roll.getElements().stream().anyMatch(compareTo::isElementsContainsElementWithValueAndTag)) {
                     rolls = inputBuilder.extendRoll(rollContext).orElse(Collections.emptyList());
@@ -51,7 +51,7 @@ public class Reroll extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(getName(), operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

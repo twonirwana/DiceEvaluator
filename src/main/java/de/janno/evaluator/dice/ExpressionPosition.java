@@ -1,30 +1,47 @@
 package de.janno.evaluator.dice;
 
+import com.google.common.base.Joiner;
 import lombok.NonNull;
 import lombok.Value;
 
+import javax.annotation.Nullable;
 
-@Value(staticConstructor = "of")
+
+@Value
 public class ExpressionPosition implements Comparable<ExpressionPosition> {
     int startInc;
     @NonNull
     String value;
+    /**
+     * A non operator/function extension on the left, like a parentheses. Needed to build the expression back together.
+     */
+    @Nullable
+    String leftExtension;
+    /**
+     * A non operator/function extension on the right, like a parentheses. Needed to build the expression back together.
+     */
+    @Nullable
+    String rightExtension;
+
+    public static ExpressionPosition of(final int startInc, final String value) {
+        return new ExpressionPosition(startInc, value, null, null);
+    }
 
     public ExpressionPosition extendLeft(final String leftValue) {
-        return ExpressionPosition.of(
-                startInc - leftValue.length(),
-                leftValue + value);
+        return new ExpressionPosition(this.startInc, this.value, leftValue, this.rightExtension);
     }
 
     public ExpressionPosition extendRight(final String rightValue) {
-        return ExpressionPosition.of(
-                startInc,
-                value + rightValue);
+        return new ExpressionPosition(this.startInc, this.value, this.leftExtension, rightValue);
     }
 
     @Override
     public String toString() {
         return startInc + value;
+    }
+
+    public String toStringWithExtension() {
+        return Joiner.on("").skipNulls().join(leftExtension, value, rightExtension);
     }
 
     @Override

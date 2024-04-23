@@ -45,7 +45,7 @@ public class GreaterThanFilter extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(expressionPosition.getValue(), operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

@@ -40,7 +40,7 @@ public class NegateBool extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getRightUnaryExpression(getName(), operands);
+                return getRightUnaryExpression(expressionPosition, operands);
             }
         };
     }

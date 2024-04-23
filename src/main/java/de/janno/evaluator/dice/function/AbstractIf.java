@@ -65,7 +65,7 @@ public abstract class AbstractIf extends Function {
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(expressionPosition.getValue(), arguments);
+                return getExpression(expressionPosition, arguments);
             }
         };
     }

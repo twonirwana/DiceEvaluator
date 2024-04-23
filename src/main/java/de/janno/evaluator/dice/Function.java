@@ -54,8 +54,8 @@ public abstract class Function {
     }
 
 
-    protected static String getExpression(String name, List<RollBuilder> arguments) {
-        return "%s%s".formatted(name, arguments.stream().map(RollBuilder::toExpression).collect(Collectors.joining(",")));
+    protected static String getExpression(ExpressionPosition expressionPosition, List<RollBuilder> arguments) {
+        return "%s%s".formatted(expressionPosition.toStringWithExtension(), arguments.stream().map(RollBuilder::toExpression).collect(Collectors.joining(",")));
     }
 
     /**

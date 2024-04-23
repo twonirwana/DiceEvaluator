@@ -40,7 +40,7 @@ public class InBool extends Operator {
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(getName(), operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

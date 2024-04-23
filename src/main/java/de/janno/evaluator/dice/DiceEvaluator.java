@@ -164,7 +164,7 @@ public class DiceEvaluator {
 
                 @Override
                 public @NonNull String toExpression() {
-                    return expressionPosition.getValue();
+                    return expressionPosition.toStringWithExtension();
                 }
             };
         }
@@ -185,7 +185,7 @@ public class DiceEvaluator {
 
             @Override
             public @NonNull String toExpression() {
-                return expressionPosition.getValue();
+                return expressionPosition.toStringWithExtension();
             }
         };
     }

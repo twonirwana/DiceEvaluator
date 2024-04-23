@@ -1,5 +1,6 @@
 package de.janno.evaluator.dice;
 
+import com.google.common.base.Strings;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -7,6 +8,8 @@ import lombok.Value;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Value
 @RequiredArgsConstructor
@@ -39,10 +42,10 @@ public class RollElement implements Comparable<RollElement> {
     }
 
     public Optional<Boolean> asBoolean() {
-        if (value.equals(String.valueOf(true))) {
+        if (value.equals(String.valueOf(true)) || value.equals("1")) {
             return Optional.of(true);
         }
-        if (value.equals(String.valueOf(false))) {
+        if (value.equals(String.valueOf(false)) || value.equals("0")) {
             return Optional.of(false);
         }
         return Optional.empty();
@@ -69,5 +72,13 @@ public class RollElement implements Comparable<RollElement> {
     public String toString() {
         String outputTag = NO_TAG.equals(tag) ? "" : "%s:".formatted(tag);
         return "%s%s".formatted(outputTag, value);
+    }
+
+    public String toStringWithColorAndTag() {
+        String outputTag = NO_TAG.equals(tag) ? "" : "t:%s".formatted(tag);
+        String outputColor = NO_COLOR.equals(color) ? "" : "c:%s".formatted(color);
+        return Stream.of(value, outputTag, outputColor)
+                .filter(s -> !Strings.isNullOrEmpty(s))
+                .collect(Collectors.joining("-"));
     }
 }
