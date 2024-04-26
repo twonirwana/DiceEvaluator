@@ -25,12 +25,12 @@ public class GreaterEqualBool extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
+                checkRollSize(expressionPosition, rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition.getValue(), left, "left"));
-                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition.getValue(), right, "right"));
+                final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition, left, "left"));
+                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition, right, "right"));
 
                 ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf(leftNumber.compareTo(rightNumber) >= 0), RollElement.NO_TAG, RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),

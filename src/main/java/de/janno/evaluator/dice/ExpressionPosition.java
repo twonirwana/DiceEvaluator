@@ -4,7 +4,7 @@ import com.google.common.base.Joiner;
 import lombok.NonNull;
 import lombok.Value;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 
 @Value

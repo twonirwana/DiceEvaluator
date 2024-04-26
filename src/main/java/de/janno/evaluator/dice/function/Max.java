@@ -21,7 +21,7 @@ public class Max extends Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(arguments, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+                checkRollSize(expressionPosition, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
                 final RollElement max = rolls.stream()
                         .flatMap(result -> result.getElements().stream())

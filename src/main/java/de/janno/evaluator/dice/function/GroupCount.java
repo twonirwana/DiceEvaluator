@@ -25,7 +25,7 @@ public class GroupCount extends de.janno.evaluator.dice.Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(arguments, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+                checkRollSize(expressionPosition, rolls, getMinArgumentCount(), getMaxArgumentCount());
                 final ImmutableList<RollElement> res = rolls.stream()
                         .flatMap(result -> result.getElements().stream())
                         .collect(Collectors.groupingBy(e -> new ValueAndTag(e.getValue(), e.getTag()))).entrySet().stream()

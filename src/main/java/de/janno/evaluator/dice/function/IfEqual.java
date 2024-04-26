@@ -1,5 +1,6 @@
 package de.janno.evaluator.dice.function;
 
+import de.janno.evaluator.dice.ExpressionPosition;
 import de.janno.evaluator.dice.Roll;
 
 public class IfEqual extends AbstractIf {
@@ -8,7 +9,7 @@ public class IfEqual extends AbstractIf {
     }
 
     @Override
-    protected boolean compare(Roll input, int inputPosition, Roll compareTo, int compareToPosition) {
+    protected boolean compare(Roll input, int inputPosition, Roll compareTo, int compareToPosition, ExpressionPosition expressionPosition) {
         return input.equalForValueAndTag(compareTo);
     }
 }

@@ -199,11 +199,11 @@ public class DiceEvaluator {
             Operator operator = token.getOperator().get();
             int argumentCount = token.getOperatorType().orElseThrow().argumentCount;
             if (values.size() < argumentCount) {
-                throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getName(), argumentCount));
+                throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getName(), argumentCount), token.getExpressionPosition());
             }
             values.push(operator.evaluate(getArguments(values, argumentCount), token.getExpressionPosition()));
         } else {
-            throw new ExpressionException(token.toString());
+            throw new ExpressionException(token.toString(), token.getExpressionPosition());
         }
     }
 
@@ -271,7 +271,7 @@ public class DiceEvaluator {
             if (previous.flatMap(Token::getFunction).isPresent() && !isFunctionOpenBracket(token)) {
                 String functionName = previous.flatMap(Token::getFunction).map(Function::getName).orElseThrow();
                 String allowedBrackets = parameters.getFunctionBrackets().stream().map(BracketPair::getOpen).collect(Collectors.joining(" or "));
-                throw new ExpressionException("A function, in this case '%s', must be followed a open function bracket: %s".formatted(functionName, allowedBrackets));
+                throw new ExpressionException("A function, in this case '%s', must be followed a open function bracket: %s".formatted(functionName, allowedBrackets), token.getExpressionPosition());
             }
 
             if (token.getBrackets().isPresent() && token.isOpenBracket()) {
@@ -279,21 +279,21 @@ public class DiceEvaluator {
                 stack.push(token);
                 if (previous.flatMap(Token::getFunction).isPresent()) {
                     if (!parameters.getFunctionBrackets().contains(token.getBrackets().get())) {
-                        throw new ExpressionException("Invalid bracket after function: %s".formatted(token));
+                        throw new ExpressionException("Invalid bracket after function: %s".formatted(token), token.getExpressionPosition());
                     }
                 } else {
                     if (!parameters.getExpressionBrackets().contains(token.getBrackets().get())) {
-                        throw new ExpressionException("Invalid bracket in expression: %s".formatted(token));
+                        throw new ExpressionException("Invalid bracket in expression: %s".formatted(token), token.getExpressionPosition());
                     }
                 }
             } else if (token.isCloseBracket()) {
                 if (previous.isEmpty()) {
-                    throw new ExpressionException("expression can't start with a close bracket");
+                    throw new ExpressionException("expression can't start with a close bracket", token.getExpressionPosition());
                 } else if (previous.get().isOpenBracket()) {
-                    throw new ExpressionException("empty brackets are not allowed");
+                    throw new ExpressionException("empty brackets are not allowed", token.getExpressionPosition());
                 }
                 if (previous.map(Token::isSeparator).get()) {
-                    throw new ExpressionException("argument is missing");
+                    throw new ExpressionException("argument is missing", token.getExpressionPosition());
                 }
                 BracketPair brackets = token.getBrackets().get();
                 // If the token is a right parenthesis:
@@ -307,7 +307,7 @@ public class DiceEvaluator {
                         if (stackToken.getBrackets().get().equals(brackets)) {
                             openBracketFound = true;
                         } else {
-                            throw new ExpressionException("Invalid parenthesis match %s%s".formatted(stackToken.getBrackets().get().getOpen(), brackets.getClose()));
+                            throw new ExpressionException("Invalid parenthesis match %s%s".formatted(stackToken.getBrackets().get().getOpen(), brackets.getClose()), token.getExpressionPosition());
                         }
                     } else {
                         processTokenToValues(values, stackToken);
@@ -316,7 +316,7 @@ public class DiceEvaluator {
                 if (!openBracketFound) {
                     // If the stack runs out without finding a left parenthesis, then
                     // there are mismatched parentheses.
-                    throw new ExpressionException("Parentheses mismatched");
+                    throw new ExpressionException("Parentheses mismatched", token.getExpressionPosition());
                 }
                 if (!stack.isEmpty() && stack.peek().getFunction().isPresent()) {
                     // If the token at the top of the stack is a function token, pop it
@@ -327,11 +327,11 @@ public class DiceEvaluator {
                 }
             } else if (token.isSeparator()) {
                 if (previous.isEmpty()) {
-                    throw new ExpressionException("expression can't start with a separator");
+                    throw new ExpressionException("expression can't start with a separator", token.getExpressionPosition());
                 }
                 // Verify that there was an argument before this separator
                 if (previous.get().isOpenBracket() || previous.get().isSeparator()) {
-                    throw new ExpressionException("A separator can't be followed by another separator or open bracket");
+                    throw new ExpressionException("A separator can't be followed by another separator or open bracket", token.getExpressionPosition());
                 }
                 boolean openBracketOnStackReached = false;
 
@@ -342,7 +342,7 @@ public class DiceEvaluator {
                             throw new ExpressionException("Separator '%s' in bracket '%s' without leading function is not allowed"
                                     .formatted(parameters.getSeparator(), parameters.getExpressionBrackets().stream()
                                             .map(Object::toString)
-                                            .collect(Collectors.joining(","))));
+                                            .collect(Collectors.joining(","))), token.getExpressionPosition());
                         }
                     } else {
                         // Until the token at the top of the stack is a left parenthesis,
@@ -378,7 +378,7 @@ public class DiceEvaluator {
                     if (!stack.peek().isOpenBracket()) { //no unfinished bracket
                         processTokenToValues(values, stack.pop());
                     } else {
-                        throw new ExpressionException("All brackets need to be closed be for starting a new expression or missing ','");
+                        throw new ExpressionException("All brackets need to be closed be for starting a new expression or missing ','", token.getExpressionPosition());
                     }
                 }
                 // If the token is literal then add its value to the output queue.
@@ -392,7 +392,7 @@ public class DiceEvaluator {
         // While there are still operator tokens in the stack:
         for (Token stackToken : stack) {
             if (stackToken.isOpenBracket() || stackToken.isCloseBracket()) {
-                throw new ExpressionException("Parentheses mismatched");
+                throw new ExpressionException("Parentheses mismatched", stackToken.getExpressionPosition());
             }
             processTokenToValues(values, stackToken);
         }

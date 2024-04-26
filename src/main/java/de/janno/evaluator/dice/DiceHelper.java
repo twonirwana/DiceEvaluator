@@ -12,7 +12,7 @@ public final class DiceHelper {
             return ImmutableList.of();
         }
         if (sides < 0) {
-            throw new ExpressionException("Sides of dice to roll must be positive");
+            throw new ExpressionException("Sides of dice to roll must be positive", rollId.getExpressionPosition());
         }
         ImmutableList.Builder<RandomElement> resultBuilder = ImmutableList.builder();
         //order of the exploded dice is not relevant, the random elements get sorted later
@@ -40,7 +40,7 @@ public final class DiceHelper {
             return ImmutableList.of();
         }
         if (sides < 0) {
-            throw new ExpressionException("Sides of dice to roll must be positive");
+            throw new ExpressionException("Sides of dice to roll must be positive", rollId.getExpressionPosition());
         }
         ImmutableList.Builder<RandomElement> randomElementBuilder = ImmutableList.builder();
         for (int i = 0; i < number; i++) {

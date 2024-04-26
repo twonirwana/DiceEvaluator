@@ -47,11 +47,13 @@ public class Roll {
         this.randomElementsInRoll = randomElementsInRoll;
         this.childrenRolls = keepChildRolls ? childrenRolls : ImmutableList.of();
         if (elements.size() > maxNumberOfElements) {
-            throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, elements.size()));
+            //todo really expressionPosition null?
+            throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, elements.size()), null);
         }
         long numberOfRandomElementsInRoll = randomElementsInRoll.stream().mapToLong(List::size).sum();
         if (numberOfRandomElementsInRoll > maxNumberOfElements) {
-            throw new ExpressionException("To many random elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, numberOfRandomElementsInRoll));
+            //todo really expressionPosition null?
+            throw new ExpressionException("To many random elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, numberOfRandomElementsInRoll), null);
         }
     }
 

@@ -23,7 +23,7 @@ public abstract class AbstractIf extends Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(arguments, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+                checkRollSize(expressionPosition, rolls, getMinArgumentCount(), getMaxArgumentCount());
                 Roll input = rolls.getFirst();
 
                 int counter = 1;
@@ -32,7 +32,7 @@ public abstract class AbstractIf extends Function {
                     Roll compareTo = rolls.get(counter);
                     Roll trueResult = rolls.get(counter + 1);
                     randomElementsBuilder.addRoll(compareTo);
-                    if (compare(input, counter, compareTo, counter + 1)) {
+                    if (compare(input, counter, compareTo, counter + 1, expressionPosition)) {
                         randomElementsBuilder.addRoll(trueResult);
                         return Optional.of(ImmutableList.of(new Roll(toExpression(),
                                 trueResult.getElements(),
@@ -71,5 +71,5 @@ public abstract class AbstractIf extends Function {
     }
 
 
-    protected abstract boolean compare(Roll input, int inputPosition, Roll compareTo, int compareToPosition) throws ExpressionException;
+    protected abstract boolean compare(Roll input, int inputPosition, Roll compareTo, int compareToPosition, ExpressionPosition expressionPosition) throws ExpressionException;
 }

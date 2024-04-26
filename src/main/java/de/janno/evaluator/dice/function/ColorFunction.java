@@ -28,10 +28,10 @@ public class ColorFunction extends Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(arguments, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+                checkRollSize(expressionPosition, rolls, getMinArgumentCount(), getMaxArgumentCount());
                 Roll p1 = rolls.getFirst();
                 Roll p2 = rolls.get(1);
-                checkContainsSingleElement(expressionPosition.getValue(), p2, "second argument");
+                checkContainsSingleElement(expressionPosition, p2, "second argument");
                 String color = p2.getElements().getFirst().getValue();
                 RandomElementsBuilder builder = RandomElementsBuilder.empty();
                 rolls.forEach(r -> builder.addWithColor(r, color));

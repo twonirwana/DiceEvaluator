@@ -25,11 +25,11 @@ public final class NegateAddRemove extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, 1, 2);
+                checkRollSize(expressionPosition, rolls, 1, 2);
 
                 if (rolls.size() == 1) {
                     Roll right = rolls.getFirst();
-                    checkContainsOnlyDecimal(expressionPosition.getValue(), right, "right");
+                     checkContainsOnlyDecimal(expressionPosition, right, "right");
                     ImmutableList<RollElement> negated = right.getElements().stream()
                             .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
                             .collect(ImmutableList.toImmutableList());
@@ -62,7 +62,7 @@ public final class NegateAddRemove extends Operator {
                     throw new ExpressionException(String.format("'%s' requires as right input only decimals or elements that are on the left side '%s' but was '%s'",
                             expressionPosition.getValue(),
                             left.getElements().stream().map(RollElement::getValue).toList(),
-                            right.getElements().stream().map(RollElement::getValue).toList()));
+                            right.getElements().stream().map(RollElement::getValue).toList()), expressionPosition);
                 }
 
                 resultBuilder.addAll(toRemove.stream()

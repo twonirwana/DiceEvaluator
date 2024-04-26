@@ -23,13 +23,13 @@ public final class Modulo extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
+                checkRollSize(expressionPosition, rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkAllElementsAreSameTag(expressionPosition.getValue(), left, right);
-                final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), left, "left"));
-                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), right, "right"));
+                checkAllElementsAreSameTag(expressionPosition, left, right);
+                final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, left, "left"));
+                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, right, "right"));
 
                 final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(leftNumber % rightNumber), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),

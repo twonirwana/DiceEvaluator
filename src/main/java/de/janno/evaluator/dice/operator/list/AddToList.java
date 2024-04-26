@@ -22,7 +22,7 @@ public final class AddToList extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, 1, 2);
+                checkRollSize(expressionPosition, rolls, 1, 2);
 
                 if (rolls.size() == 1) {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),

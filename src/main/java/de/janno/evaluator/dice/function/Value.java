@@ -20,12 +20,12 @@ public class Value extends Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 if (arguments.size() < 2) {
-                    throw new ExpressionException(String.format("'%s' requires as 2 inputs but was '%s'", getName(), arguments.size()));
+                    throw new ExpressionException(String.format("'%s' requires as 2 inputs but was '%s'", getName(), arguments.size()), expressionPosition);
                 }
                 RollContext nameContext = rollContext.copyWithEmptyVariables(); //don't replace literals in the first argument of the function, but it can use new variables
                 Optional<List<Roll>> valNameRoll = arguments.getFirst().extendRoll(nameContext);
                 if (valNameRoll.isEmpty()) {
-                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()));
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()), expressionPosition);
                 }
                 ImmutableList.Builder<Roll> rollBuilder = ImmutableList.<Roll>builder()
                         .addAll(valNameRoll.get());
@@ -33,7 +33,7 @@ public class Value extends Function {
                 List<RollBuilder> remainingRollBuilder = arguments.subList(1, arguments.size());
                 List<Roll> rolls = rollBuilder.addAll(RollBuilder.extendAllBuilder(remainingRollBuilder, rollContext)).build();
 
-                checkRollSize(expressionPosition.getValue(), rolls, getMinArgumentCount(), getMaxArgumentCount());
+                checkRollSize(expressionPosition, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
                 String valName = rolls.getFirst().getElements().getFirst().getValue();
 

@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.random.RandomGenerator;
 
 /**
@@ -24,13 +24,16 @@ public class RandomNumberSupplier implements NumberSupplier {
 
     public int get(int minExcl, int maxIncl, @Nullable DieId dieId) throws ExpressionException {
         if (minExcl == Integer.MAX_VALUE) {
-            throw new ExpressionException("Cannot give a random number for minExcl =%d".formatted(Integer.MAX_VALUE));
+            //todo null?
+            throw new ExpressionException("Cannot give a random number for minExcl =%d".formatted(Integer.MAX_VALUE), null);
         }
         if (maxIncl == Integer.MAX_VALUE) {
-            throw new ExpressionException("Cannot give a random number for maxIncl =%d".formatted(Integer.MAX_VALUE));
+            //todo null?
+            throw new ExpressionException("Cannot give a random number for maxIncl =%d".formatted(Integer.MAX_VALUE), null);
         }
         if (minExcl >= maxIncl) {
-            throw new ExpressionException("Random number between %d (excl) and %d (incl) is not possible".formatted(minExcl, maxIncl));
+            //todo null?
+            throw new ExpressionException("Random number between %d (excl) and %d (incl) is not possible".formatted(minExcl, maxIncl), null);
         }
         if (minExcl + 1 == maxIncl) {
             return maxIncl;

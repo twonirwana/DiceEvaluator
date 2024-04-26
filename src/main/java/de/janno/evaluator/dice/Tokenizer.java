@@ -2,7 +2,7 @@ package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class Tokenizer {
             if (SMALL_INTEGER_PATTERN.matcher(expressionPosition.getValue()).matches() || SMALL_DECIMAL_PATTERN.matcher(expressionPosition.getValue()).matches()) {
                 return Token.of(expressionPosition.getValue(), expressionPosition);
             }
-            throw new ExpressionException("The number '%s' is too big".formatted(expressionPosition.getValue()));
+            throw new ExpressionException("The number '%s' is too big".formatted(expressionPosition.getValue()), expressionPosition);
         }, false));
         tokenBuilders = builder.build();
 
@@ -84,7 +84,7 @@ public class Tokenizer {
             }
         } while (currentMatch.isPresent());
         if (!current.isEmpty()) {
-            throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(current, escapeCharacter));
+            throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(current, escapeCharacter), ExpressionPosition.of(currentPosition, current));
         }
 
         return setOperatorType(preTokens);
@@ -106,7 +106,7 @@ public class Tokenizer {
             if (token.getOperator().isPresent()) {
                 Token left = i == 0 ? null : in.get(i - 1);
                 Token right = i == in.size() - 1 ? null : in.get(i + 1);
-                Operator.OperatorType type = determineAndValidateOperatorType(token.getOperator().get(), left, right, lastOperatorWasUnaryLeft);
+                Operator.OperatorType type = determineAndValidateOperatorType(token, left, right, lastOperatorWasUnaryLeft);
                 builder.add(Token.of(token.getOperator().get(), type, token.getExpressionPosition()));
                 lastOperatorWasUnaryLeft = type == Operator.OperatorType.UNARY && token.getOperator().get().getAssociativityForOperantType(Operator.OperatorType.UNARY) == Operator.Associativity.LEFT;
             } else {
@@ -151,8 +151,11 @@ public class Tokenizer {
         return Optional.of(brackets.toString());
     }
 
-    private Operator.OperatorType determineAndValidateOperatorType(@NonNull Operator operator, @Nullable Token left, @Nullable Token right, boolean lastOperatorWasUnaryLeft) throws ExpressionException {
+    private Operator.OperatorType determineAndValidateOperatorType(@NonNull Token token, @Nullable Token left, @Nullable Token right, boolean lastOperatorWasUnaryLeft) throws ExpressionException {
         //todo cleanup
+
+        //has operator is already checked
+        Operator operator = token.getOperator().orElseThrow();
         boolean leftLiteralOrBracket = left != null && (left.getLiteral().isPresent() || left.isCloseBracket() || (left.getOperator().isPresent() && lastOperatorWasUnaryLeft));
         boolean rightLiteralOrBracket = right != null && (right.getLiteral().isPresent() || right.isOpenBracket() ||
                 (right.getOperator().isPresent() && right.getOperator().get().getAssociativityForOperantType(Operator.OperatorType.UNARY) == Operator.Associativity.RIGHT)
@@ -160,19 +163,19 @@ public class Tokenizer {
 
         if (leftLiteralOrBracket && rightLiteralOrBracket) {
             if (!operator.supportBinaryOperation()) {
-                throw new ExpressionException("Operator %s does not support binary operations".formatted(operator.getName()));
+                throw new ExpressionException("Operator %s does not support binary operations".formatted(operator.getName()), token.getExpressionPosition());
             }
             return Operator.OperatorType.BINARY;
         }
         if (!operator.supportUnaryOperation()) {
-            throw new ExpressionException("Operator %s does not support unary operations".formatted(operator.getName()));
+            throw new ExpressionException("Operator %s does not support unary operations".formatted(operator.getName()), token.getExpressionPosition());
         }
         Operator.Associativity operatorAssociativity = operator.getAssociativityForOperantType(Operator.OperatorType.UNARY);
         if (operatorAssociativity == Operator.Associativity.LEFT && !leftLiteralOrBracket) {
-            throw new ExpressionException("Operator %s has left associativity but the left value was: %s".formatted(operator.getName(), Optional.ofNullable(left).map(Object::toString).orElse("empty")));
+            throw new ExpressionException("Operator %s has left associativity but the left value was: %s".formatted(operator.getName(), Optional.ofNullable(left).map(Object::toString).orElse("empty")), token.getExpressionPosition());
         }
         if (operatorAssociativity == Operator.Associativity.RIGHT && !rightLiteralOrBracket) {
-            throw new ExpressionException("Operator %s has right associativity but the right value was: %s".formatted(operator.getName(), Optional.ofNullable(right).map(Object::toString).orElse("empty")));
+            throw new ExpressionException("Operator %s has right associativity but the right value was: %s".formatted(operator.getName(), Optional.ofNullable(right).map(Object::toString).orElse("empty")), token.getExpressionPosition());
         }
 
         return Operator.OperatorType.UNARY;

@@ -32,7 +32,7 @@ public final class RegularDice extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, 1, 2);
+                checkRollSize(expressionPosition, rolls, 1, 2);
 
                 final int numberOfDice;
                 final Roll right;
@@ -51,7 +51,7 @@ public final class RegularDice extends Operator {
                     Roll left = rolls.getFirst();
                     right = rolls.get(1);
                     childrenRolls = ImmutableList.of(left, right);
-                    numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition.getValue(), left, "left"));
+                    numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, left, "left"));
                     expression = toExpression();
                     randomElements.addRoll(left);
                     randomElements.addRoll(right);
@@ -61,10 +61,10 @@ public final class RegularDice extends Operator {
                 }
 
                 if (numberOfDice > maxNumberOfDice) {
-                    throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
+                    throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice), expressionPosition);
                 }
                 if (numberOfDice < 0) {
-                    throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
+                    throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice), expressionPosition);
                 }
                 final ImmutableList<RollElement> rollElements;
                 if (right.asInteger().isPresent()) {

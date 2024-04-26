@@ -23,17 +23,17 @@ public class Reroll extends Operator {
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 RollBuilder inputBuilder = operands.getFirst();
                 List<Roll> compareTos = operands.get(1).extendRoll(rollContext).orElse(Collections.emptyList());
-                checkRollSize(expressionPosition.getValue(), compareTos, 1, 1);
+                checkRollSize(expressionPosition, compareTos, 1, 1);
                 Roll compareTo = compareTos.getFirst();
 
                 List<Roll> rolls = inputBuilder.extendRoll(rollContext).orElse(Collections.emptyList());
-                checkRollSize(expressionPosition.getValue(), rolls, 1, 1);
+                checkRollSize(expressionPosition, rolls, 1, 1);
                 Roll roll = rolls.getFirst();
                 RandomElementsBuilder builder = RandomElementsBuilder.ofRoll(roll).addRoll(compareTo);
 
                 if (roll.getElements().stream().anyMatch(compareTo::isElementsContainsElementWithValueAndTag)) {
                     rolls = inputBuilder.extendRoll(rollContext).orElse(Collections.emptyList());
-                    checkRollSize(expressionPosition.getValue(), rolls, 1, 1);
+                    checkRollSize(expressionPosition, rolls, 1, 1);
                     roll = rolls.getFirst();
                     builder.addRoll(roll);
                 }

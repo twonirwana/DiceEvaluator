@@ -23,13 +23,13 @@ public final class Multiply extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
+                checkRollSize(expressionPosition, rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkAllElementsAreSameTag(expressionPosition.getValue(), left, right);
-                final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition.getValue(), left, "left"));
-                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition.getValue(), right, "right"));
+                checkAllElementsAreSameTag(expressionPosition, left, right);
+                final BigDecimal leftNumber = left.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition, left, "left"));
+                final BigDecimal rightNumber = right.asDecimal().orElseThrow(() -> throwNotDecimalExpression(expressionPosition, right, "right"));
                 final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(leftNumber.multiply(rightNumber).stripTrailingZeros().toPlainString(), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),

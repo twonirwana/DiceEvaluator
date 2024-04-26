@@ -3,7 +3,7 @@ package de.janno.evaluator.dice.random;
 import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Provides a number between minExcl and maxIncl.

@@ -24,7 +24,7 @@ public class Count extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, 1, 1);
+                checkRollSize(expressionPosition, rolls, 1, 1);
 
                 Roll left = rolls.getFirst();
 

@@ -3,7 +3,7 @@ package de.janno.evaluator.dice.random;
 import com.google.common.annotations.VisibleForTesting;
 import de.janno.evaluator.dice.DieId;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 @VisibleForTesting

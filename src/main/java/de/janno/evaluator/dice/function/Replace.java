@@ -18,11 +18,11 @@ public class Replace extends Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 if (arguments.size() % 2 == 0) {
-                    throw new ExpressionException(String.format("'%s' requires an odd number of arguments but was %d", getName(), arguments.size()));
+                    throw new ExpressionException(String.format("'%s' requires an odd number of arguments but was %d", getName(), arguments.size()), expressionPosition);
                 }
                 Optional<List<Roll>> input = arguments.getFirst().extendRoll(rollContext);
                 if (input.isEmpty()) {
-                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()));
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()), expressionPosition);
                 }
                 ImmutableList.Builder<Roll> allRolls = ImmutableList.builder();
                 ImmutableList.Builder<Roll> rollExpression = ImmutableList.builder();

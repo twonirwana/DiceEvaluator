@@ -23,12 +23,12 @@ public class If extends Function {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 if (arguments.size() < 2) {
-                    throw new ExpressionException(String.format("'%s' requires as 2 inputs but was '%s'", getName(), arguments.size()));
+                    throw new ExpressionException(String.format("'%s' requires as 2 inputs but was '%s'", getName(), arguments.size()), expressionPosition);
                 }
                 ImmutableList.Builder<Roll> allRolls = ImmutableList.builder();
                 Optional<List<Roll>> checkIfTrue = arguments.getFirst().extendRoll(rollContext);
                 if (checkIfTrue.isEmpty()) {
-                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()));
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()), expressionPosition);
                 }
                 RandomElementsBuilder booleanRandomElements = RandomElementsBuilder.empty();
                 RollContext trueContext = rollContext.copy();
@@ -37,16 +37,16 @@ public class If extends Function {
                 int checkIfTrueIndex = 1;
                 while (checkIfTrueIndex < arguments.size()) {
                     if (checkIfTrue.isEmpty()) {
-                        throw new ExpressionException(String.format("'%s' requires a non-empty input as %s argument", expressionPosition.getValue(), checkIfTrueIndex));
+                        throw new ExpressionException(String.format("'%s' requires a non-empty input as %s argument", expressionPosition.getValue(), checkIfTrueIndex), expressionPosition);
                     }
-                    checkRollSize(expressionPosition.getValue(), checkIfTrue.get(), 1, 1);
+                    checkRollSize(expressionPosition, checkIfTrue.get(), 1, 1);
                     Roll booleanExpression = checkIfTrue.get().getFirst();
                     allRolls.addAll(checkIfTrue.get());
                     allRolls.addAll(returnIfTrue.orElse(Collections.emptyList()));
 
                     int booleanArgumentIndex = checkIfTrueIndex;
                     final boolean booleanValue = booleanExpression.asBoolean()
-                            .orElseThrow(() -> throwNotBoolean(expressionPosition.getValue(), booleanExpression, "position %d".formatted(booleanArgumentIndex)));
+                            .orElseThrow(() ->  throwNotBoolean(expressionPosition, booleanExpression, "position %d".formatted(booleanArgumentIndex)));
                     booleanRandomElements.addRoll(booleanExpression);
                     if (booleanValue) {
                         List<Roll> trueResult = returnIfTrue.orElse(Collections.emptyList());

@@ -24,11 +24,11 @@ public class NegateBool extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, 1, 1);
+                checkRollSize(expressionPosition, rolls, 1, 1);
 
                 Roll value = rolls.getFirst();
 
-                final boolean boolValue = value.asBoolean().orElseThrow(() -> throwNotBoolean(expressionPosition.getValue(), value, "right"));
+                final boolean boolValue = value.asBoolean().orElseThrow(() ->  throwNotBoolean(expressionPosition, value, "right"));
 
                 ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf((!boolValue)), RollElement.NO_TAG, RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),

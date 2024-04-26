@@ -23,12 +23,12 @@ public class Tag extends Operator {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
-                checkRollSize(expressionPosition.getValue(), rolls, 2, 2);
+                checkRollSize(expressionPosition, rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkAllElementsAreSameTag(expressionPosition.getValue(), left, right);
-                checkContainsSingleElement(expressionPosition.getValue(), right, "second argument");
+                checkAllElementsAreSameTag(expressionPosition, left, right);
+                checkContainsSingleElement(expressionPosition, right, "second argument");
                 String tag = right.getElements().getFirst().getValue();
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
