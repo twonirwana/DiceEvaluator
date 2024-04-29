@@ -38,6 +38,7 @@ public final class DecimalDivide extends Operator {
                         res,
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

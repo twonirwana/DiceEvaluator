@@ -30,6 +30,7 @@ public class Concat extends Operator {
                         ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.copyOf(rolls),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

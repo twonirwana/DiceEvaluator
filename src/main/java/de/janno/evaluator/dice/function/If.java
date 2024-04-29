@@ -46,7 +46,7 @@ public class If extends Function {
 
                     int booleanArgumentIndex = checkIfTrueIndex;
                     final boolean booleanValue = booleanExpression.asBoolean()
-                            .orElseThrow(() ->  throwNotBoolean(expressionPosition, booleanExpression, "position %d".formatted(booleanArgumentIndex)));
+                            .orElseThrow(() -> throwNotBoolean(expressionPosition, booleanExpression, "position %d".formatted(booleanArgumentIndex)));
                     booleanRandomElements.addRoll(booleanExpression);
                     if (booleanValue) {
                         List<Roll> trueResult = returnIfTrue.orElse(Collections.emptyList());
@@ -61,6 +61,7 @@ public class If extends Function {
                                             .addAll(booleanExpression.getChildrenRolls())
                                             .addAll(r.getChildrenRolls())
                                             .build(),
+                                    expressionPosition,
                                     maxNumberOfElements, keepChildrenRolls));
                         }
                         return Optional.of(resultBuilder.build());
@@ -91,6 +92,7 @@ public class If extends Function {
                                             .addRoll(r)
                                             .build(),
                                     r.getChildrenRolls(),
+                                    expressionPosition,
                                     maxNumberOfElements, keepChildrenRolls));
                         }
                         return Optional.of(resultBuilder.build());
@@ -102,6 +104,7 @@ public class If extends Function {
                                 .build(),
                         //todo child rolls?
                         ImmutableList.of(),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

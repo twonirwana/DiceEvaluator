@@ -2,8 +2,8 @@ package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

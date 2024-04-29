@@ -51,7 +51,7 @@ public class Cancel extends Function {
                                 .addAll(input.getChildrenRolls())
                                 .addAll(typeA.getChildrenRolls())
                                 .addAll(typeB.getChildrenRolls())
-                                .build(), maxNumberOfElements, keepChildrenRolls)));
+                                .build(), expressionPosition, maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

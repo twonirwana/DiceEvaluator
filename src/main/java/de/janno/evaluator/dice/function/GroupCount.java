@@ -36,7 +36,7 @@ public class GroupCount extends de.janno.evaluator.dice.Function {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         RandomElementsBuilder.fromRolls(rolls),
-                        ImmutableList.copyOf(rolls), maxNumberOfElements, keepChildrenRolls)));
+                        ImmutableList.copyOf(rolls), expressionPosition, maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

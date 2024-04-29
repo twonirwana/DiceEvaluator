@@ -38,6 +38,7 @@ public class Color extends Operator {
                                 .collect(ImmutableList.toImmutableList()),
                         builder.build(),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

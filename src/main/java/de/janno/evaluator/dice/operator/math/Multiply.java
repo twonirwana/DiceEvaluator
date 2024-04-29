@@ -36,6 +36,7 @@ public final class Multiply extends Operator {
                         res,
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

@@ -2,8 +2,9 @@ package de.janno.evaluator.dice.random;
 
 import com.google.common.annotations.VisibleForTesting;
 import de.janno.evaluator.dice.DieId;
+import lombok.NonNull;
 
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 import java.util.*;
 
 @VisibleForTesting
@@ -28,7 +29,7 @@ public class GivenNumberSupplier implements NumberSupplier {
     }
 
     @Override
-    public int get(int minExcl, int maxIncl, @Nullable DieId dieId) {
+    public int get(int minExcl, int maxIncl, @NonNull DieId dieId) {
         if (results.isEmpty()) {
             return maxIncl;
         }

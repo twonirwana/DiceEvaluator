@@ -37,6 +37,7 @@ public class GreaterEqualBool extends Operator {
                         diceResult,
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

@@ -596,6 +596,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("exp(1d6, 3, 101)", "'exp' requires as third argument a number between 0 and 100"),
                 Arguments.of("1 - [a]", "'-' requires as right input only decimals or elements that are on the left side '[1]' but was '[a]'"),
                 Arguments.of("1 - [3/a]", "'-' requires as right input only decimals or elements that are on the left side '[1]' but was '[3, a]'"),
+                Arguments.of("val('a')", "'val' requires as 2 inputs but was '[[a]]'"),
+                Arguments.of("val('',d6)", "'val' requires a non-empty input as first argument"),
 
                 Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
@@ -637,11 +639,8 @@ public class DiceEvaluatorTest {
         );
     }
 
-    //todo dieId test with exp(), r, x, val(), tag, color function, col
     private static Stream<Arguments> generateStringDiceDataWithRandomElements() {
         return Stream.of(
-
-
                 //if
                 Arguments.of("if(d6>?3,d8)", List.of(4), "8", "[3de0i0r0=4∈[1...6], 9de0i0r0=8∈[1...8]]"),
                 Arguments.of("if(d6>?3,d8)", List.of(2), "", "[3de0i0r0=2∈[1...6]]"),

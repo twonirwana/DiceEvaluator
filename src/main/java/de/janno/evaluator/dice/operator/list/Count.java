@@ -42,6 +42,7 @@ public class Count extends Operator {
                         res,
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

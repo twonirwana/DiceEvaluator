@@ -45,6 +45,7 @@ public class Reroll extends Operator {
                                 .addAll(compareTo.getChildrenRolls())
                                 .addAll(roll.getChildrenRolls())
                                 .build(),
+                        expressionPosition,
                         maxNumberOfElements,
                         keepChildrenRolls)));
             }

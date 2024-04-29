@@ -35,6 +35,7 @@ public class Max extends Function {
                         res,
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.copyOf(rolls),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

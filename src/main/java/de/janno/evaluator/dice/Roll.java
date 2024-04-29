@@ -34,11 +34,17 @@ public class Roll {
 
     @NonNull
     ImmutableList<Roll> childrenRolls;
+    /**
+     * The last expression position that created this roll
+     */
+    @NonNull
+    ExpressionPosition expressionPosition;
 
     public Roll(@NonNull String expression,
                 @NonNull ImmutableList<RollElement> elements,
                 @NonNull ImmutableList<ImmutableList<RandomElement>> randomElementsInRoll,
                 @NonNull ImmutableList<Roll> childrenRolls,
+                @NonNull ExpressionPosition expressionPosition,
                 int maxNumberOfElements,
                 boolean keepChildRolls) throws ExpressionException {
         this.expression = expression;
@@ -46,14 +52,13 @@ public class Roll {
         validate(randomElementsInRoll);
         this.randomElementsInRoll = randomElementsInRoll;
         this.childrenRolls = keepChildRolls ? childrenRolls : ImmutableList.of();
+        this.expressionPosition = expressionPosition;
         if (elements.size() > maxNumberOfElements) {
-            //todo really expressionPosition null?
-            throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, elements.size()), null);
+            throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, elements.size()), expressionPosition);
         }
         long numberOfRandomElementsInRoll = randomElementsInRoll.stream().mapToLong(List::size).sum();
         if (numberOfRandomElementsInRoll > maxNumberOfElements) {
-            //todo really expressionPosition null?
-            throw new ExpressionException("To many random elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, numberOfRandomElementsInRoll), null);
+            throw new ExpressionException("To many random elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, numberOfRandomElementsInRoll), expressionPosition);
         }
     }
 

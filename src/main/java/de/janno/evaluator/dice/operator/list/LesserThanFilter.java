@@ -41,6 +41,7 @@ public class LesserThanFilter extends Operator {
                         diceResult,
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

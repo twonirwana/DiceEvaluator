@@ -61,6 +61,7 @@ public class Replace extends Function {
                         rollElements,
                         RandomElementsBuilder.fromRolls(allRolls.build()),
                         childrenRollBuilder.build(),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

@@ -3,8 +3,8 @@ package de.janno.evaluator.dice.random;
 import com.google.common.annotations.VisibleForTesting;
 import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
+import lombok.NonNull;
 
-import org.jetbrains.annotations.Nullable;
 import java.util.random.RandomGenerator;
 
 /**
@@ -22,18 +22,15 @@ public class RandomNumberSupplier implements NumberSupplier {
         randomSource = new Sfc64Random(seed);
     }
 
-    public int get(int minExcl, int maxIncl, @Nullable DieId dieId) throws ExpressionException {
+    public int get(int minExcl, int maxIncl, @NonNull DieId dieId) throws ExpressionException {
         if (minExcl == Integer.MAX_VALUE) {
-            //todo null?
-            throw new ExpressionException("Cannot give a random number for minExcl =%d".formatted(Integer.MAX_VALUE), null);
+            throw new ExpressionException("Cannot give a random number for minExcl =%d".formatted(Integer.MAX_VALUE), dieId.getRollId().getExpressionPosition());
         }
         if (maxIncl == Integer.MAX_VALUE) {
-            //todo null?
-            throw new ExpressionException("Cannot give a random number for maxIncl =%d".formatted(Integer.MAX_VALUE), null);
+            throw new ExpressionException("Cannot give a random number for maxIncl =%d".formatted(Integer.MAX_VALUE), dieId.getRollId().getExpressionPosition());
         }
         if (minExcl >= maxIncl) {
-            //todo null?
-            throw new ExpressionException("Random number between %d (excl) and %d (incl) is not possible".formatted(minExcl, maxIncl), null);
+            throw new ExpressionException("Random number between %d (excl) and %d (incl) is not possible".formatted(minExcl, maxIncl), dieId.getRollId().getExpressionPosition());
         }
         if (minExcl + 1 == maxIncl) {
             return maxIncl;

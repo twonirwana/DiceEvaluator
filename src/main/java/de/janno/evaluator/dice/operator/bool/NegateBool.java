@@ -35,6 +35,7 @@ public class NegateBool extends Operator {
                         diceResult,
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(value),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

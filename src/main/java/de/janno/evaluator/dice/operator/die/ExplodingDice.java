@@ -75,6 +75,7 @@ public final class ExplodingDice extends Operator {
                                 .addRandomElements(roll)
                                 .build(),
                         childrenRolls,
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

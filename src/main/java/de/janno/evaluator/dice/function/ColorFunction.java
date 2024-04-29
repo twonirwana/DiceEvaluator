@@ -40,7 +40,7 @@ public class ColorFunction extends Function {
                                 .map(r -> new RollElement(r.getValue(), color, color))
                                 .collect(ImmutableList.toImmutableList()),
                         builder.build(),
-                        p1.getChildrenRolls(), maxNumberOfElements, keepChildrenRolls)));
+                        p1.getChildrenRolls(), expressionPosition, maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

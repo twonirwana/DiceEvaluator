@@ -37,6 +37,7 @@ public final class NegateAddRemove extends Operator {
                             negated,
                             RandomElementsBuilder.fromRolls(rolls),
                             ImmutableList.of(right),
+                            expressionPosition,
                             maxNumberOfElements, keepChildrenRolls)));
                 }
 
@@ -73,6 +74,7 @@ public final class NegateAddRemove extends Operator {
                         resultBuilder.build(),
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

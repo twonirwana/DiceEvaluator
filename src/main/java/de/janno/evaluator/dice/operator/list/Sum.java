@@ -53,6 +53,7 @@ public class Sum extends Operator {
                         res,
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

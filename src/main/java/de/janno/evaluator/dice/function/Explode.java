@@ -72,6 +72,7 @@ public class Explode extends Function {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         allResultRolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
                         RandomElementsBuilder.fromRolls(allChildrenRollBuilder.build()), allChildrenRollBuilder.build(),
+                        expressionPosition,
                         maxNumberOfElements,
                         keepChildrenRolls)));
             }

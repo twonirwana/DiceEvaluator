@@ -49,6 +49,7 @@ public class RepeatList extends Operator {
                         rolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
                         RandomElementsBuilder.fromRolls(rolls),
                         rolls,
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

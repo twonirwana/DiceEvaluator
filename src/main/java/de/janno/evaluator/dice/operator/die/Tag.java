@@ -38,6 +38,7 @@ public class Tag extends Operator {
                         //tags are not applied to the random elements
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

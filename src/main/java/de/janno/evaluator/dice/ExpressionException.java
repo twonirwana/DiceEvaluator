@@ -1,15 +1,17 @@
 package de.janno.evaluator.dice;
 
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
+import lombok.NonNull;
+
+import javax.annotation.Nullable;
 
 @Getter
 public class ExpressionException extends Exception {
 
-    @Nullable
+    @NonNull
     private final ExpressionPosition expressionPosition;
 
-    public ExpressionException(String message, @Nullable ExpressionPosition expressionPosition) {
+    public ExpressionException(String message, @NonNull ExpressionPosition expressionPosition) {
         super(message);
         this.expressionPosition = expressionPosition;
     }

@@ -46,7 +46,7 @@ public class Double extends Function {
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(toDuplicate.getChildrenRolls())
-                                .build(), maxNumberOfElements, keepChildrenRolls)));
+                                .build(), expressionPosition, maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

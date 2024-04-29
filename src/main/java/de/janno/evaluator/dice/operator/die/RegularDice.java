@@ -86,6 +86,7 @@ public final class RegularDice extends Operator {
                         rollElements,
                         randomElements.build(),
                         childrenRolls,
+                        expressionPosition,
                         maxNumberOfElements,
                         keepChildrenRolls)));
             }

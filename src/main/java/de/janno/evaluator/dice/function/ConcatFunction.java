@@ -30,7 +30,7 @@ public class ConcatFunction extends Function {
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
                         RandomElementsBuilder.fromRolls(rolls),
-                        ImmutableList.copyOf(rolls), maxNumberOfElements, keepChildrenRolls)));
+                        ImmutableList.copyOf(rolls), expressionPosition, maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override

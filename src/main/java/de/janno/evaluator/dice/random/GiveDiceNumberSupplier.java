@@ -5,7 +5,6 @@ import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
 import lombok.NonNull;
 
-import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,11 +24,9 @@ public class GiveDiceNumberSupplier implements NumberSupplier {
     }
 
     @Override
-    public int get(int minExcl, int maxIncl, @Nullable DieId dieId) throws ExpressionException {
-        if (dieId != null) {
-            if (givenDiceNumbers.containsKey(dieId)) {
-                return givenDiceNumbers.remove(dieId);
-            }
+    public int get(int minExcl, int maxIncl, @NonNull DieId dieId) throws ExpressionException {
+        if (givenDiceNumbers.containsKey(dieId)) {
+            return givenDiceNumbers.remove(dieId);
         }
 
         return numberSupplier.get(minExcl, maxIncl, dieId);

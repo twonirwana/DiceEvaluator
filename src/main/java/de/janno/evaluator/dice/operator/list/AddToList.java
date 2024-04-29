@@ -29,6 +29,7 @@ public final class AddToList extends Operator {
                             rolls.getFirst().getElements(),
                             RandomElementsBuilder.fromRolls(rolls),
                             ImmutableList.of(rolls.getFirst()),
+                            expressionPosition,
                             maxNumberOfElements, keepChildrenRolls)));
                 }
 
@@ -42,6 +43,7 @@ public final class AddToList extends Operator {
                         res,
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 

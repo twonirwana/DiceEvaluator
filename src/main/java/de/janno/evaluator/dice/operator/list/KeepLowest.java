@@ -53,6 +53,7 @@ public class KeepLowest extends Operator {
                                 .build(),
                         RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
