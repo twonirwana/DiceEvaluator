@@ -66,7 +66,7 @@ public final class ExplodingDice extends Operator {
                     throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie), expressionPosition);
                 }
 
-                final ImmutableList<RandomElement> roll = explodingDice(numberOfDice, sidesOfDie, numberSupplier, rollId);
+                final ImmutableList<RandomElement> roll = explodingDice(numberOfDice, sidesOfDie, numberSupplier, rollId, maxNumberOfElements, toExpression());
                 final ImmutableList<RollElement> rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),

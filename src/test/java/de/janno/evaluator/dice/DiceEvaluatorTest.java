@@ -996,6 +996,43 @@ public class DiceEvaluatorTest {
     }
 
     @Test
+    void testExplodingDieHeap() {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
+
+        assertThatThrownBy(() -> underTest.evaluate("d!6"))
+                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
+                .hasMessage("To many elements in roll 'd!6', max is 10000 but there where 10001");
+    }
+
+    @Test
+    void testExplodingDiceHeap() {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
+
+        assertThatThrownBy(() -> underTest.evaluate("1000d!6"))
+                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
+                .hasMessage("To many elements in roll '1000d!6', max is 10000 but there where 10001");
+    }
+
+    @Test
+    void testExplodingAddDieHeap() {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
+
+        assertThatThrownBy(() -> underTest.evaluate("d!!6"))
+                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
+                .hasMessage("To many elements in roll 'd!!6', max is 10000 but there where 10001");
+    }
+
+    @Test
+    void testExplodingAddDiceHeap() {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
+
+        assertThatThrownBy(() -> underTest.evaluate("1000d!!6"))
+                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
+                .hasMessage("To many elements in roll '1000d!!6', max is 10000 but there where 10001");
+    }
+
+
+    @Test
     void testExplodingAddDieMaxHeap() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10_000, true);
 
