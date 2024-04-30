@@ -1,5 +1,6 @@
 package de.janno.evaluator.dice.random;
 
+import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +12,7 @@ import static org.assertj.core.api.Assertions.offset;
 
 class RandomNumberSupplierTest {
 
+    private static final DieId TEST_DIE_ID = DieId.of(0, "d", 0, 0, 0);
 
     @Test
     void d6Test() throws ExpressionException {
@@ -19,7 +21,7 @@ class RandomNumberSupplierTest {
         List<Integer> res = new ArrayList<>(testSize);
 
         for (int i = 0; i < testSize; i++) {
-            res.add(underTest.get(0, 6, null));
+            res.add(underTest.get(0, 6, TEST_DIE_ID));
         }
 
         assertThat(res).allMatch(i -> i >= 1 && i <= 6);
@@ -34,7 +36,7 @@ class RandomNumberSupplierTest {
         List<Integer> res = new ArrayList<>(testSize);
 
         for (int i = 0; i < testSize; i++) {
-            res.add(underTest.get(9, 100, null));
+            res.add(underTest.get(9, 100, TEST_DIE_ID));
         }
 
         assertThat(res).allMatch(i -> i >= 10 && i <= 100);
@@ -49,7 +51,7 @@ class RandomNumberSupplierTest {
         List<Integer> res = new ArrayList<>(testSize);
 
         for (int i = 0; i < testSize; i++) {
-            res.add(underTest.get(-4, 3, null));
+            res.add(underTest.get(-4, 3, TEST_DIE_ID));
         }
 
         assertThat(res).allMatch(i -> i >= -3 && i <= 3);
@@ -64,7 +66,7 @@ class RandomNumberSupplierTest {
         List<Integer> res = new ArrayList<>(testSize);
 
         for (int i = 0; i < testSize; i++) {
-            res.add(underTest.get(-7, -1, null));
+            res.add(underTest.get(-7, -1, TEST_DIE_ID));
         }
 
         assertThat(res).allMatch(i -> i >= -6 && i <= -1);

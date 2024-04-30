@@ -1,8 +1,10 @@
 package de.janno.evaluator.dice;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
@@ -12,7 +14,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
-@ToString
 @EqualsAndHashCode
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class Roll {
@@ -104,27 +105,17 @@ public class Roll {
         return elements.stream().map(RollElement::toString).collect(Collectors.joining(", "));
     }
 
-    public String getResultStringWithTagAndColor(){
+    public String getResultStringWithTagAndColor() {
         return elements.stream().map(RollElement::toStringWithColorAndTag).collect(Collectors.joining(", "));
     }
 
-    @VisibleForTesting
-    //todo remove
-    public String getRandomElementsString() {
-        return randomElementsInRoll.stream()
-                .map(l -> l.stream()
-                        .map(RandomElement::getRollElement)
-                        .map(RollElement::getValue)
-                        .toList())
-                .map(List::toString)
-                .collect(Collectors.joining(" "));
-    }
-
-    @VisibleForTesting
-    public String getRandomElementsDetailsString() {
-        return randomElementsInRoll.stream()
-                .flatMap(Collection::stream)
-                .toList().toString();
+    @Override
+    public String toString() {
+        return "Roll{" +
+                "expression='" + expression + '\'' +
+                ", randomElementsInRoll=" + randomElementsInRoll +
+                ", elements=" + elements +
+                '}';
     }
 
     public boolean equalForValueAndTag(Roll other) {
