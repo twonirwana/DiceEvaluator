@@ -68,23 +68,38 @@ public class Tokenizer {
         return "(?i)\\Q%s\\E(?-i)".formatted(in);
     }
 
+    private static int countLeadingWhitespaces(String input) {
+        int spaceCount = 0;
+        for (char c : input.toCharArray()) {
+            if (c == ' ') {
+                spaceCount++;
+            } else {
+                break;
+            }
+        }
+        return spaceCount;
+    }
+
     public List<Token> tokenize(final String input) throws ExpressionException {
         List<Token> preTokens = new ArrayList<>();
         String current = input.trim();
+        //input it trimmed and has never leading spaces
+        int currentPositionWithSpace = 0;
         Optional<Token> currentMatch;
-        int currentPosition = 0;
         do {
-            currentMatch = getBestMatch(current, currentPosition);
+            currentMatch = getBestMatch(current, currentPositionWithSpace);
             if (currentMatch.isPresent()) {
                 Token token = currentMatch.get();
                 preTokens.add(token);
                 int matchLength = token.getExpressionPosition().getValue().length();
-                current = current.substring(matchLength).trim();
-                currentPosition += matchLength;
+                currentPositionWithSpace += matchLength;
+                String substringWithSpace = current.substring(matchLength);
+                currentPositionWithSpace += countLeadingWhitespaces(substringWithSpace);
+                current = substringWithSpace.trim();
             }
         } while (currentMatch.isPresent());
         if (!current.isEmpty()) {
-            throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(current, escapeCharacter), ExpressionPosition.of(currentPosition, current));
+            throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(current, escapeCharacter), ExpressionPosition.of(currentPositionWithSpace, current));
         }
 
         return setOperatorType(preTokens);

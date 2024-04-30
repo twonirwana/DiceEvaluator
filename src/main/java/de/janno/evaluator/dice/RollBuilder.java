@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RollBuilder {
-    static List<Roll> extendAllBuilder(@NonNull List<RollBuilder> rollBuilders, @NonNull RollContext rollContext) throws ExpressionException {
+    static ImmutableList<Roll> extendAllBuilder(@NonNull List<RollBuilder> rollBuilders, @NonNull RollContext rollContext) throws ExpressionException {
         ImmutableList.Builder<Roll> builder = ImmutableList.builder();
         for (RollBuilder rs : rollBuilders) {
             extendRollBuilder(rollContext, rs, builder);

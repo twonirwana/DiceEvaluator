@@ -131,10 +131,10 @@ public class DiceEvaluator {
                 (currentToken.getOperatorPrecedence().orElseThrow() < stackToken.getOperatorPrecedence().orElseThrow()));
     }
 
-    private Roller createRollSupplier(List<RollBuilder> rollBuilders) {
+    private Roller createRollSupplier(String expression, List<RollBuilder> rollBuilders) {
         return () -> {
             RollContext rollContext = new RollContext();
-            List<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, rollContext);
+            ImmutableList<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, rollContext);
             Optional<String> expressionPrefix = rollContext.getExpressionPrefixString();
             if (expressionPrefix.isPresent()) {
                 //we need to add the val expression in front of the expression
@@ -151,7 +151,7 @@ public class DiceEvaluator {
                 }
                 rolls = rollBuilder.build();
             }
-            return rolls;
+            return new RollResult(expression, rolls);
         };
     }
 
@@ -248,10 +248,10 @@ public class DiceEvaluator {
      * Evaluates an expression.
      *
      * @param expression The expression to evaluate
-     * @return The result of the evaluation. This can be multiple values, if the expression can't be reduced to a single value.
+     * @return The result of the evaluation.
      * @throws ExpressionException if the expression is not correct.
      */
-    public List<Roll> evaluate(String expression) throws ExpressionException {
+    public RollResult evaluate(String expression) throws ExpressionException {
         return buildRollSupplier(expression).roll();
     }
 
@@ -259,14 +259,19 @@ public class DiceEvaluator {
      * Create a roller for an expression. The roller is the expression as function can be used again to roll the expression
      * again. Each execution of the roller will generate new random elements.
      *
-     * @param expression The expression to evaluate
+     * @param inputExpression The expression to evaluate
      * @return A roller that executes the expression
      * @throws ExpressionException if the expression is not correct.
      */
-    public Roller buildRollSupplier(String expression) throws ExpressionException {
-        expression = expression.trim();
+    public Roller buildRollSupplier(final String inputExpression) throws ExpressionException {
+        final String expression = inputExpression.trim();
         if (Strings.isNullOrEmpty(expression)) {
-            return ImmutableList::of;
+            return new Roller() {
+                @Override
+                public @NonNull RollResult roll() {
+                    return new RollResult(expression, ImmutableList.of());
+                }
+            };
         }
 
         final List<Token> tokens = tokenizer.tokenize(expression);
@@ -404,6 +409,6 @@ public class DiceEvaluator {
             }
             processTokenToValues(values, stackToken);
         }
-        return createRollSupplier(reverse(values));
+        return createRollSupplier(expression, reverse(values));
     }
 }
