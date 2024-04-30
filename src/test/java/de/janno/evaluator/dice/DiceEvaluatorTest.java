@@ -776,8 +776,10 @@ public class DiceEvaluatorTest {
             s.assertThat(result).isEqualTo(expectedResult);
             s.assertThat(randomElements).isEqualTo(expectedRandomElements);
 
-            //todo maybe activate, problem with val and x
-            //s.assertThat(res.getFirst().getExpression().replace(" ", "")).isEqualTo(diceExpression.replace(" ", ""));
+            //x will not be part of the result expression
+            if (!diceExpression.contains("x")) {
+                s.assertThat(res.getFirst().getExpression().replace(" ", "")).isEqualTo(diceExpression.replace(" ", ""));
+            }
         });
     }
 
@@ -976,22 +978,6 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate(diceExpression);
 
         assertThat(res.stream().flatMap(r -> r.getElements().stream()).flatMap(e -> e.asInteger().stream())).containsExactlyElementsOf(expected);
-
-
-        if (res.size() == 1) {
-            String givenExpression = diceExpression.replace(" ", "");
-            String resExpression = res.getFirst().getExpression().replace(" ", "");
-            /*
-            todo overwriting val removes from the expression
-            if (resExpression.contains("val")) {
-                //val is added with a `,` to the expression and not with a ` `
-                resExpression = Pattern.compile("(.*)val\\((.*)\\),(.*)").matcher(resExpression).replaceAll("$1val($2)$3");
-                givenExpression = Pattern.compile("(.*)val\\((.*)\\),(.*)").matcher(givenExpression).replaceAll("$1val($2)$3");
-            }*/
-            if (!resExpression.contains("val")) {
-                assertThat(resExpression).isEqualTo(givenExpression);
-            }
-        }
     }
 
     @Test

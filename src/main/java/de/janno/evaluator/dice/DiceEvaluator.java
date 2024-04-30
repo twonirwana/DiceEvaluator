@@ -135,13 +135,19 @@ public class DiceEvaluator {
         return () -> {
             RollContext rollContext = new RollContext();
             List<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, rollContext);
-            if (!rollContext.getVariables().isEmpty()) {
-                //todo why not do it on val? or usage of val?
+            Optional<String> expressionPrefix = rollContext.getExpressionPrefixString();
+            if (expressionPrefix.isPresent()) {
                 //we need to add the val expression in front of the expression
-                String variableString = rollContext.getVariables().values().stream().map(Roll::getExpression).collect(Collectors.joining(", "));
                 ImmutableList.Builder<Roll> rollBuilder = ImmutableList.builder();
                 for (Roll r : rolls) {
-                    rollBuilder.add(new Roll("%s, %s".formatted(variableString, r.getExpression()), r.getElements(), r.getRandomElementsInRoll(), r.getChildrenRolls(), r.getExpressionPosition(), maxNumberOfElements, keepChildrenRolls));
+                    String newExpressionString = "%s, %s".formatted(expressionPrefix.get(), r.getExpression());
+                    rollBuilder.add(new Roll(newExpressionString,
+                            r.getElements(),
+                            r.getRandomElementsInRoll(),
+                            r.getChildrenRolls(),
+                            r.getExpressionPosition(),
+                            maxNumberOfElements,
+                            keepChildrenRolls));
                 }
                 rolls = rollBuilder.build();
             }
@@ -172,8 +178,9 @@ public class DiceEvaluator {
         return new RollBuilder() {
             @Override
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
-                if (rollContext.getVariables().containsKey(literal)) {
-                    Roll variableValue = rollContext.getVariables().get(literal);
+                Optional<Roll> variableRoll = rollContext.getVariable(literal);
+                if (variableRoll.isPresent()) {
+                    Roll variableValue = variableRoll.get();
                     //set the input as expression
                     Roll replacedValue = new Roll(toExpression(), variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls(), expressionPosition, maxNumberOfElements, keepChildrenRolls);
                     return Optional.of(ImmutableList.of(replacedValue));

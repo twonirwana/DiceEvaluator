@@ -39,7 +39,7 @@ public class Value extends Function {
                 String valName = rolls.getFirst().getElements().getFirst().getValue();
 
                 String expression = toExpression();
-                rollContext.getVariables().put(valName, new Roll(expression,
+                rollContext.putVariable(valName, new Roll(expression,
                         rolls.get(1).getElements(),
                         RandomElementsBuilder.fromRolls(rolls),
                         rolls.get(1).getChildrenRolls(),
