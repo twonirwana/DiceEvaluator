@@ -30,8 +30,13 @@ public final class Modulo extends Operator {
                 checkAllElementsAreSameTag(expressionPosition, left, right);
                 final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, left, "left"));
                 final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, right, "right"));
-
-                final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(leftNumber % rightNumber), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
+                final int calculationResult;
+                try {
+                    calculationResult = leftNumber % rightNumber;
+                } catch (ArithmeticException e) {
+                    throw new ExpressionException(e.getMessage(), expressionPosition);
+                }
+                final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(calculationResult), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
                         RandomElementsBuilder.fromRolls(rolls),

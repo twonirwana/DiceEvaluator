@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.offset;
+import static org.assertj.core.api.Assertions.*;
 
 class RandomNumberSupplierTest {
 
@@ -72,5 +71,39 @@ class RandomNumberSupplierTest {
         assertThat(res).allMatch(i -> i >= -6 && i <= -1);
         assertThat(res).containsOnly(-1, -2, -3, -4, -5, -6);
         assertThat(res.stream().mapToInt(i -> i).average().orElseThrow()).isEqualTo(-3.5, offset(0.01));
+    }
+
+    @Test
+    void maxMinTest() {
+        RandomNumberSupplier underTest = new RandomNumberSupplier();
+
+        assertThatThrownBy(() -> underTest.get(Integer.MAX_VALUE, Integer.MAX_VALUE, DieId.of(1, "d", 0, 2, 0)))
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("Cannot give a random number for minExcl =2147483647");
+    }
+
+    @Test
+    void maxMaxTest() {
+        RandomNumberSupplier underTest = new RandomNumberSupplier();
+
+        assertThatThrownBy(() -> underTest.get(0, Integer.MAX_VALUE, DieId.of(1, "d", 0, 2, 0)))
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("Cannot give a random number for maxIncl =2147483647");
+    }
+
+    @Test
+    void equalTest() {
+        RandomNumberSupplier underTest = new RandomNumberSupplier();
+
+        assertThatThrownBy(() -> underTest.get(0, 0, DieId.of(1, "d", 0, 2, 0)))
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("Random number between 0 (excl) and 0 (incl) is not possible");
+    }
+
+    @Test
+    void notRandom() throws ExpressionException {
+        RandomNumberSupplier underTest = new RandomNumberSupplier();
+
+        assertThat(underTest.get(0, 1, DieId.of(1, "d", 0, 2, 0))).isEqualTo(1);
     }
 }

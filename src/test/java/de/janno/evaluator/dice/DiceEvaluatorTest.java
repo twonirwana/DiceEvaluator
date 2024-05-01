@@ -951,8 +951,9 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10, false);
 
         assertThatThrownBy(() -> underTest.evaluate("10d10 + 5"))
-                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
-                .hasMessage("To many elements in roll '10d10+5', max is 10 but there where 11");
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("To many elements in roll '10d10+5', max is 10 but there where 11")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(6, "+"));
     }
 
     @Test
@@ -960,8 +961,9 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(), 1000, 10, false);
 
         assertThatThrownBy(() -> underTest.evaluate("(6d6k1)+(6d6k1)"))
-                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
-                .hasMessage("To many random elements in roll '(6d6k1)+(6d6k1)', max is 10 but there where 12");
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("To many random elements in roll '(6d6k1)+(6d6k1)', max is 10 but there where 12")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(7, "+"));
     }
 
     private long getNumberOfChildrenRolls(Roll roll) {
@@ -1000,8 +1002,10 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
 
         assertThatThrownBy(() -> underTest.evaluate("d!6"))
-                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
-                .hasMessage("To many elements in roll 'd!6', max is 10000 but there where 10001");
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("To many elements in roll 'd!6', max is 10000 but there where 10001")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(0, "d!"));
+
     }
 
     @Test
@@ -1009,8 +1013,10 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
 
         assertThatThrownBy(() -> underTest.evaluate("1000d!6"))
-                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
-                .hasMessage("To many elements in roll '1000d!6', max is 10000 but there where 10001");
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("To many elements in roll '1000d!6', max is 10000 but there where 10001")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(4, "d!"));
+
     }
 
     @Test
@@ -1018,8 +1024,10 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
 
         assertThatThrownBy(() -> underTest.evaluate("d!!6"))
-                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
-                .hasMessage("To many elements in roll 'd!!6', max is 10000 but there where 10001");
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("To many elements in roll 'd!!6', max is 10000 but there where 10001")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(0, "d!!"));
+
     }
 
     @Test
@@ -1027,8 +1035,10 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
 
         assertThatThrownBy(() -> underTest.evaluate("1000d!!6"))
-                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
-                .hasMessage("To many elements in roll '1000d!!6', max is 10000 but there where 10001");
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("To many elements in roll '1000d!!6', max is 10000 but there where 10001")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(4, "d!!"));
+
     }
 
 
@@ -1138,7 +1148,9 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate("2d6 / 3"))
                 .isInstanceOf(ExpressionException.class)
-                .hasMessage("'/' requires as left input a single integer but was '[4, 1]'. Try to sum the numbers together like (2d6=)");
+                .hasMessage("'/' requires as left input a single integer but was '[4, 1]'. Try to sum the numbers together like (2d6=)")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(4, "/"));
+
     }
 
     @Test
@@ -1146,15 +1158,18 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(4, 1), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate("2d6 // 3"))
                 .isInstanceOf(ExpressionException.class)
-                .hasMessage("'//' requires as left input a single decimal but was '[4, 1]'. Try to sum the numbers together like (2d6=)");
+                .hasMessage("'//' requires as left input a single decimal but was '[4, 1]'. Try to sum the numbers together like (2d6=)")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(4, "//"));
+
     }
 
     @Test
     void divisorZero() {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate("10 / 0"))
-                .isInstanceOf(ArithmeticException.class)
-                .hasMessage("/ by zero");
+                .isInstanceOf(ExpressionException.class)
+                .hasMessage("/ by zero")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(3, "/"));
     }
 
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
@@ -1585,7 +1600,8 @@ public class DiceEvaluatorTest {
 
         assertThatThrownBy(() -> underTest.evaluate("1001d6"))
                 .isInstanceOf(ExpressionException.class)
-                .hasMessage("The number of dice must be less or equal then 1000 but was 1001");
+                .hasMessage("The number of dice must be less or equal then 1000 but was 1001")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(4, "d"));
     }
 
     @Test
@@ -1593,7 +1609,9 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate("-1001d6"))
                 .isInstanceOf(ExpressionException.class)
-                .hasMessage("The number of dice must be less or equal then 1000 but was 1001");
+                .hasMessage("The number of dice must be less or equal then 1000 but was 1001")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(5, "d"));
+
     }
 
     @ParameterizedTest(name = "{index} {0} -> {1}")
@@ -1601,7 +1619,7 @@ public class DiceEvaluatorTest {
     void testError(String input, String expectedMessage) {
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate(input))
-                .isInstanceOfAny(ExpressionException.class, ArithmeticException.class)
+                .isInstanceOfAny(ExpressionException.class)
                 .hasMessage(expectedMessage);
     }
 
