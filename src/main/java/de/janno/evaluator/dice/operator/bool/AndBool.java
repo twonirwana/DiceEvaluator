@@ -5,7 +5,6 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -20,31 +19,32 @@ public class AndBool extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
 
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 2, 2);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition, rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                final boolean leftBoolValue = left.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, left, "left"));
-                final boolean rightBoolValue = right.asBoolean().orElseThrow(() -> throwNotBoolean(inputValue, right, "right"));
+                final boolean leftBoolValue = left.asBoolean().orElseThrow(() ->  throwNotBoolean(expressionPosition, left, "left"));
+                final boolean rightBoolValue = right.asBoolean().orElseThrow(() ->  throwNotBoolean(expressionPosition, right, "right"));
 
 
                 ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf((leftBoolValue && rightBoolValue)), RollElement.NO_TAG, RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(getName(), operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

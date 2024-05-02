@@ -1,16 +1,16 @@
 package de.janno.evaluator.dice;
 
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
 
 import java.util.Optional;
 
-@EqualsAndHashCode
 public class Token {
+    @Getter
+    @NonNull
+    private final ExpressionPosition expressionPosition;
     @NonNull
     private final Kind kind;
-    @NonNull
-    private final String inputValue;
     private final Operator operator;
     private final Function function;
     private final String literal;
@@ -19,9 +19,9 @@ public class Token {
     private final Operator.OperatorType operatorType;
 
 
-    private Token(@NonNull Kind kind, @NonNull String inputValue, Operator operator, Function function, String literal, Operator.OperatorType operatorType, BracketPair bracketPair) {
+    private Token(@NonNull Kind kind, @NonNull ExpressionPosition expressionPosition, Operator operator, Function function, String literal, Operator.OperatorType operatorType, BracketPair bracketPair) {
         this.kind = kind;
-        this.inputValue = inputValue;
+        this.expressionPosition = expressionPosition;
         this.operator = operator;
         this.function = function;
         this.literal = literal;
@@ -29,46 +29,46 @@ public class Token {
         this.bracketPair = bracketPair;
     }
 
-    public static Token addOpenBracket(Token token, String brackets) {
-        return new Token(token.kind, brackets + token.getInputValue(), token.operator, token.function, token.literal, token.operatorType, token.bracketPair);
+    public static Token addOpenBracket(@NonNull Token token, @NonNull String brackets) {
+        return new Token(token.kind, token.expressionPosition.extendLeft(brackets), token.operator, token.function, token.literal, token.operatorType, token.bracketPair);
     }
 
-    public static Token addCloseBracket(Token token, String brackets) {
-        return new Token(token.kind, token.getInputValue() + brackets, token.operator, token.function, token.literal, token.operatorType, token.bracketPair);
+    public static Token addCloseBracket(@NonNull Token token, @NonNull String brackets) {
+        return new Token(token.kind, token.expressionPosition.extendRight(brackets), token.operator, token.function, token.literal, token.operatorType, token.bracketPair);
     }
 
-    public static Token of(Operator operator, String inputValue) {
-        return new Token(Kind.OPERATOR, inputValue, operator, null, null, null, null);
+    public static Token of(@NonNull Operator operator, @NonNull ExpressionPosition expressionPosition) {
+        return new Token(Kind.OPERATOR, expressionPosition, operator, null, null, null, null);
     }
 
-    public static Token of(Operator operator, Operator.OperatorType operatorType, String inputValue) {
+    public static Token of(@NonNull Operator operator, @NonNull Operator.OperatorType operatorType, @NonNull ExpressionPosition expressionPosition) {
         if (operatorType == Operator.OperatorType.UNARY && !operator.supportUnaryOperation()) {
             throw new IllegalArgumentException(operator + "only supports binary operation");
         }
         if (operatorType == Operator.OperatorType.BINARY && !operator.supportBinaryOperation()) {
             throw new IllegalArgumentException(operator + "only supports unary operation");
         }
-        return new Token(Kind.OPERATOR, inputValue, operator, null, null, operatorType, null);
+        return new Token(Kind.OPERATOR, expressionPosition, operator, null, null, operatorType, null);
     }
 
-    public static Token of(Function function, String inputValue) {
-        return new Token(Kind.FUNCTION, inputValue, null, function, null, null, null);
+    public static Token of(@NonNull Function function, @NonNull ExpressionPosition expressionPosition) {
+        return new Token(Kind.FUNCTION, expressionPosition, null, function, null, null, null);
     }
 
-    public static Token of(String literal, String inputValue) {
-        return new Token(Kind.LITERAL, inputValue, null, null, literal, null, null);
+    public static Token of(@NonNull String literal, @NonNull ExpressionPosition expressionPosition) {
+        return new Token(Kind.LITERAL, expressionPosition, null, null, literal, null, null);
     }
 
-    public static Token openTokenOf(BracketPair bracketPair, String inputValue) {
-        return new Token(Kind.OPEN_BRACKET, inputValue, null, null, null, null, bracketPair);
+    public static Token openTokenOf(@NonNull BracketPair bracketPair, @NonNull ExpressionPosition expressionPosition) {
+        return new Token(Kind.OPEN_BRACKET, expressionPosition, null, null, null, null, bracketPair);
     }
 
-    public static Token closeTokenOf(BracketPair bracketPair, String inputValue) {
-        return new Token(Kind.CLOSE_BRACKET, inputValue, null, null, null, null, bracketPair);
+    public static Token closeTokenOf(@NonNull BracketPair bracketPair, @NonNull ExpressionPosition expressionPosition) {
+        return new Token(Kind.CLOSE_BRACKET, expressionPosition, null, null, null, null, bracketPair);
     }
 
-    public static Token separator(String inputValue) {
-        return new Token(Kind.SEPARATOR, inputValue, null, null, null, null, null);
+    public static Token separator(@NonNull ExpressionPosition expressionPosition) {
+        return new Token(Kind.SEPARATOR, expressionPosition, null, null, null, null, null);
     }
 
     public Optional<BracketPair> getBrackets() {
@@ -109,10 +109,6 @@ public class Token {
 
     public Optional<Integer> getOperatorPrecedence() {
         return getOperator().map(o -> o.getPrecedenceForOperantType(operatorType));
-    }
-
-    public @NonNull String getInputValue() {
-        return inputValue;
     }
 
     @Override

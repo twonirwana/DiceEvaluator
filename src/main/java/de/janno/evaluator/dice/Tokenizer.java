@@ -2,8 +2,8 @@ package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,18 +29,18 @@ public class Tokenizer {
         Stream.concat(parameters.getExpressionBrackets().stream(), parameters.getFunctionBrackets().stream())
                 .distinct() //expression and function brackets are allowed to contain the same elements
                 .forEach(c -> {
-                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getOpen()), s -> Token.openTokenOf(c, s), false));
-                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getClose()), s -> Token.closeTokenOf(c, s), false));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getOpen()), expressionPosition -> Token.openTokenOf(c, expressionPosition), false));
+                    builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(c.getClose()), expressionPosition -> Token.closeTokenOf(c, expressionPosition), false));
                 });
-        parameters.getFunctions().forEach(function -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(function.getName()), s -> Token.of(function, s), false)));
-        parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), s -> Token.of(operator, s), false)));
+        parameters.getFunctions().forEach(function -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(function.getName()), expressionPosition -> Token.of(function, expressionPosition), false)));
+        parameters.getOperators().forEach(operator -> builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(operator.getName()), expressionPosition -> Token.of(operator, expressionPosition), false)));
         builder.add(new TokenBuilder(escapeForRegexAndAddCaseInsensitivity(parameters.getSeparator()), Token::separator, false));
-        parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), s -> Token.of(s.substring(1, s.length() - 1), s), true)));
-        builder.add(new TokenBuilder(ALL_NUMBER_REGEX, s -> {
-            if (SMALL_INTEGER_PATTERN.matcher(s).matches() || SMALL_DECIMAL_PATTERN.matcher(s).matches()) {
-                return Token.of(s, s);
+        parameters.getEscapeBrackets().forEach(b -> builder.add(new TokenBuilder(buildEscapeBracketsRegex(b), expressionPosition -> Token.of(expressionPosition.getValue().substring(1, expressionPosition.getValue().length() - 1), expressionPosition), true)));
+        builder.add(new TokenBuilder(ALL_NUMBER_REGEX, expressionPosition -> {
+            if (SMALL_INTEGER_PATTERN.matcher(expressionPosition.getValue()).matches() || SMALL_DECIMAL_PATTERN.matcher(expressionPosition.getValue()).matches()) {
+                return Token.of(expressionPosition.getValue(), expressionPosition);
             }
-            throw new ExpressionException("The number '%s' is too big".formatted(s));
+            throw new ExpressionException("The number '%s' is too big".formatted(expressionPosition.getValue()), expressionPosition);
         }, false));
         tokenBuilders = builder.build();
 
@@ -68,21 +68,38 @@ public class Tokenizer {
         return "(?i)\\Q%s\\E(?-i)".formatted(in);
     }
 
+    private static int countLeadingWhitespaces(String input) {
+        int spaceCount = 0;
+        for (char c : input.toCharArray()) {
+            if (c == ' ') {
+                spaceCount++;
+            } else {
+                break;
+            }
+        }
+        return spaceCount;
+    }
+
     public List<Token> tokenize(final String input) throws ExpressionException {
         List<Token> preTokens = new ArrayList<>();
         String current = input.trim();
-        Optional<Match> currentMatch;
+        //input it trimmed and has never leading spaces
+        int currentPositionWithSpace = 0;
+        Optional<Token> currentMatch;
         do {
-            currentMatch = getBestMatch(current);
+            currentMatch = getBestMatch(current, currentPositionWithSpace);
             if (currentMatch.isPresent()) {
-                Match match = currentMatch.get();
-                Token token = match.token();
+                Token token = currentMatch.get();
                 preTokens.add(token);
-                current = current.substring(match.match().length()).trim();
+                int matchLength = token.getExpressionPosition().getValue().length();
+                currentPositionWithSpace += matchLength;
+                String substringWithSpace = current.substring(matchLength);
+                currentPositionWithSpace += countLeadingWhitespaces(substringWithSpace);
+                current = substringWithSpace.trim();
             }
         } while (currentMatch.isPresent());
         if (!current.isEmpty()) {
-            throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(current, escapeCharacter));
+            throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(current, escapeCharacter), ExpressionPosition.of(currentPositionWithSpace, current));
         }
 
         return setOperatorType(preTokens);
@@ -104,8 +121,8 @@ public class Tokenizer {
             if (token.getOperator().isPresent()) {
                 Token left = i == 0 ? null : in.get(i - 1);
                 Token right = i == in.size() - 1 ? null : in.get(i + 1);
-                Operator.OperatorType type = determineAndValidateOperatorType(token.getOperator().get(), left, right, lastOperatorWasUnaryLeft);
-                builder.add(Token.of(token.getOperator().get(), type, token.getInputValue()));
+                Operator.OperatorType type = determineAndValidateOperatorType(token, left, right, lastOperatorWasUnaryLeft);
+                builder.add(Token.of(token.getOperator().get(), type, token.getExpressionPosition()));
                 lastOperatorWasUnaryLeft = type == Operator.OperatorType.UNARY && token.getOperator().get().getAssociativityForOperantType(Operator.OperatorType.UNARY) == Operator.Associativity.LEFT;
             } else {
                 builder.add(token);
@@ -149,8 +166,11 @@ public class Tokenizer {
         return Optional.of(brackets.toString());
     }
 
-    private Operator.OperatorType determineAndValidateOperatorType(@NonNull Operator operator, @Nullable Token left, @Nullable Token right, boolean lastOperatorWasUnaryLeft) throws ExpressionException {
+    private Operator.OperatorType determineAndValidateOperatorType(@NonNull Token token, @Nullable Token left, @Nullable Token right, boolean lastOperatorWasUnaryLeft) throws ExpressionException {
         //todo cleanup
+
+        //has operator is already checked
+        Operator operator = token.getOperator().orElseThrow();
         boolean leftLiteralOrBracket = left != null && (left.getLiteral().isPresent() || left.isCloseBracket() || (left.getOperator().isPresent() && lastOperatorWasUnaryLeft));
         boolean rightLiteralOrBracket = right != null && (right.getLiteral().isPresent() || right.isOpenBracket() ||
                 (right.getOperator().isPresent() && right.getOperator().get().getAssociativityForOperantType(Operator.OperatorType.UNARY) == Operator.Associativity.RIGHT)
@@ -158,57 +178,59 @@ public class Tokenizer {
 
         if (leftLiteralOrBracket && rightLiteralOrBracket) {
             if (!operator.supportBinaryOperation()) {
-                throw new ExpressionException("Operator %s does not support binary operations".formatted(operator.getName()));
+                throw new ExpressionException("Operator %s does not support binary operations".formatted(operator.getName()), token.getExpressionPosition());
             }
             return Operator.OperatorType.BINARY;
         }
         if (!operator.supportUnaryOperation()) {
-            throw new ExpressionException("Operator %s does not support unary operations".formatted(operator.getName()));
+            throw new ExpressionException("Operator %s does not support unary operations".formatted(operator.getName()), token.getExpressionPosition());
         }
         Operator.Associativity operatorAssociativity = operator.getAssociativityForOperantType(Operator.OperatorType.UNARY);
         if (operatorAssociativity == Operator.Associativity.LEFT && !leftLiteralOrBracket) {
-            throw new ExpressionException("Operator %s has left associativity but the left value was: %s".formatted(operator.getName(), Optional.ofNullable(left).map(Object::toString).orElse("empty")));
+            throw new ExpressionException("Operator %s has left associativity but the left value was: %s".formatted(operator.getName(), Optional.ofNullable(left).map(Object::toString).orElse("empty")), token.getExpressionPosition());
         }
         if (operatorAssociativity == Operator.Associativity.RIGHT && !rightLiteralOrBracket) {
-            throw new ExpressionException("Operator %s has right associativity but the right value was: %s".formatted(operator.getName(), Optional.ofNullable(right).map(Object::toString).orElse("empty")));
+            throw new ExpressionException("Operator %s has right associativity but the right value was: %s".formatted(operator.getName(), Optional.ofNullable(right).map(Object::toString).orElse("empty")), token.getExpressionPosition());
         }
 
         return Operator.OperatorType.UNARY;
     }
 
-    private Optional<Match> getBestMatch(String input) throws ExpressionException {
-        List<Match> allMatches = getAllMatches(input);
+    private Optional<Token> getBestMatch(String input, int position) throws ExpressionException {
+        List<Token> allMatches = getAllMatches(input, position);
         int maxLength = allMatches.stream()
-                .mapToInt(Match::length)
+                .map(Token::getExpressionPosition)
+                .map(ExpressionPosition::getValue)
+                .mapToInt(String::length)
                 .max()
                 .orElse(0);
-        List<Match> maxLengthMatches = allMatches.stream()
-                .filter(m -> m.length() == maxLength)
+        List<Token> maxLengthMatches = allMatches.stream()
+                .filter(m -> m.getExpressionPosition().getValue().length() == maxLength)
                 .toList();
         if (maxLengthMatches.isEmpty()) {
             return Optional.empty();
         }
         if (maxLengthMatches.size() > 1) {
-            throw new IllegalStateException("More then one operator matched the input %s: %s".formatted(input, maxLengthMatches.stream().map(Match::token).map(Token::toString).toList()));
+            throw new IllegalStateException("More then one operator matched the input %s: %s".formatted(input, maxLengthMatches.stream().map(Token::toString).toList()));
         }
 
         return Optional.of(maxLengthMatches.getFirst());
     }
 
-    private List<Match> getAllMatches(String input) throws ExpressionException {
-        ImmutableList.Builder<Match> matchBuilder = ImmutableList.builder();
+    private List<Token> getAllMatches(String input, int position) throws ExpressionException {
+        ImmutableList.Builder<Token> matchBuilder = ImmutableList.builder();
         for (Tokenizer.TokenBuilder tokenBuilder : tokenBuilders) {
-            Optional<Match> firstMatch = getFirstMatch(input, tokenBuilder);
+            Optional<Token> firstMatch = getFirstMatch(input, tokenBuilder, position);
             firstMatch.ifPresent(matchBuilder::add);
         }
         return matchBuilder.build();
     }
 
-    private Optional<Match> getFirstMatch(String input, TokenBuilder tokenBuilder) throws ExpressionException {
+    private Optional<Token> getFirstMatch(String input, TokenBuilder tokenBuilder, int position) throws ExpressionException {
         Matcher matcher = tokenBuilder.pattern().matcher(input);
         if (matcher.find()) {
             String matchGroup = matcher.group().trim();
-            return Optional.of(new Match(matcher.start(), matchGroup, tokenBuilder.toToken().apply(matchGroup)));
+            return Optional.of(tokenBuilder.toToken().apply(ExpressionPosition.of(position, matchGroup)));
         }
         return Optional.empty();
     }
@@ -218,13 +240,7 @@ public class Tokenizer {
     }
 
     private interface ToToken {
-        Token apply(String in) throws ExpressionException;
-    }
-
-    private record Match(int start, String match, Token token) {
-        public int length() {
-            return match.length();
-        }
+        Token apply(ExpressionPosition expressionPosition) throws ExpressionException;
     }
 
     private record TokenBuilder(String regex, ToToken toToken, boolean multiLine) {

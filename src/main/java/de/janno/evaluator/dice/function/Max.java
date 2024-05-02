@@ -5,7 +5,6 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -17,12 +16,12 @@ public class Max extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(arguments, variables);
-                checkRollSize(inputValue, rolls, getMinArgumentCount(), getMaxArgumentCount());
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(arguments, rollContext);
+                checkRollSize(expressionPosition, rolls, getMinArgumentCount(), getMaxArgumentCount());
 
                 final RollElement max = rolls.stream()
                         .flatMap(result -> result.getElements().stream())
@@ -34,14 +33,15 @@ public class Max extends Function {
                         .collect(ImmutableList.toImmutableList());
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.copyOf(rolls),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(inputValue, arguments);
+                return getExpression(expressionPosition, arguments);
             }
         };
 

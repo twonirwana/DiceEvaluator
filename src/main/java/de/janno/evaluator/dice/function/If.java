@@ -6,9 +6,7 @@ import lombok.NonNull;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotBoolean;
@@ -19,61 +17,60 @@ public class If extends Function {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> arguments, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
 
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 if (arguments.size() < 2) {
-                    throw new ExpressionException(String.format("'%s' requires as 2 inputs but was '%s'", getName(), arguments.size()));
+                    throw new ExpressionException(String.format("'%s' requires as 2 inputs but was '%s'", getName(), arguments.size()), expressionPosition);
                 }
                 ImmutableList.Builder<Roll> allRolls = ImmutableList.builder();
-                Optional<List<Roll>> checkIfTrue = arguments.getFirst().extendRoll(variables);
+                Optional<List<Roll>> checkIfTrue = arguments.getFirst().extendRoll(rollContext);
                 if (checkIfTrue.isEmpty()) {
-                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", inputValue));
+                    throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()), expressionPosition);
                 }
-                UniqueRandomElements.Builder booleanRandomElements = UniqueRandomElements.builder();
-                Map<String, Roll> trueVariable = new ConcurrentHashMap<>(variables);
-                Optional<List<Roll>> returnIfTrue = arguments.get(1).extendRoll(trueVariable);
+                RandomElementsBuilder booleanRandomElements = RandomElementsBuilder.empty();
+                RollContext trueContext = rollContext.copy();
+                Optional<List<Roll>> returnIfTrue = arguments.get(1).extendRoll(trueContext);
 
                 int checkIfTrueIndex = 1;
                 while (checkIfTrueIndex < arguments.size()) {
                     if (checkIfTrue.isEmpty()) {
-                        throw new ExpressionException(String.format("'%s' requires a non-empty input as %s argument", inputValue, checkIfTrueIndex));
+                        throw new ExpressionException(String.format("'%s' requires a non-empty input as %s argument", expressionPosition.getValue(), checkIfTrueIndex), expressionPosition);
                     }
-                    checkRollSize(inputValue, checkIfTrue.get(), 1, 1);
+                    checkRollSize(expressionPosition, checkIfTrue.get(), 1, 1);
                     Roll booleanExpression = checkIfTrue.get().getFirst();
                     allRolls.addAll(checkIfTrue.get());
                     allRolls.addAll(returnIfTrue.orElse(Collections.emptyList()));
 
                     int booleanArgumentIndex = checkIfTrueIndex;
                     final boolean booleanValue = booleanExpression.asBoolean()
-                            .orElseThrow(() -> throwNotBoolean(inputValue, booleanExpression, "position %d".formatted(booleanArgumentIndex)));
-                    booleanRandomElements.add(booleanExpression.getRandomElementsInRoll());
+                            .orElseThrow(() -> throwNotBoolean(expressionPosition, booleanExpression, "position %d".formatted(booleanArgumentIndex)));
+                    booleanRandomElements.addRoll(booleanExpression);
                     if (booleanValue) {
                         List<Roll> trueResult = returnIfTrue.orElse(Collections.emptyList());
-                        variables.putAll(trueVariable); //only the variable of the true result are added
-                        UniqueRandomElements allBooleanRandomElements = booleanRandomElements.build();
+                        rollContext.merge(trueContext); //only the variable of the true result are added
                         ImmutableList.Builder<Roll> resultBuilder = ImmutableList.builder();
                         for (Roll r : trueResult) {
                             resultBuilder.add(new Roll(toExpression(), r.getElements(),
-                                    UniqueRandomElements.builder()
-                                            .add(allBooleanRandomElements)
-                                            .add(r.getRandomElementsInRoll())
+                                    booleanRandomElements
+                                            .addRoll(r)
                                             .build(),
                                     ImmutableList.<Roll>builder()
                                             .addAll(booleanExpression.getChildrenRolls())
                                             .addAll(r.getChildrenRolls())
                                             .build(),
+                                    expressionPosition,
                                     maxNumberOfElements, keepChildrenRolls));
                         }
                         return Optional.of(resultBuilder.build());
                     }
                     checkIfTrueIndex = checkIfTrueIndex + 2;
                     if (checkIfTrueIndex < arguments.size()) {
-                        checkIfTrue = arguments.get(checkIfTrueIndex - 1).extendRoll(variables);
-                        trueVariable = new ConcurrentHashMap<>(variables); //reset the true variables, we only add them to the result if the result was returned
-                        returnIfTrue = arguments.get(checkIfTrueIndex).extendRoll(trueVariable);
+                        checkIfTrue = arguments.get(checkIfTrueIndex - 1).extendRoll(rollContext);
+                        trueContext = rollContext.copy(); //reset the true context, we only add them to the result if the result was returned
+                        returnIfTrue = arguments.get(checkIfTrueIndex).extendRoll(trueContext);
                     } else {
                         //should not be read anymore, but making sure
                         checkIfTrue = Optional.empty();
@@ -84,29 +81,36 @@ public class If extends Function {
 
                 //there is a last element in the arguments, which is the default result and not a check value
                 if (checkIfTrueIndex == arguments.size()) {
-                    Optional<List<Roll>> defaultResult = arguments.get(checkIfTrueIndex - 1).extendRoll(variables);
+                    Optional<List<Roll>> defaultResult = arguments.get(checkIfTrueIndex - 1).extendRoll(rollContext);
                     if (defaultResult.isPresent()) {
                         allRolls.addAll(defaultResult.get());
 
                         ImmutableList.Builder<Roll> resultBuilder = ImmutableList.builder();
                         for (Roll r : defaultResult.get()) {
                             resultBuilder.add(new Roll(toExpression(), r.getElements(),
-                                    UniqueRandomElements.builder()
-                                            .add(booleanRandomElements.build())
-                                            .add(r.getRandomElementsInRoll())
-                                            .build(), r.getChildrenRolls(),
+                                    booleanRandomElements
+                                            .addRoll(r)
+                                            .build(),
+                                    r.getChildrenRolls(),
+                                    expressionPosition,
                                     maxNumberOfElements, keepChildrenRolls));
                         }
                         return Optional.of(resultBuilder.build());
                     }
                 }
 
-                return Optional.empty();
+                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(),
+                        booleanRandomElements
+                                .build(),
+                        //todo child rolls?
+                        ImmutableList.of(),
+                        expressionPosition,
+                        maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return getExpression(inputValue, arguments);
+                return getExpression(expressionPosition, arguments);
             }
         };
 

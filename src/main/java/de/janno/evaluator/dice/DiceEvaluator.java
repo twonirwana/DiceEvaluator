@@ -131,61 +131,69 @@ public class DiceEvaluator {
                 (currentToken.getOperatorPrecedence().orElseThrow() < stackToken.getOperatorPrecedence().orElseThrow()));
     }
 
-    public Roller createRollSupplier(List<RollBuilder> rollBuilders) {
+    private Roller createRollSupplier(String expression, List<RollBuilder> rollBuilders) {
         return () -> {
-            Map<String, Roll> variableMap = new HashMap<>();
-            List<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, variableMap);
-            if (!variableMap.isEmpty()) {
+            RollContext rollContext = new RollContext();
+            ImmutableList<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, rollContext);
+            Optional<String> expressionPrefix = rollContext.getExpressionPrefixString();
+            if (expressionPrefix.isPresent()) {
                 //we need to add the val expression in front of the expression
-                String variablestring = variableMap.values().stream().map(Roll::getExpression).collect(Collectors.joining(", "));
                 ImmutableList.Builder<Roll> rollBuilder = ImmutableList.builder();
                 for (Roll r : rolls) {
-                    rollBuilder.add(new Roll("%s, %s".formatted(variablestring, r.getExpression()), r.getElements(), r.getRandomElementsInRoll(), r.getChildrenRolls(), maxNumberOfElements, keepChildrenRolls));
+                    String newExpressionString = "%s, %s".formatted(expressionPrefix.get(), r.getExpression());
+                    rollBuilder.add(new Roll(newExpressionString,
+                            r.getElements(),
+                            r.getRandomElementsInRoll(),
+                            r.getChildrenRolls(),
+                            r.getExpressionPosition(),
+                            maxNumberOfElements,
+                            keepChildrenRolls));
                 }
                 rolls = rollBuilder.build();
             }
-            return rolls;
+            return new RollResult(expression, rolls);
         };
     }
 
-    private @NonNull RollBuilder toValue(@NonNull String literal, @NonNull String inputValue) {
+    private @NonNull RollBuilder toValue(@NonNull String literal, @NonNull ExpressionPosition expressionPosition) {
         Matcher listMatcher = LIST_REGEX.matcher(literal);
         if (listMatcher.find()) {
             List<String> list = Arrays.asList(listMatcher.group(1).split("[%s%s]".formatted(SEPARATOR, LEGACY_LIST_SEPARATOR)));
             return new RollBuilder() {
                 @Override
-                public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variableMap) throws ExpressionException {
+                public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(), list.stream()
                             .map(String::trim)
                             .map(s -> new RollElement(s, RollElement.NO_TAG, RollElement.NO_COLOR))
-                            .collect(ImmutableList.toImmutableList()), UniqueRandomElements.empty(), ImmutableList.of(),
+                            .collect(ImmutableList.toImmutableList()), ImmutableList.of(), ImmutableList.of(), expressionPosition,
                             maxNumberOfElements, keepChildrenRolls)));
                 }
 
                 @Override
                 public @NonNull String toExpression() {
-                    return inputValue;
+                    return expressionPosition.toStringWithExtension();
                 }
             };
         }
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                if (variables.containsKey(literal)) {
-                    Roll variableValue = variables.get(literal);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                Optional<Roll> variableRoll = rollContext.getVariable(literal);
+                if (variableRoll.isPresent()) {
+                    Roll variableValue = variableRoll.get();
                     //set the input as expression
-                    Roll replacedValue = new Roll(toExpression(), variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls(), maxNumberOfElements, keepChildrenRolls);
+                    Roll replacedValue = new Roll(toExpression(), variableValue.getElements(), variableValue.getRandomElementsInRoll(), variableValue.getChildrenRolls(), expressionPosition, maxNumberOfElements, keepChildrenRolls);
                     return Optional.of(ImmutableList.of(replacedValue));
                 }
                 if (literal.isEmpty()) {
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(), UniqueRandomElements.empty(), ImmutableList.of(), maxNumberOfElements, keepChildrenRolls)));
+                    return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), expressionPosition, maxNumberOfElements, keepChildrenRolls)));
                 }
-                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), UniqueRandomElements.empty(), ImmutableList.of(), maxNumberOfElements, keepChildrenRolls)));
+                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(new RollElement(literal, RollElement.NO_TAG, RollElement.NO_COLOR)), ImmutableList.of(), ImmutableList.of(), expressionPosition, maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
-                return inputValue;
+                return expressionPosition.toStringWithExtension();
             }
         };
     }
@@ -193,22 +201,22 @@ public class DiceEvaluator {
     private void processTokenToValues(Deque<RollBuilder> values, Token token) throws ExpressionException {
         if (token.getLiteral().isPresent()) { // If the token is a literal, a constant, or a variable name
             String literal = token.getLiteral().get();
-            values.push(toValue(literal, token.getInputValue()));
+            values.push(toValue(literal, token.getExpressionPosition()));
 
         } else if (token.getOperator().isPresent()) { // If the token is an operator
             Operator operator = token.getOperator().get();
             int argumentCount = token.getOperatorType().orElseThrow().argumentCount;
             if (values.size() < argumentCount) {
-                throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getName(), argumentCount));
+                throw new ExpressionException("Not enough values, %s needs %d".formatted(operator.getName(), argumentCount), token.getExpressionPosition());
             }
-            values.push(operator.evaluate(getArguments(values, argumentCount), token.getInputValue()));
+            values.push(operator.evaluate(getArguments(values, argumentCount), token.getExpressionPosition()));
         } else {
-            throw new ExpressionException(token.toString());
+            throw new ExpressionException(token.toString(), token.getExpressionPosition());
         }
     }
 
-    private void doFunction(Deque<RollBuilder> values, Function function, int argumentCount, String inputValue) throws ExpressionException {
-        final RollBuilder res = function.evaluate(getArguments(values, argumentCount), inputValue);
+    private void doFunction(Deque<RollBuilder> values, Function function, int argumentCount, ExpressionPosition expressionPosition) throws ExpressionException {
+        final RollBuilder res = function.evaluate(getArguments(values, argumentCount), expressionPosition);
         values.push(res);
     }
 
@@ -240,10 +248,10 @@ public class DiceEvaluator {
      * Evaluates an expression.
      *
      * @param expression The expression to evaluate
-     * @return The result of the evaluation. This can be multiple values, if the expression can't be reduced to a single value.
+     * @return The result of the evaluation.
      * @throws ExpressionException if the expression is not correct.
      */
-    public List<Roll> evaluate(String expression) throws ExpressionException {
+    public RollResult evaluate(String expression) throws ExpressionException {
         return buildRollSupplier(expression).roll();
     }
 
@@ -251,14 +259,19 @@ public class DiceEvaluator {
      * Create a roller for an expression. The roller is the expression as function can be used again to roll the expression
      * again. Each execution of the roller will generate new random elements.
      *
-     * @param expression The expression to evaluate
+     * @param inputExpression The expression to evaluate
      * @return A roller that executes the expression
      * @throws ExpressionException if the expression is not correct.
      */
-    public Roller buildRollSupplier(String expression) throws ExpressionException {
-        expression = expression.trim();
+    public Roller buildRollSupplier(final String inputExpression) throws ExpressionException {
+        final String expression = inputExpression.trim();
         if (Strings.isNullOrEmpty(expression)) {
-            return ImmutableList::of;
+            return new Roller() {
+                @Override
+                public @NonNull RollResult roll() {
+                    return new RollResult(expression, ImmutableList.of());
+                }
+            };
         }
 
         final List<Token> tokens = tokenizer.tokenize(expression);
@@ -271,7 +284,7 @@ public class DiceEvaluator {
             if (previous.flatMap(Token::getFunction).isPresent() && !isFunctionOpenBracket(token)) {
                 String functionName = previous.flatMap(Token::getFunction).map(Function::getName).orElseThrow();
                 String allowedBrackets = parameters.getFunctionBrackets().stream().map(BracketPair::getOpen).collect(Collectors.joining(" or "));
-                throw new ExpressionException("A function, in this case '%s', must be followed a open function bracket: %s".formatted(functionName, allowedBrackets));
+                throw new ExpressionException("A function, in this case '%s', must be followed a open function bracket: %s".formatted(functionName, allowedBrackets), token.getExpressionPosition());
             }
 
             if (token.getBrackets().isPresent() && token.isOpenBracket()) {
@@ -279,21 +292,21 @@ public class DiceEvaluator {
                 stack.push(token);
                 if (previous.flatMap(Token::getFunction).isPresent()) {
                     if (!parameters.getFunctionBrackets().contains(token.getBrackets().get())) {
-                        throw new ExpressionException("Invalid bracket after function: %s".formatted(token));
+                        throw new ExpressionException("Invalid bracket after function: %s".formatted(token), token.getExpressionPosition());
                     }
                 } else {
                     if (!parameters.getExpressionBrackets().contains(token.getBrackets().get())) {
-                        throw new ExpressionException("Invalid bracket in expression: %s".formatted(token));
+                        throw new ExpressionException("Invalid bracket in expression: %s".formatted(token), token.getExpressionPosition());
                     }
                 }
             } else if (token.isCloseBracket()) {
                 if (previous.isEmpty()) {
-                    throw new ExpressionException("expression can't start with a close bracket");
+                    throw new ExpressionException("expression can't start with a close bracket", token.getExpressionPosition());
                 } else if (previous.get().isOpenBracket()) {
-                    throw new ExpressionException("empty brackets are not allowed");
+                    throw new ExpressionException("empty brackets are not allowed", token.getExpressionPosition());
                 }
                 if (previous.map(Token::isSeparator).get()) {
-                    throw new ExpressionException("argument is missing");
+                    throw new ExpressionException("argument is missing", token.getExpressionPosition());
                 }
                 BracketPair brackets = token.getBrackets().get();
                 // If the token is a right parenthesis:
@@ -307,7 +320,7 @@ public class DiceEvaluator {
                         if (stackToken.getBrackets().get().equals(brackets)) {
                             openBracketFound = true;
                         } else {
-                            throw new ExpressionException("Invalid parenthesis match %s%s".formatted(stackToken.getBrackets().get().getOpen(), brackets.getClose()));
+                            throw new ExpressionException("Invalid parenthesis match %s%s".formatted(stackToken.getBrackets().get().getOpen(), brackets.getClose()), token.getExpressionPosition());
                         }
                     } else {
                         processTokenToValues(values, stackToken);
@@ -316,22 +329,22 @@ public class DiceEvaluator {
                 if (!openBracketFound) {
                     // If the stack runs out without finding a left parenthesis, then
                     // there are mismatched parentheses.
-                    throw new ExpressionException("Parentheses mismatched");
+                    throw new ExpressionException("Parentheses mismatched", token.getExpressionPosition());
                 }
                 if (!stack.isEmpty() && stack.peek().getFunction().isPresent()) {
                     // If the token at the top of the stack is a function token, pop it
                     // onto the output queue.
                     int argumentCount = values.size() - previousValuesSize.pop();
                     final Token functionToken = stack.pop();
-                    doFunction(values, functionToken.getFunction().orElseThrow(), argumentCount, functionToken.getInputValue());
+                    doFunction(values, functionToken.getFunction().orElseThrow(), argumentCount, functionToken.getExpressionPosition());
                 }
             } else if (token.isSeparator()) {
                 if (previous.isEmpty()) {
-                    throw new ExpressionException("expression can't start with a separator");
+                    throw new ExpressionException("expression can't start with a separator", token.getExpressionPosition());
                 }
                 // Verify that there was an argument before this separator
                 if (previous.get().isOpenBracket() || previous.get().isSeparator()) {
-                    throw new ExpressionException("A separator can't be followed by another separator or open bracket");
+                    throw new ExpressionException("A separator can't be followed by another separator or open bracket", token.getExpressionPosition());
                 }
                 boolean openBracketOnStackReached = false;
 
@@ -342,7 +355,7 @@ public class DiceEvaluator {
                             throw new ExpressionException("Separator '%s' in bracket '%s' without leading function is not allowed"
                                     .formatted(parameters.getSeparator(), parameters.getExpressionBrackets().stream()
                                             .map(Object::toString)
-                                            .collect(Collectors.joining(","))));
+                                            .collect(Collectors.joining(","))), token.getExpressionPosition());
                         }
                     } else {
                         // Until the token at the top of the stack is a left parenthesis,
@@ -378,7 +391,7 @@ public class DiceEvaluator {
                     if (!stack.peek().isOpenBracket()) { //no unfinished bracket
                         processTokenToValues(values, stack.pop());
                     } else {
-                        throw new ExpressionException("All brackets need to be closed be for starting a new expression or missing ','");
+                        throw new ExpressionException("All brackets need to be closed be for starting a new expression or missing ','", token.getExpressionPosition());
                     }
                 }
                 // If the token is literal then add its value to the output queue.
@@ -392,10 +405,10 @@ public class DiceEvaluator {
         // While there are still operator tokens in the stack:
         for (Token stackToken : stack) {
             if (stackToken.isOpenBracket() || stackToken.isCloseBracket()) {
-                throw new ExpressionException("Parentheses mismatched");
+                throw new ExpressionException("Parentheses mismatched", stackToken.getExpressionPosition());
             }
             processTokenToValues(values, stackToken);
         }
-        return createRollSupplier(reverse(values));
+        return createRollSupplier(expression, reverse(values));
     }
 }

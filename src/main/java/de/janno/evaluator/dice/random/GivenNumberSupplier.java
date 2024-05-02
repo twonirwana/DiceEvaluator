@@ -1,6 +1,8 @@
 package de.janno.evaluator.dice.random;
 
 import com.google.common.annotations.VisibleForTesting;
+import de.janno.evaluator.dice.DieId;
+import lombok.NonNull;
 
 import java.util.*;
 
@@ -26,7 +28,7 @@ public class GivenNumberSupplier implements NumberSupplier {
     }
 
     @Override
-    public int get(int minExcl, int maxIncl) {
+    public int get(int minExcl, int maxIncl, @NonNull DieId dieId) {
         if (results.isEmpty()) {
             return maxIncl;
         }

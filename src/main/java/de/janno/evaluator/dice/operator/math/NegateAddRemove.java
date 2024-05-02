@@ -20,23 +20,24 @@ public final class NegateAddRemove extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 1, 2);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition, rolls, 1, 2);
 
                 if (rolls.size() == 1) {
                     Roll right = rolls.getFirst();
-                    checkContainsOnlyDecimal(inputValue, right, "right");
+                     checkContainsOnlyDecimal(expressionPosition, right, "right");
                     ImmutableList<RollElement> negated = right.getElements().stream()
                             .map(e -> new RollElement(e.asDecimal().orElseThrow().multiply(MINUS_ONE).stripTrailingZeros().toPlainString(), e.getTag(), e.getColor()))
                             .collect(ImmutableList.toImmutableList());
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),
                             negated,
-                            UniqueRandomElements.from(rolls),
+                            RandomElementsBuilder.fromRolls(rolls),
                             ImmutableList.of(right),
+                            expressionPosition,
                             maxNumberOfElements, keepChildrenRolls)));
                 }
 
@@ -60,9 +61,9 @@ public final class NegateAddRemove extends Operator {
 
                 if (toRemove.stream().anyMatch(r -> r.asDecimal().isEmpty())) {
                     throw new ExpressionException(String.format("'%s' requires as right input only decimals or elements that are on the left side '%s' but was '%s'",
-                            inputValue,
+                            expressionPosition.getValue(),
                             left.getElements().stream().map(RollElement::getValue).toList(),
-                            right.getElements().stream().map(RollElement::getValue).toList()));
+                            right.getElements().stream().map(RollElement::getValue).toList()), expressionPosition);
                 }
 
                 resultBuilder.addAll(toRemove.stream()
@@ -71,18 +72,19 @@ public final class NegateAddRemove extends Operator {
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         resultBuilder.build(),
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
                 if (operands.size() == 1) {
-                    return getRightUnaryExpression(inputValue, operands);
+                    return getRightUnaryExpression(expressionPosition, operands);
                 }
 
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

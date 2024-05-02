@@ -51,7 +51,7 @@ For example `1d4+3d6` is the appending of roll of 1d4 and 3d6, but `(1d4+3=)d6)`
 
 The number of dice is limited to 1000 and every number approve 9 digits or with more than 9 digit after the decimal dot result in an error.
 
-Boolean values will be represented by `'true'` and `'false'`.
+Boolean values will be represented by `'true'` (or `1`) and `'false'` (or `0`) .
 
 It is possible to set tags and color.
 Colors have no direct effect and will be also set to all random elements of the expression.

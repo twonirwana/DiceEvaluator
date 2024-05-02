@@ -1,6 +1,7 @@
 package de.janno.evaluator.dice.function;
 
 import de.janno.evaluator.dice.ExpressionException;
+import de.janno.evaluator.dice.ExpressionPosition;
 import de.janno.evaluator.dice.Roll;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleElement;
@@ -11,8 +12,8 @@ public class IfIn extends AbstractIf {
     }
 
     @Override
-    protected boolean compare(Roll input, int inputPosition, Roll compareTo, int compareToPosition) throws ExpressionException {
-        checkContainsSingleElement(getName(), input, "%d argument".formatted(inputPosition));
+    protected boolean compare(Roll input, int inputPosition, Roll compareTo, int compareToPosition, ExpressionPosition expressionPosition) throws ExpressionException {
+        checkContainsSingleElement(expressionPosition, input, "%d argument".formatted(inputPosition));
         return compareTo.isElementsContainsElementWithValueAndTag(input.getElements().getFirst());
     }
 }

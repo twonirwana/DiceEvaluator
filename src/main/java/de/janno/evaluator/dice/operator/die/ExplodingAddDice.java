@@ -5,11 +5,12 @@ import de.janno.evaluator.dice.*;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static de.janno.evaluator.dice.DiceHelper.*;
+import static de.janno.evaluator.dice.DiceHelper.explodingDice;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -26,63 +27,77 @@ public final class ExplodingAddDice extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
-        return new RollBuilder() {
-            @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 1, 2);
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
 
-                UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
+        return new RollBuilder() {
+            private static ImmutableList<RollElement> sumRerollsTogether(List<RandomElement> randomElements) {
+                return randomElements.stream().collect(Collectors.groupingBy(r -> r.getDieId().getDieIndex()))
+                        .values().stream()
+                        .map(r -> new RollElement(r.stream()
+                                .map(RandomElement::getRollElement)
+                                .map(RollElement::asDecimal)
+                                .flatMap(Optional::stream)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                .stripTrailingZeros().toPlainString()
+                                , RollElement.NO_TAG, RollElement.NO_COLOR))
+                        .collect(ImmutableList.toImmutableList());
+            }
+
+            @Override
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition, rolls, 1, 2);
+
+                RandomElementsBuilder randomElements = RandomElementsBuilder.empty();
+                final RollId rollId = RollId.of(expressionPosition, rollContext.getNextReEvaluationNumber(expressionPosition));
+
+                final int numberOfDice;
+                final int sidesOfDie;
+                final ImmutableList<Roll> childrenRolls;
                 if (rolls.size() == 1) {
+                    numberOfDice = 1;
                     final Roll right = rolls.getFirst();
-                    final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
-                    if (sidesOfDie < 2) {
-                        throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
-                    }
-                    final ImmutableList<ExplodedAddDie> explodingAddDice = explodingAddDice(1, sidesOfDie, numberSupplier);
-                    final ImmutableList<RollElement> rollElements = explodedAddDie2RollElements(explodingAddDice);
-                    randomElements.add(right.getRandomElementsInRoll());
-                    randomElements.addAsRandomElements(explodedAddDie2RandomElements(explodingAddDice));
-                    return Optional.of(ImmutableList.of(new Roll(toExpression(),
-                            rollElements,
-                            randomElements.build(),
-                            ImmutableList.of(right),
-                            maxNumberOfElements, keepChildrenRolls)));
+                    randomElements.addRoll(right);
+                    sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, right, "right"));
+                    childrenRolls = ImmutableList.of(right);
+                } else {
+                    final Roll left = rolls.getFirst();
+                    final Roll right = rolls.get(1);
+                    randomElements.addRoll(left);
+                    randomElements.addRoll(right);
+                    numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, left, "left"));
+                    sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, right, "right"));
+                    childrenRolls = ImmutableList.of(left, right);
                 }
 
-                final Roll left = rolls.getFirst();
-                final Roll right = rolls.get(1);
-                randomElements.add(left.getRandomElementsInRoll());
-                randomElements.add(right.getRandomElementsInRoll());
-                final int numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
                 if (numberOfDice > maxNumberOfDice) {
-                    throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
+                    throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice), expressionPosition);
                 }
                 if (numberOfDice < 0) {
-                    throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
+                    throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice), expressionPosition);
                 }
-                final int sidesOfDie = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
                 if (sidesOfDie < 2) {
-                    throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie));
+                    throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie), expressionPosition);
                 }
-                final ImmutableList<ExplodedAddDie> explodingAddDice = explodingAddDice(numberOfDice, sidesOfDie, numberSupplier);
-                final ImmutableList<RollElement> rollElements = explodedAddDie2RollElements(explodingAddDice);
-                randomElements.addAsRandomElements(explodedAddDie2RandomElements(explodingAddDice));
+                final ImmutableList<RandomElement> roll = explodingDice(numberOfDice, sidesOfDie, numberSupplier, rollId, maxNumberOfElements, toExpression());
+                final ImmutableList<RollElement> rollElements = sumRerollsTogether(roll);
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
-                        randomElements.build(),
-                        ImmutableList.of(left, right),
+                        randomElements
+                                .addRandomElements(roll)
+                                .build(),
+                        childrenRolls,
+                        expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
             }
 
             @Override
             public @NonNull String toExpression() {
                 if (operands.size() == 1) {
-                    return getRightUnaryExpression(inputValue, operands);
+                    return getRightUnaryExpression(expressionPosition, operands);
                 }
 
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

@@ -6,10 +6,10 @@ import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import static de.janno.evaluator.dice.DiceHelper.*;
+import static de.janno.evaluator.dice.DiceHelper.pickOneOf;
+import static de.janno.evaluator.dice.DiceHelper.rollDice;
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
 import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
 import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
@@ -26,20 +26,24 @@ public final class RegularDice extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
+
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 1, 2);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition, rolls, 1, 2);
 
                 final int numberOfDice;
                 final Roll right;
                 final ImmutableList<Roll> childrenRolls;
                 final String expression;
-                UniqueRandomElements.Builder randomElements = UniqueRandomElements.builder();
+                final RollId rollId = RollId.of(expressionPosition, rollContext.getNextReEvaluationNumber(expressionPosition));
+
+                RandomElementsBuilder randomElements = RandomElementsBuilder.empty();
                 if (rolls.size() == 1) {
                     right = rolls.getFirst();
+                    randomElements.addRoll(right);
                     numberOfDice = 1;
                     childrenRolls = ImmutableList.of(right);
                     expression = toExpression();
@@ -47,46 +51,42 @@ public final class RegularDice extends Operator {
                     Roll left = rolls.getFirst();
                     right = rolls.get(1);
                     childrenRolls = ImmutableList.of(left, right);
-                    numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
+                    numberOfDice = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, left, "left"));
                     expression = toExpression();
-                    randomElements.add(left.getRandomElementsInRoll());
+                    randomElements.addRoll(left);
+                    randomElements.addRoll(right);
 
                 } else {
-                    throw new IllegalStateException("More then two operands for " + inputValue);
+                    throw new IllegalStateException("More then two operands for " + expressionPosition.getValue());
                 }
-                randomElements.add(right.getRandomElementsInRoll());
 
                 if (numberOfDice > maxNumberOfDice) {
-                    throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice));
+                    throw new ExpressionException(String.format("The number of dice must be less or equal then %d but was %d", maxNumberOfDice, numberOfDice), expressionPosition);
                 }
                 if (numberOfDice < 0) {
-                    throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice));
+                    throw new ExpressionException(String.format("The number of dice can not be negativ but was %d", numberOfDice), expressionPosition);
                 }
                 final ImmutableList<RollElement> rollElements;
                 if (right.asInteger().isPresent()) {
                     int sidesOfDie = right.asInteger().get();
-                    rollElements = toRollElements(rollDice(numberOfDice, sidesOfDie, numberSupplier));
-
-                    randomElements.addAsRandomElements(rollElements.stream()
-                            .map(r -> new RandomElement(r, 1, sidesOfDie))
-                            .collect(ImmutableList.toImmutableList()));
+                    List<RandomElement> roll = rollDice(numberOfDice, sidesOfDie, numberSupplier, rollId);
+                    rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());
+                    randomElements.addRandomElements(roll);
                 } else {
-                    ImmutableList.Builder<RollElement> builder = ImmutableList.builder();
+                    ImmutableList.Builder<RandomElement> rollBuilder = ImmutableList.builder();
                     for (int i = 0; i < numberOfDice; i++) {
-                        builder.add(pickOneOf(right.getElements(), numberSupplier));
+                        rollBuilder.add(pickOneOf(right.getElements(), numberSupplier, DieId.of(rollId, i, 0)));
                     }
-                    rollElements = builder.build();
-                    randomElements.addAsRandomElements(rollElements.stream()
-                            .map(r -> new RandomElement(r, right.getElements().stream()
-                                    .map(RollElement::getValue)
-                                    .collect(ImmutableList.toImmutableList())))
-                            .collect(ImmutableList.toImmutableList()));
+                    List<RandomElement> roll = rollBuilder.build();
+                    rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());
+                    randomElements.addRandomElements(roll);
                 }
 
                 return Optional.of(ImmutableList.of(new Roll(expression,
                         rollElements,
                         randomElements.build(),
                         childrenRolls,
+                        expressionPosition,
                         maxNumberOfElements,
                         keepChildrenRolls)));
             }
@@ -94,9 +94,9 @@ public final class RegularDice extends Operator {
             @Override
             public @NonNull String toExpression() {
                 if (operands.size() == 1) {
-                    return getRightUnaryExpression(inputValue, operands);
+                    return getRightUnaryExpression(expressionPosition, operands);
                 }
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

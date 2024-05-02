@@ -1,6 +1,8 @@
 package de.janno.evaluator.dice.random;
 
+import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
+import lombok.NonNull;
 
 /**
  * Provides a number between minExcl and maxIncl.
@@ -13,7 +15,8 @@ public interface NumberSupplier {
      *
      * @param minExcl the minimum value (exclusive)
      * @param maxIncl the maximum value (inclusive)
+     * @param dieId   the id of the die in the expression that is rolled
      * @return a number between minExcl and maxIncl
      */
-    int get(int minExcl, int maxIncl) throws ExpressionException;
+    int get(int minExcl, int maxIncl, @NonNull DieId dieId) throws ExpressionException;
 }

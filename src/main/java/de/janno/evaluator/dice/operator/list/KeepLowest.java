@@ -5,7 +5,6 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,18 +20,18 @@ public class KeepLowest extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 2, 2);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition, rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
+                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, right, "right"));
                 if (rightNumber < 0) {
-                    throw new ExpressionException(String.format("The number to keep can not be negativ but was %d", rightNumber));
+                    throw new ExpressionException(String.format("The number to keep can not be negativ but was %d", rightNumber), expressionPosition);
                 }
                 final String rightTag = right.getElements().getFirst().getTag();
                 ImmutableList<RollElement> otherTagElements = left.getElements().stream()
@@ -52,13 +51,15 @@ public class KeepLowest extends Operator {
                                 .addAll(keep)
                                 .addAll(otherTagElements)
                                 .build(),
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
-                        maxNumberOfElements, keepChildrenRolls)));            }
+                        expressionPosition,
+                        maxNumberOfElements, keepChildrenRolls)));
+            }
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }

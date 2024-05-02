@@ -3,100 +3,75 @@ package de.janno.evaluator.dice;
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
-import lombok.Value;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class DiceHelper {
-    public static @NonNull ImmutableList<Integer> explodingDice(int number, int sides, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
+    public static @NonNull ImmutableList<RandomElement> explodingDice(int number,
+                                                                      int sides,
+                                                                      @NonNull NumberSupplier numberSupplier,
+                                                                      @NonNull RollId rollId,
+                                                                      int maxNumberOfElements,
+                                                                      String expression) throws ExpressionException {
         if (sides == 0) {
             return ImmutableList.of();
         }
         if (sides < 0) {
-            throw new ExpressionException("Sides of dice to roll must be positive");
+            throw new ExpressionException("Sides of dice to roll must be positive", rollId.getExpressionPosition());
         }
-        ImmutableList.Builder<Integer> resultBuilder = ImmutableList.builder();
-        int diceToRoll = number;
-        while (diceToRoll > 0) {
-            List<Integer> roll = rollDice(diceToRoll, sides, numberSupplier);
-            resultBuilder.addAll(roll);
-            diceToRoll = (int) roll.stream().filter(i -> i == sides).count();
-        }
-        return resultBuilder.build();
-    }
-
-    public static @NonNull ImmutableList<RollElement> explodedAddDie2RollElements(@NonNull List<ExplodedAddDie> in) {
-        return in.stream()
-                .map(ExplodedAddDie::getValue)
-                .map(String::valueOf)
-                .map(i -> new RollElement(i, RollElement.NO_TAG, RollElement.NO_COLOR))
-                .collect(ImmutableList.toImmutableList());
-    }
-
-    public static @NonNull ImmutableList<RandomElement> explodedAddDie2RandomElements(@NonNull List<ExplodedAddDie> in) {
-        return in.stream()
-                .flatMap(r -> r.getDiceThrowResults().stream().map(String::valueOf)
-                        .map(i -> new RollElement(i, RollElement.NO_TAG, RollElement.NO_COLOR))
-                        .map(re -> new RandomElement(re, 1, r.getSidesOfDie())))
-                .collect(ImmutableList.toImmutableList());
-    }
-
-    public static @NonNull ImmutableList<RollElement> toRollElements(@NonNull List<Integer> in) {
-        return in.stream()
-                .map(String::valueOf)
-                .map(i -> new RollElement(i, RollElement.NO_TAG, RollElement.NO_COLOR))
-                .collect(ImmutableList.toImmutableList());
-    }
-
-    public static @NonNull ImmutableList<ExplodedAddDie> explodingAddDice(int number, int sides, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
-        if (sides == 0) {
-            return ImmutableList.of();
-        }
-        if (sides < 0) {
-            throw new ExpressionException("Sides of dice to roll must be positive");
-        }
-        ImmutableList.Builder<ExplodedAddDie> resultBuilder = ImmutableList.builder();
+        List<RandomElement> resultBuilder = new ArrayList<>();
+        //order of the exploded dice is not relevant, the random elements get sorted later
         for (int i = 0; i < number; i++) {
-            resultBuilder.add(rollExplodingAddDie(sides, numberSupplier));
+            resultBuilder.addAll(rollExplodingDie(sides, numberSupplier, rollId, i, maxNumberOfElements, expression));
+            if (resultBuilder.size() > maxNumberOfElements) {
+                throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, resultBuilder.size()), rollId.getExpressionPosition());
+            }
         }
-        return resultBuilder.build();
+        return ImmutableList.copyOf(resultBuilder);
     }
 
-    public static ExplodedAddDie rollExplodingAddDie(int sides, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
-        int current = numberSupplier.get(0, sides);
-        int res = current;
-        ImmutableList.Builder<Integer> resultBuilder = ImmutableList.builder();
-        resultBuilder.add(current);
-        while (current == sides) {
-            current = numberSupplier.get(0, sides);
-            res += current;
-            resultBuilder.add(current);
+    private static List<RandomElement> rollExplodingDie(int sides, NumberSupplier numberSupplier, RollId rollId, int index, int maxNumberOfElements, String expression) throws ExpressionException {
+        List<RandomElement> resultBuilder = new ArrayList<>();
+        int rerollCounter = 0;
+        RandomElement currentRoll = rollDie(sides, numberSupplier, rollId, index, rerollCounter++);
+        final String rerollValue = String.valueOf(sides);
+        resultBuilder.add(currentRoll);
+        while (currentRoll.getRollElement().getValue().equals(rerollValue)) {
+            currentRoll = rollDie(sides, numberSupplier, rollId, index, rerollCounter++);
+            resultBuilder.add(currentRoll);
+            if (resultBuilder.size() > maxNumberOfElements) {
+                throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, resultBuilder.size()), rollId.getExpressionPosition());
+            }
         }
-        return new ExplodedAddDie(res, sides, resultBuilder.build());
+        return ImmutableList.copyOf(resultBuilder);
     }
 
-    public static @NonNull ImmutableList<Integer> rollDice(int number, int sides, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
+    public static @NonNull ImmutableList<RandomElement> rollDice(int number, int sides, @NonNull NumberSupplier numberSupplier, @NonNull RollId rollId) throws ExpressionException {
         if (sides == 0) {
             return ImmutableList.of();
         }
         if (sides < 0) {
-            throw new ExpressionException("Sides of dice to roll must be positive");
+            throw new ExpressionException("Sides of dice to roll must be positive", rollId.getExpressionPosition());
         }
-        ImmutableList.Builder<Integer> resultBuilder = ImmutableList.builder();
+        ImmutableList.Builder<RandomElement> randomElementBuilder = ImmutableList.builder();
         for (int i = 0; i < number; i++) {
-            resultBuilder.add(numberSupplier.get(0, sides));
+            randomElementBuilder.add(rollDie(sides, numberSupplier, rollId, i, 0));
         }
-        return resultBuilder.build();
+        return randomElementBuilder.build();
     }
 
-    public static @NonNull RollElement pickOneOf(List<RollElement> list, @NonNull NumberSupplier numberSupplier) throws ExpressionException {
-        return list.get(numberSupplier.get(0, list.size()) - 1);
+    private static RandomElement rollDie(int sides, @NonNull NumberSupplier numberSupplier, @NonNull RollId rollId, int index, int reroll) throws ExpressionException {
+        final DieId dieId = DieId.of(rollId, index, reroll);
+        final int value = numberSupplier.get(0, sides, dieId);
+        return new RandomElement(new RollElement(String.valueOf(value), RollElement.NO_TAG, RollElement.NO_COLOR), 1, sides, dieId);
+
     }
 
-    @Value
-    public static class ExplodedAddDie {
-        int value;
-        int sidesOfDie;
-        ImmutableList<Integer> diceThrowResults;
+    public static @NonNull RandomElement pickOneOf(List<RollElement> list, @NonNull NumberSupplier numberSupplier, @NonNull DieId dieId) throws ExpressionException {
+        return new RandomElement(list.get(numberSupplier.get(0, list.size(), dieId) - 1), list.stream()
+                .map(RollElement::getValue)
+                .collect(ImmutableList.toImmutableList()), dieId);
     }
+
 }

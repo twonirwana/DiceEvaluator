@@ -1,16 +1,19 @@
 package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableList;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.util.AbstractCollection;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
-@ToString
 @EqualsAndHashCode
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class Roll {
@@ -19,29 +22,57 @@ public class Roll {
     String expression;
     @NonNull
     ImmutableList<RollElement> elements;
+
+    /**
+     * all random elements that were involved in this roll, this can be more than the elements, because it includes also filtered elements
+     * The random elements are grouped by rollId
+     */
     @NonNull
-    //all random elements that were involved in this roll, this can be more than the elements, because it includes also filtered elements
-    UniqueRandomElements randomElementsInRoll;
-    //all rolls that produced this roll
+    ImmutableList<ImmutableList<RandomElement>> randomElementsInRoll;
+    /**
+     * all rolls that produced this roll. The collection of the childrenRolls can be disabled and the list is then empty
+     */
+
     @NonNull
     ImmutableList<Roll> childrenRolls;
+    /**
+     * The last expression position that created this roll
+     */
+    @NonNull
+    ExpressionPosition expressionPosition;
 
     public Roll(@NonNull String expression,
                 @NonNull ImmutableList<RollElement> elements,
-                @NonNull UniqueRandomElements randomElementsInRoll,
+                @NonNull ImmutableList<ImmutableList<RandomElement>> randomElementsInRoll,
                 @NonNull ImmutableList<Roll> childrenRolls,
+                @NonNull ExpressionPosition expressionPosition,
                 int maxNumberOfElements,
                 boolean keepChildRolls) throws ExpressionException {
         this.expression = expression;
         this.elements = elements;
+        validate(randomElementsInRoll);
         this.randomElementsInRoll = randomElementsInRoll;
         this.childrenRolls = keepChildRolls ? childrenRolls : ImmutableList.of();
+        this.expressionPosition = expressionPosition;
         if (elements.size() > maxNumberOfElements) {
-            throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, elements.size()));
+            throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, elements.size()), expressionPosition);
         }
-        long numberOfRandomElementsInRoll = randomElementsInRoll.getRandomElements().stream().map(RandomElements::getRandomElements).mapToLong(AbstractCollection::size).sum();
+        long numberOfRandomElementsInRoll = randomElementsInRoll.stream().mapToLong(List::size).sum();
         if (numberOfRandomElementsInRoll > maxNumberOfElements) {
-            throw new ExpressionException("To many random elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, numberOfRandomElementsInRoll));
+            throw new ExpressionException("To many random elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, numberOfRandomElementsInRoll), expressionPosition);
+        }
+    }
+
+    private void validate(ImmutableList<ImmutableList<RandomElement>> randomElements) {
+        List<DieId> diceIdsWithDuplicatedRandomElements = randomElements.stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(RandomElement::getDieId)).values().stream()
+                .filter(l -> l.size() > 1)
+                .map(r -> r.getFirst().getDieId())
+                .toList();
+
+        if (!diceIdsWithDuplicatedRandomElements.isEmpty()) {
+            throw new IllegalStateException("Random elements must have unique dice ids but %s occurred more than once".formatted(diceIdsWithDuplicatedRandomElements));
         }
     }
 
@@ -74,10 +105,17 @@ public class Roll {
         return elements.stream().map(RollElement::toString).collect(Collectors.joining(", "));
     }
 
-    public String getRandomElementsString() {
-        return randomElementsInRoll.getRandomElements().stream()
-                .map(l -> l.getRandomElements().stream().map(RandomElement::getRollElement).map(RollElement::toString).toList().toString())
-                .collect(Collectors.joining(" "));
+    public String getResultStringWithTagAndColor() {
+        return elements.stream().map(RollElement::toStringWithColorAndTag).collect(Collectors.joining(", "));
+    }
+
+    @Override
+    public String toString() {
+        return "Roll{" +
+                "expression='" + expression + '\'' +
+                ", randomElementsInRoll=" + randomElementsInRoll +
+                ", elements=" + elements +
+                '}';
     }
 
     public boolean equalForValueAndTag(Roll other) {

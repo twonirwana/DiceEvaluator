@@ -11,7 +11,7 @@ public class RandomDiceEvaluatorTest {
     void testWithRandom() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator();
 
-        List<Roll> res = underTest.evaluate("1d6");
+        List<Roll> res = underTest.evaluate("1d6").getRolls();
 
         assertThat(res.size()).isEqualTo(1);
         assertThat(res.getFirst().getElements().size()).isEqualTo(1);

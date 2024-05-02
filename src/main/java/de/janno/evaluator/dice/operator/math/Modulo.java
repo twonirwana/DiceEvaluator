@@ -5,7 +5,6 @@ import de.janno.evaluator.dice.*;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.RollBuilder.extendAllBuilder;
@@ -19,29 +18,36 @@ public final class Modulo extends Operator {
     }
 
     @Override
-    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull String inputValue) throws ExpressionException {
+    public @NonNull RollBuilder evaluate(@NonNull List<RollBuilder> operands, @NonNull ExpressionPosition expressionPosition) throws ExpressionException {
         return new RollBuilder() {
             @Override
-            public @NonNull Optional<List<Roll>> extendRoll(@NonNull Map<String, Roll> variables) throws ExpressionException {
-                List<Roll> rolls = extendAllBuilder(operands, variables);
-                checkRollSize(inputValue, rolls, 2, 2);
+            public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
+                List<Roll> rolls = extendAllBuilder(operands, rollContext);
+                checkRollSize(expressionPosition, rolls, 2, 2);
 
                 Roll left = rolls.getFirst();
                 Roll right = rolls.get(1);
-                checkAllElementsAreSameTag(inputValue, left, right);
-                final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, left, "left"));
-                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(inputValue, right, "right"));
-
-                final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(leftNumber % rightNumber), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
+                checkAllElementsAreSameTag(expressionPosition, left, right);
+                final int leftNumber = left.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, left, "left"));
+                final int rightNumber = right.asInteger().orElseThrow(() -> throwNotIntegerExpression(expressionPosition, right, "right"));
+                final int calculationResult;
+                try {
+                    calculationResult = leftNumber % rightNumber;
+                } catch (ArithmeticException e) {
+                    throw new ExpressionException(e.getMessage(), expressionPosition);
+                }
+                final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(calculationResult), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
-                        UniqueRandomElements.from(rolls),
+                        RandomElementsBuilder.fromRolls(rolls),
                         ImmutableList.of(left, right),
-                        maxNumberOfElements, keepChildrenRolls)));            }
+                        expressionPosition,
+                        maxNumberOfElements, keepChildrenRolls)));
+            }
 
             @Override
             public @NonNull String toExpression() {
-                return getBinaryOperatorExpression(inputValue, operands);
+                return getBinaryOperatorExpression(expressionPosition, operands);
             }
         };
     }
