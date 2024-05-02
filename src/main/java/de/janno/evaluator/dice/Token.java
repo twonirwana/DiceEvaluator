@@ -1,12 +1,10 @@
 package de.janno.evaluator.dice;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
 import java.util.Optional;
 
-@EqualsAndHashCode
 public class Token {
     @Getter
     @NonNull

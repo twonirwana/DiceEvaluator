@@ -9,7 +9,7 @@ public class ExpressionException extends Exception {
     @NonNull
     private final ExpressionPosition expressionPosition;
 
-    public ExpressionException(String message, @NonNull ExpressionPosition expressionPosition) {
+    public ExpressionException(@NonNull String message, @NonNull ExpressionPosition expressionPosition) {
         super(message);
         this.expressionPosition = expressionPosition;
     }

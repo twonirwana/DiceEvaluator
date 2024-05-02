@@ -8,17 +8,17 @@ import lombok.NonNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class GiveDiceNumberSupplier implements NumberSupplier {
+public class GivenDiceNumberSupplier implements NumberSupplier {
     private final NumberSupplier numberSupplier;
     private final Map<DieId, Integer> givenDiceNumbers;
 
-    public GiveDiceNumberSupplier(@NonNull Map<DieId, Integer> givenDiceNumbers) {
+    public GivenDiceNumberSupplier(@NonNull Map<DieId, Integer> givenDiceNumbers) {
         numberSupplier = new RandomNumberSupplier();
         this.givenDiceNumbers = new ConcurrentHashMap<>(givenDiceNumbers);
     }
 
     @VisibleForTesting
-    public GiveDiceNumberSupplier(@NonNull NumberSupplier numberSupplier, @NonNull Map<DieId, Integer> givenDiceNumbers) {
+    public GivenDiceNumberSupplier(@NonNull NumberSupplier numberSupplier, @NonNull Map<DieId, Integer> givenDiceNumbers) {
         this.numberSupplier = numberSupplier;
         this.givenDiceNumbers = new ConcurrentHashMap<>(givenDiceNumbers);
     }

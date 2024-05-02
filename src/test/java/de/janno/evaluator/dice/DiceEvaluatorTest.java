@@ -1,7 +1,7 @@
 package de.janno.evaluator.dice;
 
 import com.google.common.collect.ImmutableMap;
-import de.janno.evaluator.dice.random.GiveDiceNumberSupplier;
+import de.janno.evaluator.dice.random.GivenDiceNumberSupplier;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
 import org.assertj.core.api.SoftAssertions;
@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -529,6 +530,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("min3(45)", "A function, in this case 'min', must be followed a open function bracket: ("),
                 Arguments.of(")", "expression can't start with a close bracket"),
                 Arguments.of("(", "Parentheses mismatched"),
+                Arguments.of("1)", "Parentheses mismatched"),
                 Arguments.of(",3", "expression can't start with a separator"),
                 Arguments.of("10*", "Operator * does not support unary operations"),
                 Arguments.of("10*a", "No matching operator for 'a', non-functional text and value names must to be surrounded by '' or []"),
@@ -556,6 +558,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("(-6)d!2", "The number of dice can not be negativ but was -6"),
                 Arguments.of("(-6)d!!2", "The number of dice can not be negativ but was -6"),
                 Arguments.of("d'-1'", "Sides of dice to roll must be positive"),
+                Arguments.of("d!'-1'", "The number of sides of a die must be greater then 1 but was -1"),
+                Arguments.of("d!!'-1'", "The number of sides of a die must be greater then 1 but was -1"),
                 Arguments.of("5 mod 0", "/ by zero"),
                 Arguments.of("11x(1d6)", "The number of repeat must between 1-10 but was 11"),
                 Arguments.of("0x(1d6)", "The number of repeat must between 1-10 but was 0"),
@@ -816,11 +820,11 @@ public class DiceEvaluatorTest {
 
     @Test
     void giveDiceNumber() throws ExpressionException {
-        GiveDiceNumberSupplier giveDiceNumberSupplier = new GiveDiceNumberSupplier(new GivenNumberSupplier(), ImmutableMap.of(
+        GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(new GivenNumberSupplier(), ImmutableMap.of(
                 DieId.of(1, "d", 0, 2, 0), 4,
                 DieId.of(9, "d", 1, 1, 0), 1)
         );
-        DiceEvaluator underTest = new DiceEvaluator(giveDiceNumberSupplier, 1000, 10_000, true);
+        DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("3d6+(2r(2d8))").getRolls();
 
@@ -840,17 +844,36 @@ public class DiceEvaluatorTest {
                 "9de1i0r0=8",
                 "9de1i1r0=1");
         assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[6, 6, 4] [8, 8] [8, 1]");
-        assertThat(giveDiceNumberSupplier.allStoredDiceUsed()).isTrue();
+        assertThat(givenDiceNumberSupplier.allStoredDiceUsed()).isTrue();
+    }
+
+    @Test
+    void giveDiceNumberRandom() throws ExpressionException {
+        GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(ImmutableMap.of(
+                DieId.of(1, "d", 0, 2, 0), 10,
+                DieId.of(9, "d", 1, 1, 0), 11)
+        );
+        DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
+
+        List<Roll> res = underTest.evaluate("3d6+(2r(2d8))").getRolls();
+
+        assertThat(res.size()).isEqualTo(1);
+        assertThat(values(res)).contains("10", "11");
+        assertThat(res.getFirst().getRandomElementsInRoll().stream()
+                .flatMap(Collection::stream)
+                .map(Objects::toString))
+                .contains("1de0i2r0=10∈[1...6]", "9de1i1r0=11∈[1...8]");
+        assertThat(givenDiceNumberSupplier.allStoredDiceUsed()).isTrue();
     }
 
     @Test
     void giveDiceNumber_additionalyStoredValue() throws ExpressionException {
-        GiveDiceNumberSupplier giveDiceNumberSupplier = new GiveDiceNumberSupplier(new GivenNumberSupplier(), ImmutableMap.of(
+        GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(new GivenNumberSupplier(), ImmutableMap.of(
                 DieId.of(1, "d", 0, 2, 0), 4,
                 DieId.of(9, "d", 1, 1, 0), 1,
                 DieId.of(10, "d", 1, 1, 0), 1)
         );
-        DiceEvaluator underTest = new DiceEvaluator(giveDiceNumberSupplier, 1000, 10_000, true);
+        DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
 
         List<Roll> res = underTest.evaluate("3d6+(2r(2d8))").getRolls();
 
@@ -870,7 +893,7 @@ public class DiceEvaluatorTest {
                 "9de1i0r0=8",
                 "9de1i1r0=1");
         assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[6, 6, 4] [8, 8] [8, 1]");
-        assertThat(giveDiceNumberSupplier.allStoredDiceUsed()).isFalse();
+        assertThat(givenDiceNumberSupplier.allStoredDiceUsed()).isFalse();
     }
 
     @Test

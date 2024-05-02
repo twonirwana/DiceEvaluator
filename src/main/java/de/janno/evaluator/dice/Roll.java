@@ -71,7 +71,7 @@ public class Roll {
                 .map(r -> r.getFirst().getDieId())
                 .toList();
 
-        if (diceIdsWithDuplicatedRandomElements.size() > 1) {
+        if (!diceIdsWithDuplicatedRandomElements.isEmpty()) {
             throw new IllegalStateException("Random elements must have unique dice ids but %s occurred more than once".formatted(diceIdsWithDuplicatedRandomElements));
         }
     }
