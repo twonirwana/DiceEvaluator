@@ -1,6 +1,5 @@
 package de.janno.evaluator.dice;
 
-import com.google.common.collect.ImmutableMap;
 import de.janno.evaluator.dice.random.GivenDiceNumberSupplier;
 import de.janno.evaluator.dice.random.GivenNumberSupplier;
 import de.janno.evaluator.dice.random.RandomNumberSupplier;
@@ -513,7 +512,7 @@ public class DiceEvaluatorTest {
     private static Stream<Arguments> generateErrorData() {
         return Stream.of(
                 Arguments.of("=1", "Operator = has left associativity but the left value was: empty"),
-                Arguments.of("abc", "No matching operator for 'abc', non-functional text and value names must to be surrounded by '' or []"),
+                Arguments.of("abc", "No matching operator for 'ab', non-functional text and value names must to be surrounded by '' or []"),
                 Arguments.of("1-", "Operator - has right associativity but the right value was: empty"),
                 Arguments.of("1*", "Operator * does not support unary operations"),
                 Arguments.of("*1", "Operator * does not support unary operations"),
@@ -820,9 +819,9 @@ public class DiceEvaluatorTest {
 
     @Test
     void giveDiceNumber() throws ExpressionException {
-        GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(new GivenNumberSupplier(), ImmutableMap.of(
-                DieId.of(1, "d", 0, 2, 0), 4,
-                DieId.of(9, "d", 1, 1, 0), 1)
+        GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(new GivenNumberSupplier(), List.of(
+                DiceIdAndValue.of(DieId.of(1, "d", 0, 2, 0), 4),
+                DiceIdAndValue.of(DieId.of(9, "d", 1, 1, 0), 1))
         );
         DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
 
@@ -844,14 +843,13 @@ public class DiceEvaluatorTest {
                 "9de1i0r0=8",
                 "9de1i1r0=1");
         assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[6, 6, 4] [8, 8] [8, 1]");
-        assertThat(givenDiceNumberSupplier.allStoredDiceUsed()).isTrue();
     }
 
     @Test
     void giveDiceNumberRandom() throws ExpressionException {
-        GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(ImmutableMap.of(
-                DieId.of(1, "d", 0, 2, 0), 10,
-                DieId.of(9, "d", 1, 1, 0), 11)
+        GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(List.of(
+                DiceIdAndValue.of(DieId.of(1, "d", 0, 2, 0), 10),
+                DiceIdAndValue.of(DieId.of(9, "d", 1, 1, 0), 11))
         );
         DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
 
@@ -863,15 +861,14 @@ public class DiceEvaluatorTest {
                 .flatMap(Collection::stream)
                 .map(Objects::toString))
                 .contains("1de0i2r0=10∈[1...6]", "9de1i1r0=11∈[1...8]");
-        assertThat(givenDiceNumberSupplier.allStoredDiceUsed()).isTrue();
     }
 
     @Test
     void giveDiceNumber_additionalyStoredValue() throws ExpressionException {
-        GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(new GivenNumberSupplier(), ImmutableMap.of(
-                DieId.of(1, "d", 0, 2, 0), 4,
-                DieId.of(9, "d", 1, 1, 0), 1,
-                DieId.of(10, "d", 1, 1, 0), 1)
+        GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(new GivenNumberSupplier(), List.of(
+                DiceIdAndValue.of(DieId.of(1, "d", 0, 2, 0), 4),
+                DiceIdAndValue.of(DieId.of(9, "d", 1, 1, 0), 1),
+                DiceIdAndValue.of(DieId.of(10, "d", 1, 1, 0), 1))
         );
         DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
 
@@ -893,7 +890,6 @@ public class DiceEvaluatorTest {
                 "9de1i0r0=8",
                 "9de1i1r0=1");
         assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[6, 6, 4] [8, 8] [8, 1]");
-        assertThat(givenDiceNumberSupplier.allStoredDiceUsed()).isFalse();
     }
 
     @Test
@@ -1647,6 +1643,46 @@ public class DiceEvaluatorTest {
     }
 
     @Test
+    void testNoMatch_start() {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
+        assertThatThrownBy(() -> underTest.evaluate("asefa+78901"))
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("No matching operator for 'asefa', non-functional text and value names must to be surrounded by '' or []")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(0, "asefa"));
+
+    }
+
+    @Test
+    void testNoMatch_middle() {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
+        assertThatThrownBy(() -> underTest.evaluate("123456+asefa+78901"))
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("No matching operator for 'asefa', non-functional text and value names must to be surrounded by '' or []")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(7, "asefa"));
+
+    }
+
+    @Test
+    void testNoMatch_end() {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
+        assertThatThrownBy(() -> underTest.evaluate("123456+asefa"))
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("No matching operator for 'asefa', non-functional text and value names must to be surrounded by '' or []")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(7, "asefa"));
+
+    }
+
+    @Test
+    void testNoMatch_all() {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
+        assertThatThrownBy(() -> underTest.evaluate("asefa"))
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("No matching operator for 'asefa', non-functional text and value names must to be surrounded by '' or []")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(0, "asefa"));
+
+    }
+
+    @Test
     void rollTwice_1d6() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000, 10_000, true);
 
@@ -1680,4 +1716,52 @@ public class DiceEvaluatorTest {
 
         assertThat(underTest.expressionContainsOperatorOrFunction(expression)).isEqualTo(hasOperatorOrFunction);
     }
+
+    @Test
+    void overwriteNumberSupplier() throws ExpressionException {
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
+
+        Roller roller = underTest.buildRollSupplier("2d6");
+        RollResult res = roller.roll();
+        assertThat(res.getRolls()).hasSize(1);
+        assertThat(res.getRolls().getFirst().getResultString()).isEqualTo("6, 6");
+
+        RollResult res2 = roller.roll(new GivenNumberSupplier(3, 3));
+        assertThat(res2.getRolls()).hasSize(1);
+        assertThat(res2.getRolls().getFirst().getResultString()).isEqualTo("3, 3");
+
+        RollResult res3 = roller.roll(new GivenNumberSupplier(1, 1));
+        assertThat(res3.getRolls()).hasSize(1);
+        assertThat(res3.getRolls().getFirst().getResultString()).isEqualTo("1, 1");
+
+    }
+
+    @Test
+    void givenDiceNumberSupplierCustomDice() throws ExpressionException {
+        DiceEvaluator diceEvaluator = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, true);
+
+        Roller roller = diceEvaluator.buildRollSupplier("2d[a/b/c/d]");
+        RollResult res = roller.roll();
+        assertThat(res.getRolls()).hasSize(1);
+        assertThat(res.getRolls().getFirst().getResultString()).isEqualTo("d, d");
+
+        RollResult res2 = roller.roll(new GivenNumberSupplier(1, 1));
+        assertThat(res2.getRolls()).hasSize(1);
+        assertThat(res2.getRolls().getFirst().getResultString()).isEqualTo("a, a");
+
+        List<DiceIdAndValue> givenRolls = res.getRolls().getFirst().getRandomElementsInRoll().stream()
+                .flatMap(Collection::stream)
+                .map(RandomElement::getDiceIdAndValue)
+                .toList();
+
+        GivenDiceNumberSupplier underTest = new GivenDiceNumberSupplier(new GivenNumberSupplier(1, 1), givenRolls);
+
+
+        RollResult res3 = roller.roll(underTest);
+        assertThat(res3.getRolls()).hasSize(1);
+        assertThat(res3.getRolls().getFirst().getResultString()).isEqualTo("d, d");
+
+    }
+
+
 }

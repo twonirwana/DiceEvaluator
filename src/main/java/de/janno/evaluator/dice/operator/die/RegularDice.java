@@ -2,7 +2,6 @@ package de.janno.evaluator.dice.operator.die;
 
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
-import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.util.List;
@@ -16,12 +15,10 @@ import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public final class RegularDice extends Operator {
-    private final NumberSupplier numberSupplier;
     private final int maxNumberOfDice;
 
-    public RegularDice(NumberSupplier numberSupplier, int maxNumberOfDice, int maxNumberOfElements, boolean keepChildrenRolls) {
+    public RegularDice(int maxNumberOfDice, int maxNumberOfElements, boolean keepChildrenRolls) {
         super("d", Operator.Associativity.RIGHT, getOderNumberOf(RegularDice.class), Operator.Associativity.LEFT, getOderNumberOf(RegularDice.class), maxNumberOfElements, keepChildrenRolls);
-        this.numberSupplier = numberSupplier;
         this.maxNumberOfDice = maxNumberOfDice;
     }
 
@@ -69,13 +66,13 @@ public final class RegularDice extends Operator {
                 final ImmutableList<RollElement> rollElements;
                 if (right.asInteger().isPresent()) {
                     int sidesOfDie = right.asInteger().get();
-                    List<RandomElement> roll = rollDice(numberOfDice, sidesOfDie, numberSupplier, rollId);
+                    List<RandomElement> roll = rollDice(numberOfDice, sidesOfDie, rollContext.getNumberSupplier(), rollId);
                     rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());
                     randomElements.addRandomElements(roll);
                 } else {
                     ImmutableList.Builder<RandomElement> rollBuilder = ImmutableList.builder();
                     for (int i = 0; i < numberOfDice; i++) {
-                        rollBuilder.add(pickOneOf(right.getElements(), numberSupplier, DieId.of(rollId, i, 0)));
+                        rollBuilder.add(pickOneOf(right.getElements(), rollContext.getNumberSupplier(), DieId.of(rollId, i, 0)));
                     }
                     List<RandomElement> roll = rollBuilder.build();
                     rollElements = roll.stream().map(RandomElement::getRollElement).collect(ImmutableList.toImmutableList());

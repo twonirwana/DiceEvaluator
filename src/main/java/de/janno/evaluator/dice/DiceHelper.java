@@ -63,15 +63,16 @@ public final class DiceHelper {
 
     private static RandomElement rollDie(int sides, @NonNull NumberSupplier numberSupplier, @NonNull RollId rollId, int index, int reroll) throws ExpressionException {
         final DieId dieId = DieId.of(rollId, index, reroll);
-        final int value = numberSupplier.get(0, sides, dieId);
-        return new RandomElement(new RollElement(String.valueOf(value), RollElement.NO_TAG, RollElement.NO_COLOR), 1, sides, dieId);
+        final int numberSupplierValue = numberSupplier.get(0, sides, dieId);
+        return new RandomElement(new RollElement(String.valueOf(numberSupplierValue), RollElement.NO_TAG, RollElement.NO_COLOR), 1, sides, dieId, numberSupplierValue);
 
     }
 
     public static @NonNull RandomElement pickOneOf(List<RollElement> list, @NonNull NumberSupplier numberSupplier, @NonNull DieId dieId) throws ExpressionException {
-        return new RandomElement(list.get(numberSupplier.get(0, list.size(), dieId) - 1), list.stream()
+        int numberSupplierValue = numberSupplier.get(0, list.size(), dieId);
+        return new RandomElement(list.get(numberSupplierValue - 1), list.stream()
                 .map(RollElement::getValue)
-                .collect(ImmutableList.toImmutableList()), dieId);
+                .collect(ImmutableList.toImmutableList()), dieId, numberSupplierValue);
     }
 
 }
