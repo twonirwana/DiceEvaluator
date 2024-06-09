@@ -100,7 +100,7 @@ public class Tokenizer {
         } while (currentMatch.isPresent());
         if (!current.isEmpty()) {
 
-            int nextPositionWithMatch = findNextMatch(current);
+            int nextPositionWithMatch = findNextMatchForErrorMessage(current);
             String nonMatchingString = current.substring(0, nextPositionWithMatch);
             throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(nonMatchingString, escapeCharacter),
                     ExpressionPosition.of(currentPositionWithSpace, nonMatchingString));
@@ -109,7 +109,7 @@ public class Tokenizer {
         return setOperatorType(preTokens);
     }
 
-    private int findNextMatch(String current) {
+    private int findNextMatchForErrorMessage(String current) {
         int i=0;
         while(!current.isEmpty()){
             i++;
@@ -120,7 +120,8 @@ public class Tokenizer {
                     return i;
                 }
             } catch (ExpressionException e) {
-                //ignore errors
+                //next error, we want to return only the current error
+                return i;
             }
         }
         return i;

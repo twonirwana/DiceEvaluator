@@ -1663,6 +1663,16 @@ public class DiceEvaluatorTest {
     }
 
     @Test
+    void testNoMatch_middle_returnOnlyFirstError() {
+        DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
+        assertThatThrownBy(() -> underTest.evaluate("123456+asefa999999999999999999+1"))
+                .isInstanceOfAny(ExpressionException.class)
+                .hasMessage("No matching operator for 'asefa', non-functional text and value names must to be surrounded by '' or []")
+                .extracting(e -> ((ExpressionException) e).getExpressionPosition()).isEqualTo(ExpressionPosition.of(7, "asefa"));
+
+    }
+
+    @Test
     void testNoMatch_end() {
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
         assertThatThrownBy(() -> underTest.evaluate("123456+asefa"))
@@ -1761,6 +1771,14 @@ public class DiceEvaluatorTest {
         assertThat(res3.getRolls()).hasSize(1);
         assertThat(res3.getRolls().getFirst().getResultString()).isEqualTo("d, d");
 
+    }
+
+    @Test
+    void keepChildrenRollsFalse() throws ExpressionException {
+        DiceEvaluator diceEvaluator = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, false);
+        RollResult res = diceEvaluator.evaluate("(d2)d6");
+
+        assertThat(res.getRolls().get(0).getChildrenRolls()).isEmpty();
     }
 
 
