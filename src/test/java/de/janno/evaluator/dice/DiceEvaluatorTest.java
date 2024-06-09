@@ -782,7 +782,7 @@ public class DiceEvaluatorTest {
         String randomElements = res.stream().map(r -> r.getRandomElementsInRoll().stream()
                 .flatMap(Collection::stream)
                 .toList().toString()).collect(Collectors.joining(", "));
-        String diceNumbersOut = diceNumbers.stream().map(String::valueOf).collect(Collectors.joining(", "));
+        //String diceNumbersOut = diceNumbers.stream().map(String::valueOf).collect(Collectors.joining(", "));
         //System.out.printf("Arguments.of(\"%s\", List.of(%s), \"%s\", \"%s\"),%n", diceExpression, diceNumbersOut, result, randomElements);
 
 
@@ -1778,7 +1778,7 @@ public class DiceEvaluatorTest {
         DiceEvaluator diceEvaluator = new DiceEvaluator(new GivenNumberSupplier(), 1000, 10_000, false);
         RollResult res = diceEvaluator.evaluate("(d2)d6");
 
-        assertThat(res.getRolls().get(0).getChildrenRolls()).isEmpty();
+        assertThat(res.getRolls().getFirst().getChildrenRolls()).isEmpty();
     }
 
 
