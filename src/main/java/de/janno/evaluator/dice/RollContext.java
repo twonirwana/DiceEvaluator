@@ -1,5 +1,8 @@
 package de.janno.evaluator.dice;
 
+import de.janno.evaluator.dice.random.NumberSupplier;
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,14 +16,17 @@ public class RollContext {
     private final List<String> expressionPrefix = new ArrayList<>();
     private final Map<String, Roll> currentVariables;
     private final Map<ExpressionPosition, AtomicInteger> reEvaluationNumber;
+    @Getter
+    private final NumberSupplier numberSupplier;
 
-    public RollContext() {
-        this(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+    public RollContext(NumberSupplier numberSupplier) {
+        this(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), numberSupplier);
     }
 
-    private RollContext(Map<String, Roll> variables, Map<ExpressionPosition, AtomicInteger> reEvaluationNumber) {
+    private RollContext(Map<String, Roll> variables, Map<ExpressionPosition, AtomicInteger> reEvaluationNumber, NumberSupplier numberSupplier) {
         this.currentVariables = variables;
         this.reEvaluationNumber = reEvaluationNumber;
+        this.numberSupplier = numberSupplier;
     }
 
 
@@ -30,11 +36,11 @@ public class RollContext {
 
 
     public RollContext copy() {
-        return new RollContext(new ConcurrentHashMap<>(currentVariables), new ConcurrentHashMap<>(reEvaluationNumber));
+        return new RollContext(new ConcurrentHashMap<>(currentVariables), new ConcurrentHashMap<>(reEvaluationNumber), numberSupplier);
     }
 
     public RollContext copyWithEmptyVariables() {
-        return new RollContext(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(reEvaluationNumber));
+        return new RollContext(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(reEvaluationNumber), numberSupplier);
     }
 
     public void merge(RollContext rollContext) {

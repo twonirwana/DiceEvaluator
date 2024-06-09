@@ -1,6 +1,5 @@
 package de.janno.evaluator.dice;
 
-import com.google.common.annotations.VisibleForTesting;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -11,7 +10,6 @@ public class DieId implements Comparable<DieId> {
     int dieIndex;
     int reroll;
 
-    @VisibleForTesting
     public static DieId of(int expressionPositionStartInc, String value, int reEvaluateCounter, int dieIndex, int reroll) {
         return new DieId(RollId.of(ExpressionPosition.of(expressionPositionStartInc, value), reEvaluateCounter), dieIndex, reroll);
     }

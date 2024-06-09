@@ -99,10 +99,32 @@ public class Tokenizer {
             }
         } while (currentMatch.isPresent());
         if (!current.isEmpty()) {
-            throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(current, escapeCharacter), ExpressionPosition.of(currentPositionWithSpace, current));
+
+            int nextPositionWithMatch = findNextMatchForErrorMessage(current);
+            String nonMatchingString = current.substring(0, nextPositionWithMatch);
+            throw new ExpressionException("No matching operator for '%s', non-functional text and value names must to be surrounded by %s".formatted(nonMatchingString, escapeCharacter),
+                    ExpressionPosition.of(currentPositionWithSpace, nonMatchingString));
         }
 
         return setOperatorType(preTokens);
+    }
+
+    private int findNextMatchForErrorMessage(String current) {
+        int i=0;
+        while(!current.isEmpty()){
+            i++;
+            current = current.substring(1);
+            try {
+                Optional<Token> match = getBestMatch(current, i);
+                if (match.isPresent()) {
+                    return i;
+                }
+            } catch (ExpressionException e) {
+                //next error, we want to return only the current error
+                return i;
+            }
+        }
+        return i;
     }
 
     private List<Token> setOperatorType(List<Token> in) throws ExpressionException {
@@ -169,7 +191,7 @@ public class Tokenizer {
     private Operator.OperatorType determineAndValidateOperatorType(@NonNull Token token, @Nullable Token left, @Nullable Token right, boolean lastOperatorWasUnaryLeft) throws ExpressionException {
         //todo cleanup
 
-        //has operator is already checked
+        //operator is already checked
         Operator operator = token.getOperator().orElseThrow();
         boolean leftLiteralOrBracket = left != null && (left.getLiteral().isPresent() || left.isCloseBracket() || (left.getOperator().isPresent() && lastOperatorWasUnaryLeft));
         boolean rightLiteralOrBracket = right != null && (right.getLiteral().isPresent() || right.isOpenBracket() ||

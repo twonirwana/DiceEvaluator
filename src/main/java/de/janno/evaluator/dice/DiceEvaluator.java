@@ -34,6 +34,7 @@ public class DiceEvaluator {
     private final Parameters parameters;
     private final int maxNumberOfElements;
     private final boolean keepChildrenRolls;
+    private final NumberSupplier defaultNumberSupplier;
 
     public DiceEvaluator() {
         this(new RandomNumberSupplier(), DEFAULT_MAX_NUMBER_OF_DICE, DEFAULT_MAX_NUMBER_OF_ELEMENTS, DEFAULT_KEEP_CHILDREN_ROLLS);
@@ -42,15 +43,16 @@ public class DiceEvaluator {
     public DiceEvaluator(@NonNull NumberSupplier numberSupplier, int maxNumberOfDice, int maxNumberOfElements, boolean keepChildrenRolls) {
         this.maxNumberOfElements = maxNumberOfElements;
         this.keepChildrenRolls = keepChildrenRolls;
+        this.defaultNumberSupplier = numberSupplier;
         parameters = Parameters.builder()
                 .expressionBracket(BracketPair.PARENTHESES)
                 .functionBracket(BracketPair.PARENTHESES)
                 .escapeBracket(BracketPair.APOSTROPHE)
                 .escapeBracket(BracketPair.BRACKETS)
                 .operators(ImmutableList.<Operator>builder()
-                        .add(new RegularDice(numberSupplier, maxNumberOfDice, maxNumberOfElements, keepChildrenRolls))
-                        .add(new ExplodingDice(numberSupplier, maxNumberOfDice, maxNumberOfElements, keepChildrenRolls))
-                        .add(new ExplodingAddDice(numberSupplier, maxNumberOfDice, maxNumberOfElements, keepChildrenRolls))
+                        .add(new RegularDice(maxNumberOfDice, maxNumberOfElements, keepChildrenRolls))
+                        .add(new ExplodingDice(maxNumberOfDice, maxNumberOfElements, keepChildrenRolls))
+                        .add(new ExplodingAddDice(maxNumberOfDice, maxNumberOfElements, keepChildrenRolls))
                         .add(new AddToList(maxNumberOfElements, keepChildrenRolls))
                         .add(new Concat(maxNumberOfElements, keepChildrenRolls))
                         .add(new Color(maxNumberOfElements, keepChildrenRolls))
@@ -132,27 +134,39 @@ public class DiceEvaluator {
     }
 
     private Roller createRollSupplier(String expression, List<RollBuilder> rollBuilders) {
-        return () -> {
-            RollContext rollContext = new RollContext();
-            ImmutableList<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, rollContext);
-            Optional<String> expressionPrefix = rollContext.getExpressionPrefixString();
-            if (expressionPrefix.isPresent()) {
-                //we need to add the val expression in front of the expression
-                ImmutableList.Builder<Roll> rollBuilder = ImmutableList.builder();
-                for (Roll r : rolls) {
-                    String newExpressionString = "%s, %s".formatted(expressionPrefix.get(), r.getExpression());
-                    rollBuilder.add(new Roll(newExpressionString,
-                            r.getElements(),
-                            r.getRandomElementsInRoll(),
-                            r.getChildrenRolls(),
-                            r.getExpressionPosition(),
-                            maxNumberOfElements,
-                            keepChildrenRolls));
-                }
-                rolls = rollBuilder.build();
+        return new Roller() {
+            @Override
+            public @NonNull RollResult roll() throws ExpressionException {
+                return rollWithNumberSupplier(expression, defaultNumberSupplier, rollBuilders);
             }
-            return new RollResult(expression, rolls);
+
+            @Override
+            public @NonNull RollResult roll(NumberSupplier numberSupplier) throws ExpressionException {
+                return rollWithNumberSupplier(expression, numberSupplier, rollBuilders);
+            }
         };
+    }
+
+    private RollResult rollWithNumberSupplier(String expression, NumberSupplier numberSupplier, List<RollBuilder> rollBuilders) throws ExpressionException {
+        RollContext rollContext = new RollContext(numberSupplier);
+        ImmutableList<Roll> rolls = RollBuilder.extendAllBuilder(rollBuilders, rollContext);
+        Optional<String> expressionPrefix = rollContext.getExpressionPrefixString();
+        if (expressionPrefix.isPresent()) {
+            //we need to add the val expression in front of the expression
+            ImmutableList.Builder<Roll> rollBuilder = ImmutableList.builder();
+            for (Roll r : rolls) {
+                String newExpressionString = "%s, %s".formatted(expressionPrefix.get(), r.getExpression());
+                rollBuilder.add(new Roll(newExpressionString,
+                        r.getElements(),
+                        r.getRandomElementsInRoll(),
+                        r.getChildrenRolls(),
+                        r.getExpressionPosition(),
+                        maxNumberOfElements,
+                        keepChildrenRolls));
+            }
+            rolls = rollBuilder.build();
+        }
+        return new RollResult(expression, rolls);
     }
 
     private @NonNull RollBuilder toValue(@NonNull String literal, @NonNull ExpressionPosition expressionPosition) {
@@ -269,6 +283,11 @@ public class DiceEvaluator {
             return new Roller() {
                 @Override
                 public @NonNull RollResult roll() {
+                    return new RollResult(expression, ImmutableList.of());
+                }
+
+                @Override
+                public @NonNull RollResult roll(NumberSupplier numberSupplier) throws ExpressionException {
                     return new RollResult(expression, ImmutableList.of());
                 }
             };

@@ -2,7 +2,6 @@ package de.janno.evaluator.dice.operator.die;
 
 import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.*;
-import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.NonNull;
 
 import java.math.BigDecimal;
@@ -17,12 +16,11 @@ import static de.janno.evaluator.dice.ValidatorUtil.throwNotIntegerExpression;
 import static de.janno.evaluator.dice.operator.OperatorOrder.getOderNumberOf;
 
 public final class ExplodingAddDice extends Operator {
-    private final NumberSupplier numberSupplier;
+
     private final int maxNumberOfDice;
 
-    public ExplodingAddDice(NumberSupplier numberSupplier, int maxNumberOfDice, int maxNumberOfElements, boolean keepChildrenRolls) {
+    public ExplodingAddDice(int maxNumberOfDice, int maxNumberOfElements, boolean keepChildrenRolls) {
         super("d!!", Operator.Associativity.RIGHT, getOderNumberOf(ExplodingAddDice.class), Operator.Associativity.LEFT, getOderNumberOf(ExplodingAddDice.class), maxNumberOfElements, keepChildrenRolls);
-        this.numberSupplier = numberSupplier;
         this.maxNumberOfDice = maxNumberOfDice;
     }
 
@@ -79,7 +77,7 @@ public final class ExplodingAddDice extends Operator {
                 if (sidesOfDie < 2) {
                     throw new ExpressionException(String.format("The number of sides of a die must be greater then 1 but was %d", sidesOfDie), expressionPosition);
                 }
-                final ImmutableList<RandomElement> roll = explodingDice(numberOfDice, sidesOfDie, numberSupplier, rollId, maxNumberOfElements, toExpression());
+                final ImmutableList<RandomElement> roll = explodingDice(numberOfDice, sidesOfDie, rollContext.getNumberSupplier(), rollId, maxNumberOfElements, toExpression());
                 final ImmutableList<RollElement> rollElements = sumRerollsTogether(roll);
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
