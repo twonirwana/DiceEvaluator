@@ -1,7 +1,7 @@
 package de.janno.evaluator.dice.random;
 
 import com.google.common.annotations.VisibleForTesting;
-import de.janno.evaluator.dice.DiceIdAndValue;
+import de.janno.evaluator.dice.DieIdAndValue;
 import de.janno.evaluator.dice.DieId;
 import de.janno.evaluator.dice.ExpressionException;
 import lombok.NonNull;
@@ -16,25 +16,24 @@ public class GivenDiceNumberSupplier implements NumberSupplier {
     private final NumberSupplier numberSupplier;
     private final Map<DieId, Integer> givenDiceNumbers;
 
-    public GivenDiceNumberSupplier(@NonNull List<DiceIdAndValue> givenDiceNumbers) {
+    public GivenDiceNumberSupplier(@NonNull List<DieIdAndValue> givenDiceNumbers) {
         this(new RandomNumberSupplier(), givenDiceNumbers);
     }
 
-    @VisibleForTesting
-    public GivenDiceNumberSupplier(@NonNull NumberSupplier numberSupplier, @NonNull List<DiceIdAndValue> givenDiceNumbers) {
+    public GivenDiceNumberSupplier(@NonNull NumberSupplier numberSupplier, @NonNull List<DieIdAndValue> givenDiceNumbers) {
         this.numberSupplier = numberSupplier;
         Set<DieId> allDiceIds = new HashSet<>();
         Set<DieId> duplicatedDiceIds = new HashSet<>();
-        for (DiceIdAndValue diceIdAndValue : givenDiceNumbers) {
-            if (allDiceIds.contains(diceIdAndValue.getDieId())) {
-                duplicatedDiceIds.add(diceIdAndValue.getDieId());
+        for (DieIdAndValue dieIdAndValue : givenDiceNumbers) {
+            if (allDiceIds.contains(dieIdAndValue.getDieId())) {
+                duplicatedDiceIds.add(dieIdAndValue.getDieId());
             }
-            allDiceIds.add(diceIdAndValue.getDieId());
+            allDiceIds.add(dieIdAndValue.getDieId());
         }
         if (!duplicatedDiceIds.isEmpty()) {
             throw new IllegalStateException("Duplicated dice ids: " + duplicatedDiceIds);
         }
-        this.givenDiceNumbers = givenDiceNumbers.stream().collect(Collectors.toMap(DiceIdAndValue::getDieId, DiceIdAndValue::getNumberSupplierValue));
+        this.givenDiceNumbers = givenDiceNumbers.stream().collect(Collectors.toMap(DieIdAndValue::getDieId, DieIdAndValue::getNumberSupplierValue));
     }
 
     @Override

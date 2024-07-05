@@ -29,7 +29,7 @@ public class Reroll extends Operator {
                 List<Roll> rolls = inputBuilder.extendRoll(rollContext).orElse(Collections.emptyList());
                 checkRollSize(expressionPosition, rolls, 1, 1);
                 Roll roll = rolls.getFirst();
-                RandomElementsBuilder builder = RandomElementsBuilder.ofRoll(roll).addRoll(compareTo);
+                RandomElementsBuilder builder = RandomElementsBuilder.ofRoll(roll, rollContext).addRoll(compareTo);
 
                 if (roll.getElements().stream().anyMatch(compareTo::isElementsContainsElementWithValueAndTag)) {
                     rolls = inputBuilder.extendRoll(rollContext).orElse(Collections.emptyList());

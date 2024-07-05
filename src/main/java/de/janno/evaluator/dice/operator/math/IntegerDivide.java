@@ -39,7 +39,7 @@ public final class IntegerDivide extends Operator {
                 final ImmutableList<RollElement> res = ImmutableList.of(new RollElement(String.valueOf(quotient), left.getElements().getFirst().getTag(), RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.of(left, right),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

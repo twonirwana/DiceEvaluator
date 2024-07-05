@@ -36,7 +36,7 @@ public class Tag extends Operator {
                                 .map(r -> new RollElement(r.getValue(), tag, r.getColor()))
                                 .collect(ImmutableList.toImmutableList()),
                         //tags are not applied to the random elements
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.of(left, right),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

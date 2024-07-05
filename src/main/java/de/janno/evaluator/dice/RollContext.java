@@ -1,14 +1,13 @@
 package de.janno.evaluator.dice;
 
+import com.google.common.collect.ImmutableList;
 import de.janno.evaluator.dice.random.NumberSupplier;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 public class RollContext {
@@ -18,6 +17,7 @@ public class RollContext {
     private final Map<ExpressionPosition, AtomicInteger> reEvaluationNumber;
     @Getter
     private final NumberSupplier numberSupplier;
+    private final Map<DieId, RandomElement> randomElements = new HashMap<>();
 
     public RollContext(NumberSupplier numberSupplier) {
         this(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), numberSupplier);
@@ -29,11 +29,9 @@ public class RollContext {
         this.numberSupplier = numberSupplier;
     }
 
-
     public int getNextReEvaluationNumber(ExpressionPosition expressionPosition) {
         return reEvaluationNumber.computeIfAbsent(expressionPosition, s -> new AtomicInteger(0)).getAndIncrement();
     }
-
 
     public RollContext copy() {
         return new RollContext(new ConcurrentHashMap<>(currentVariables), new ConcurrentHashMap<>(reEvaluationNumber), numberSupplier);
@@ -63,6 +61,16 @@ public class RollContext {
             return Optional.empty();
         }
         return Optional.of(String.join(", ", expressionPrefix));
+    }
+
+    public void addRandomElements(List<RandomElement> uniqueList) {
+        uniqueList.forEach(r -> randomElements.put(r.getDieId(), r));
+    }
+
+    public ImmutableList<RandomElement> getAllRandomElements (){
+        return randomElements.values().stream()
+                .sorted(Comparator.comparing(RandomElement::getDieId))
+                .collect(ImmutableList.toImmutableList());
     }
 
 }

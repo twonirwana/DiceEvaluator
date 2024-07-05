@@ -46,7 +46,7 @@ public class Cancel extends Function {
                 }
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         resultBuilder.build(),
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(typeA.getChildrenRolls())

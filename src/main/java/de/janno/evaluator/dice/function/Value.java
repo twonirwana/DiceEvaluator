@@ -41,7 +41,7 @@ public class Value extends Function {
                 String expression = toExpression();
                 rollContext.putVariable(valName, new Roll(expression,
                         rolls.get(1).getElements(),
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         rolls.get(1).getChildrenRolls(),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls));

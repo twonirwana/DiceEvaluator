@@ -1,6 +1,6 @@
 package de.janno.evaluator.dice.random;
 
-import de.janno.evaluator.dice.DiceIdAndValue;
+import de.janno.evaluator.dice.DieIdAndValue;
 import de.janno.evaluator.dice.DieId;
 import org.junit.jupiter.api.Test;
 
@@ -13,8 +13,8 @@ class GivenDiceNumberSupplierTest {
     @Test
     void setDuplicateId() {
         assertThatThrownBy(() -> new GivenDiceNumberSupplier(List.of(
-                DiceIdAndValue.of(DieId.of(1, "d", 1, 1, 1), 1),
-                DiceIdAndValue.of(DieId.of(1, "d", 1, 1, 1), 2)
+                DieIdAndValue.of(DieId.of(1, "d", 1, 1, 1), 1),
+                DieIdAndValue.of(DieId.of(1, "d", 1, 1, 1), 2)
         )))
                 .isInstanceOfAny(IllegalStateException.class)
                 .hasMessage("Duplicated dice ids: [1de1i1r1]");

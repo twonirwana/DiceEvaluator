@@ -59,7 +59,7 @@ public class Replace extends Function {
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
-                        RandomElementsBuilder.fromRolls(allRolls.build()),
+                        RandomElementsBuilder.fromRolls(allRolls.build(), rollContext),
                         childrenRollBuilder.build(),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

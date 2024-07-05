@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class DiceEvaluatorTest {
     private static final String VAMPIRE_V5 = "val('$r',3d10) val('$h',3d10) val('$s',('$r'+'$h')>=6c) val('$rt','$r'==10c) val('$ht','$h'==10c) val('$ho','$h'==1c) val('$2s',((('$rt'+'$ht'=))/2)*2) val('$ts',('$s'+'$2s'=)) concat('successes: ', '$ts', ifE('$ts',0,ifG('$ho',1,' bestial failure' , ''),''), ifE('$rt' mod 2, 1, ifE('$ht' mod 2, 1, ' messy critical', ''), ''))";
+    private static final String THE_ONE_RING = "val('$w', 0) val('$f',   replace(1d12,11, 0,12,100) ) val('$s',  0d6 ) val('$SR',  0 ) if('$w'=?1, val('$s', '$s'>=4)) val('$t', ('$s'>5)c) val('$total', '$f' + '$s'=)  concat (if('$f'=?100||'$f'=?-666, '', '$f'=?200, '  =  '_'$s'=_'  =', '  =  '_'$total'_'  ='), if('$f'=?200||'$SR'=?0, '', if('$total'>=?'$SR', ' +++ SUCCESS ! +++', ' --- FAILURE ! ---')), if('$f'=?200, '', concat(' ⬟= ', if('$f'=?0||'$f'=?-666, '\uD83D\uDC41', '$f'=?100, 'ᚠ', '$f'))), if('$total'>=?'$SR'&&'$t'>?0, ' ✶successes= '_'$t', ''))";
 
     private static Stream<Arguments> generateData() {
         return Stream.of(
@@ -653,6 +654,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("if(d6>?3,d4,d12<?3,d8)", List.of(2), "", "[3de0i0r0=2∈[1...6], 12de0i0r0=12∈[1...12]]"),
                 Arguments.of("if(d6>?3,d4,d12>?3,d8)", List.of(2), "8", "[3de0i0r0=2∈[1...6], 12de0i0r0=12∈[1...12], 19de0i0r0=8∈[1...8]]"),
                 Arguments.of("if(d6>?3,d4,d12<?3,d8,d20)", List.of(2), "20", "[3de0i0r0=2∈[1...6], 12de0i0r0=12∈[1...12], 22de0i0r0=20∈[1...20]]"),
+                Arguments.of("if(0=?1, '') 1", List.of(), "1", "[]"),
 
                 //val
                 Arguments.of("val('$a',1d6),'$a' +'$a'", List.of(3), "3, 3", "[10de0i0r0=3∈[1...6]]"),
@@ -725,8 +727,8 @@ public class DiceEvaluatorTest {
                 Arguments.of("d6 < d6", List.of(6, 5), "", "[0de0i0r0=6∈[1...6], 5de0i0r0=5∈[1...6]]"),
                 Arguments.of("d6 k d6", List.of(), "6", "[0de0i0r0=6∈[1...6], 5de0i0r0=6∈[1...6]]"),
                 Arguments.of("d6 l d6", List.of(), "6", "[0de0i0r0=6∈[1...6], 5de0i0r0=6∈[1...6]]"),
-                Arguments.of("d6 x d6", List.of(3), "6, 6, 6", "[5de0i0r0=6∈[1...6]], [5de1i0r0=6∈[1...6]], [5de2i0r0=6∈[1...6]]"),
-                Arguments.of("d6 r d6", List.of(3), "6, 6, 6", "[5de0i0r0=6∈[1...6], 5de1i0r0=6∈[1...6], 5de2i0r0=6∈[1...6]]"),
+                Arguments.of("d6 x d6", List.of(3), "6, 6, 6", "[0de0i0r0=3∈[1...6], 5de0i0r0=6∈[1...6], 5de1i0r0=6∈[1...6], 5de2i0r0=6∈[1...6]]"),
+                Arguments.of("d6 r d6", List.of(3), "6, 6, 6", "[0de0i0r0=3∈[1...6], 5de0i0r0=6∈[1...6], 5de1i0r0=6∈[1...6], 5de2i0r0=6∈[1...6]]"),
 
                 //math
                 Arguments.of("3d6=", List.of(), "18", "[1de0i0r0=6∈[1...6], 1de0i1r0=6∈[1...6], 1de0i2r0=6∈[1...6]]"),
@@ -757,8 +759,14 @@ public class DiceEvaluatorTest {
                 Arguments.of("asc(d6,d4,d6)", List.of(), "4, 6, 6", "[4de0i0r0=6∈[1...6], 7de0i0r0=4∈[1...4], 10de0i0r0=6∈[1...6]]"),
                 Arguments.of("desc(d6,d4,d6)", List.of(), "6, 6, 4", "[5de0i0r0=6∈[1...6], 8de0i0r0=4∈[1...4], 11de0i0r0=6∈[1...6]]"),
                 Arguments.of("val('$1',d6), '$1' + '$1'", List.of(), "6, 6", "[9de0i0r0=6∈[1...6]]"),
-                Arguments.of("val('$1',d6), val('$1',d4), '$1'", List.of(), "4", "[23de0i0r0=4∈[1...4]]"),
-                Arguments.of("val('$1',d6), val('$2',d4 + '$1'), '$2'", List.of(), "4, 6", "[9de0i0r0=6∈[1...6], 23de0i0r0=4∈[1...4]]")
+                Arguments.of("val('$1',d6), val('$1',d4), '$1'", List.of(), "4", "[9de0i0r0=6∈[1...6], 23de0i0r0=4∈[1...4]]"),
+                Arguments.of("val('$1',d6), val('$2',d4 + '$1'), '$2'", List.of(), "4, 6", "[9de0i0r0=6∈[1...6], 23de0i0r0=4∈[1...4]]"),
+                Arguments.of("val('$s',1), if(0=?1, '') + '$s'", List.of(), "1", "[]"),
+                Arguments.of("val('$s',1) if(0=?1, '') '$s'", List.of(), "1", "[]"),
+
+                //systems
+                Arguments.of(THE_ONE_RING, List.of(), " ⬟= ᚠ", "[34de0i0r0=12∈[1...12]]"),
+                Arguments.of(VAMPIRE_V5, List.of(), "successes: 12 messy critical", "[10de0i0r0=10∈[1...10], 10de0i1r0=10∈[1...10], 10de0i2r0=10∈[1...10], 25de0i0r0=10∈[1...10], 25de0i1r0=10∈[1...10], 25de0i2r0=10∈[1...10]]")
         );
     }
 
@@ -776,12 +784,10 @@ public class DiceEvaluatorTest {
     @MethodSource("generateStringDiceDataWithRandomElements")
     void rollDiceExpressionWithRandomElements(String diceExpression, List<Integer> diceNumbers, String expectedResult, String expectedRandomElements) throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceNumbers), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate(diceExpression).getRolls();
+        RollResult res = underTest.evaluate(diceExpression);
 
-        String result = res.stream().map(Roll::getResultStringWithTagAndColor).collect(Collectors.joining(", "));
-        String randomElements = res.stream().map(r -> r.getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)
-                .toList().toString()).collect(Collectors.joining(", "));
+        String result = res.getRolls().stream().map(Roll::getResultStringWithTagAndColor).collect(Collectors.joining(", "));
+        String randomElements = res.getAllRandomElements().toString();
         //String diceNumbersOut = diceNumbers.stream().map(String::valueOf).collect(Collectors.joining(", "));
         //System.out.printf("Arguments.of(\"%s\", List.of(%s), \"%s\", \"%s\"),%n", diceExpression, diceNumbersOut, result, randomElements);
 
@@ -792,19 +798,20 @@ public class DiceEvaluatorTest {
 
             //x will not be part of the result expression
             if (!diceExpression.contains("x")) {
-                s.assertThat(res.getFirst().getExpression().replace(" ", "")).isEqualTo(diceExpression.replace(" ", ""));
+                s.assertThat(res.getExpression().replace(" ", "")).isEqualTo(diceExpression.replace(" ", ""));
             }
         });
     }
 
     @Test
     void debug() throws ExpressionException {
-        GivenNumberSupplier numberSupplier = new GivenNumberSupplier(1);
+        GivenNumberSupplier numberSupplier = new GivenNumberSupplier(3);
         DiceEvaluator underTest = new DiceEvaluator(numberSupplier, 1000, 10_000, true);
 
         // List<Roll> res = underTest.evaluate("3d!6+(2r(2d8))");
-        List<Roll> res = underTest.evaluate("if(d6>?3,d8)").getRolls();
+        List<Roll> res = underTest.evaluate("if(d6>?3,d8) + 1").getRolls();
         System.out.println(res.size());
+        res.forEach(System.out::println);
         res.forEach(r -> System.out.println(r.getResultString()));
         System.out.println(res);
         System.out.println(res.getFirst().getExpression());
@@ -814,14 +821,13 @@ public class DiceEvaluatorTest {
         res.forEach(r -> System.out.println(r.getRandomElementsInRoll()));
         res.forEach(r -> System.out.println(getRandomElementsString(r)));
         System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
-        //   assertThat(numberSupplier.allStoredDiceUsed()).isTrue();
     }
 
     @Test
     void giveDiceNumber() throws ExpressionException {
         GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(new GivenNumberSupplier(), List.of(
-                DiceIdAndValue.of(DieId.of(1, "d", 0, 2, 0), 4),
-                DiceIdAndValue.of(DieId.of(9, "d", 1, 1, 0), 1))
+                DieIdAndValue.of(DieId.of(1, "d", 0, 2, 0), 4),
+                DieIdAndValue.of(DieId.of(9, "d", 1, 1, 0), 1))
         );
         DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
 
@@ -848,8 +854,8 @@ public class DiceEvaluatorTest {
     @Test
     void giveDiceNumberRandom() throws ExpressionException {
         GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(List.of(
-                DiceIdAndValue.of(DieId.of(1, "d", 0, 2, 0), 10),
-                DiceIdAndValue.of(DieId.of(9, "d", 1, 1, 0), 11))
+                DieIdAndValue.of(DieId.of(1, "d", 0, 2, 0), 10),
+                DieIdAndValue.of(DieId.of(9, "d", 1, 1, 0), 11))
         );
         DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
 
@@ -866,9 +872,9 @@ public class DiceEvaluatorTest {
     @Test
     void giveDiceNumber_additionalyStoredValue() throws ExpressionException {
         GivenDiceNumberSupplier givenDiceNumberSupplier = new GivenDiceNumberSupplier(new GivenNumberSupplier(), List.of(
-                DiceIdAndValue.of(DieId.of(1, "d", 0, 2, 0), 4),
-                DiceIdAndValue.of(DieId.of(9, "d", 1, 1, 0), 1),
-                DiceIdAndValue.of(DieId.of(10, "d", 1, 1, 0), 1))
+                DieIdAndValue.of(DieId.of(1, "d", 0, 2, 0), 4),
+                DieIdAndValue.of(DieId.of(9, "d", 1, 1, 0), 1),
+                DieIdAndValue.of(DieId.of(10, "d", 1, 1, 0), 1))
         );
         DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
 
@@ -1759,7 +1765,7 @@ public class DiceEvaluatorTest {
         assertThat(res2.getRolls()).hasSize(1);
         assertThat(res2.getRolls().getFirst().getResultString()).isEqualTo("a, a");
 
-        List<DiceIdAndValue> givenRolls = res.getRolls().getFirst().getRandomElementsInRoll().stream()
+        List<DieIdAndValue> givenRolls = res.getRolls().getFirst().getRandomElementsInRoll().stream()
                 .flatMap(Collection::stream)
                 .map(RandomElement::getDiceIdAndValue)
                 .toList();

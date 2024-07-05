@@ -52,7 +52,7 @@ public class KeepHighest extends Operator {
                                 .addAll(keep)
                                 .addAll(otherTagElements)
                                 .build(),
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.of(left, right),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

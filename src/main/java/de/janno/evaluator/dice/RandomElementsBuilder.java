@@ -16,24 +16,26 @@ import java.util.stream.Collectors;
 @Getter
 public class RandomElementsBuilder {
     private final List<RandomElement> randomElements = new ArrayList<>();
+    private final RollContext rollContext;
 
-    private RandomElementsBuilder() {
+    private RandomElementsBuilder(@NonNull RollContext rollContext) {
+        this.rollContext = rollContext;
     }
 
-    public static ImmutableList<ImmutableList<RandomElement>> fromRolls(@NonNull Collection<Roll> rolls) {
-        return ofRolls(rolls).build();
+    public static ImmutableList<ImmutableList<RandomElement>> fromRolls(@NonNull Collection<Roll> rolls, @NonNull RollContext rollContext) {
+        return ofRolls(rolls, rollContext).build();
     }
 
-    public static RandomElementsBuilder empty() {
-        return new RandomElementsBuilder();
+    public static RandomElementsBuilder empty(@NonNull RollContext rollContext) {
+        return new RandomElementsBuilder(rollContext);
     }
 
-    public static RandomElementsBuilder ofRoll(@NonNull Roll roll) {
-        return ofRolls(List.of(roll));
+    public static RandomElementsBuilder ofRoll(@NonNull Roll roll, @NonNull RollContext rollContext) {
+        return ofRolls(List.of(roll), rollContext);
     }
 
-    public static RandomElementsBuilder ofRolls(@NonNull Collection<Roll> rolls) {
-        RandomElementsBuilder builder = new RandomElementsBuilder();
+    public static RandomElementsBuilder ofRolls(@NonNull Collection<Roll> rolls, @NonNull RollContext rollContext) {
+        RandomElementsBuilder builder = new RandomElementsBuilder(rollContext);
         rolls.forEach(r -> builder.addRandomElements(r.getRandomElementsInRoll().stream().flatMap(Collection::stream).toList()));
         return builder;
     }
@@ -70,6 +72,8 @@ public class RandomElementsBuilder {
                 dieIdIndexMap.put(re.getDieId(), index);
             }
         }
+
+        rollContext.addRandomElements(uniqueList);
 
         List<RollId> rollIds = uniqueList.stream()
                 .map(RandomElement::getDieId)

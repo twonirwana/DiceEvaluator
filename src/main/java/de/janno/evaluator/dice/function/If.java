@@ -30,7 +30,7 @@ public class If extends Function {
                 if (checkIfTrue.isEmpty()) {
                     throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()), expressionPosition);
                 }
-                RandomElementsBuilder booleanRandomElements = RandomElementsBuilder.empty();
+                RandomElementsBuilder booleanRandomElements = RandomElementsBuilder.empty(rollContext);
                 RollContext trueContext = rollContext.copy();
                 Optional<List<Roll>> returnIfTrue = arguments.get(1).extendRoll(trueContext);
 
@@ -98,14 +98,7 @@ public class If extends Function {
                         return Optional.of(resultBuilder.build());
                     }
                 }
-
-                return Optional.of(ImmutableList.of(new Roll(toExpression(), ImmutableList.of(),
-                        booleanRandomElements
-                                .build(),
-                        //todo child rolls?
-                        ImmutableList.of(),
-                        expressionPosition,
-                        maxNumberOfElements, keepChildrenRolls)));
+                return Optional.empty();
             }
 
             @Override

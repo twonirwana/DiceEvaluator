@@ -34,7 +34,7 @@ public final class Multiply extends Operator {
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.of(left, right),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

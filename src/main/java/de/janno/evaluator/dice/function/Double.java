@@ -42,7 +42,7 @@ public class Double extends Function {
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rollElements,
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.<Roll>builder()
                                 .addAll(input.getChildrenRolls())
                                 .addAll(toDuplicate.getChildrenRolls())
