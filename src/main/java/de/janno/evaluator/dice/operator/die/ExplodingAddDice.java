@@ -46,7 +46,7 @@ public final class ExplodingAddDice extends Operator {
                 List<Roll> rolls = extendAllBuilder(operands, rollContext);
                 checkRollSize(expressionPosition, rolls, 1, 2);
 
-                RandomElementsBuilder randomElements = RandomElementsBuilder.empty();
+                RandomElementsBuilder randomElements = RandomElementsBuilder.empty(rollContext);
                 final RollId rollId = RollId.of(expressionPosition, rollContext.getNextReEvaluationNumber(expressionPosition));
 
                 final int numberOfDice;

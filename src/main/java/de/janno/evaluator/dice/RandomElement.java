@@ -61,7 +61,7 @@ public class RandomElement {
         }
     }
 
-    public DiceIdAndValue getDiceIdAndValue() {
-        return DiceIdAndValue.of(dieId, numberSupplierValue);
+    public DieIdAndValue getDiceIdAndValue() {
+        return DieIdAndValue.of(dieId, numberSupplierValue);
     }
 }

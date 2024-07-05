@@ -27,7 +27,7 @@ public abstract class AbstractIf extends Function {
                 Roll input = rolls.getFirst();
 
                 int counter = 1;
-                RandomElementsBuilder randomElementsBuilder = RandomElementsBuilder.ofRoll(input);
+                RandomElementsBuilder randomElementsBuilder = RandomElementsBuilder.ofRoll(input, rollContext);
                 while (counter < rolls.size() - 1) {
                     Roll compareTo = rolls.get(counter);
                     Roll trueResult = rolls.get(counter + 1);

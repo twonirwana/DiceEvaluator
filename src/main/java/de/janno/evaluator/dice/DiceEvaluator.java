@@ -166,7 +166,7 @@ public class DiceEvaluator {
             }
             rolls = rollBuilder.build();
         }
-        return new RollResult(expression, rolls);
+        return new RollResult(expression, rolls, rollContext.getAllRandomElements());
     }
 
     private @NonNull RollBuilder toValue(@NonNull String literal, @NonNull ExpressionPosition expressionPosition) {
@@ -283,12 +283,12 @@ public class DiceEvaluator {
             return new Roller() {
                 @Override
                 public @NonNull RollResult roll() {
-                    return new RollResult(expression, ImmutableList.of());
+                    return new RollResult(expression, ImmutableList.of(), ImmutableList.of());
                 }
 
                 @Override
-                public @NonNull RollResult roll(NumberSupplier numberSupplier) throws ExpressionException {
-                    return new RollResult(expression, ImmutableList.of());
+                public @NonNull RollResult roll(NumberSupplier numberSupplier) {
+                    return new RollResult(expression, ImmutableList.of(), ImmutableList.of());
                 }
             };
         }

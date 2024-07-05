@@ -38,7 +38,7 @@ public class GreaterThanFilter extends Operator {
                         .collect(ImmutableList.toImmutableList());
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.of(left, right),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

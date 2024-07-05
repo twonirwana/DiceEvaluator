@@ -30,7 +30,7 @@ public class Color extends Operator {
                 checkContainsSingleElement(expressionPosition, right, "second argument");
                 String color = right.getElements().getFirst().getValue();
                 //colors are applied to the random elements, so they can be used for dice images
-                RandomElementsBuilder builder = RandomElementsBuilder.empty();
+                RandomElementsBuilder builder = RandomElementsBuilder.empty(rollContext);
                 rolls.forEach(r -> builder.addWithColor(r, color));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         left.getElements().stream()

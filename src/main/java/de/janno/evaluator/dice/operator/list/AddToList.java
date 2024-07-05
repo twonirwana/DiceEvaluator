@@ -27,7 +27,7 @@ public final class AddToList extends Operator {
                 if (rolls.size() == 1) {
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),
                             rolls.getFirst().getElements(),
-                            RandomElementsBuilder.fromRolls(rolls),
+                            RandomElementsBuilder.fromRolls(rolls, rollContext),
                             ImmutableList.of(rolls.getFirst()),
                             expressionPosition,
                             maxNumberOfElements, keepChildrenRolls)));
@@ -41,7 +41,7 @@ public final class AddToList extends Operator {
                         .build();
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.of(left, right),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

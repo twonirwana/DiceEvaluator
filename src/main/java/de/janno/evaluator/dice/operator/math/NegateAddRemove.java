@@ -35,7 +35,7 @@ public final class NegateAddRemove extends Operator {
                             .collect(ImmutableList.toImmutableList());
                     return Optional.of(ImmutableList.of(new Roll(toExpression(),
                             negated,
-                            RandomElementsBuilder.fromRolls(rolls),
+                            RandomElementsBuilder.fromRolls(rolls, rollContext),
                             ImmutableList.of(right),
                             expressionPosition,
                             maxNumberOfElements, keepChildrenRolls)));
@@ -72,7 +72,7 @@ public final class NegateAddRemove extends Operator {
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         resultBuilder.build(),
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.of(left, right),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

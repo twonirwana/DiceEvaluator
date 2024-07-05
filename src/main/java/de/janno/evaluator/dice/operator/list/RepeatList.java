@@ -47,7 +47,7 @@ public class RepeatList extends Operator {
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         rolls.stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList()),
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         rolls,
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

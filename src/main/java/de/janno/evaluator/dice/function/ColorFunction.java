@@ -33,7 +33,7 @@ public class ColorFunction extends Function {
                 Roll p2 = rolls.get(1);
                 checkContainsSingleElement(expressionPosition, p2, "second argument");
                 String color = p2.getElements().getFirst().getValue();
-                RandomElementsBuilder builder = RandomElementsBuilder.empty();
+                RandomElementsBuilder builder = RandomElementsBuilder.empty(rollContext);
                 rolls.forEach(r -> builder.addWithColor(r, color));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         p1.getElements().stream()

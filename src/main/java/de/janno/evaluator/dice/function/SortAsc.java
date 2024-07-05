@@ -29,7 +29,7 @@ public class SortAsc extends Function {
                         .collect(ImmutableList.toImmutableList());
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         res,
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.copyOf(rolls),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

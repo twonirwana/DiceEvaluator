@@ -37,7 +37,7 @@ public final class RegularDice extends Operator {
                 final String expression;
                 final RollId rollId = RollId.of(expressionPosition, rollContext.getNextReEvaluationNumber(expressionPosition));
 
-                RandomElementsBuilder randomElements = RandomElementsBuilder.empty();
+                RandomElementsBuilder randomElements = RandomElementsBuilder.empty(rollContext);
                 if (rolls.size() == 1) {
                     right = rolls.getFirst();
                     randomElements.addRoll(right);

@@ -29,7 +29,7 @@ public class ConcatFunction extends Function {
                         .collect(Collectors.joining());
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         ImmutableList.of(new RollElement(joined, RollElement.NO_TAG, RollElement.NO_COLOR)),
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.copyOf(rolls), expressionPosition, maxNumberOfElements, keepChildrenRolls)));
             }
 

@@ -32,7 +32,7 @@ public class EqualBool extends Operator {
                 ImmutableList<RollElement> diceResult = ImmutableList.of(new RollElement(String.valueOf(isEqual), RollElement.NO_TAG, RollElement.NO_COLOR));
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         diceResult,
-                        RandomElementsBuilder.fromRolls(rolls),
+                        RandomElementsBuilder.fromRolls(rolls, rollContext),
                         ImmutableList.of(left, right),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));

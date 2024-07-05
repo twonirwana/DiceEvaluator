@@ -4,7 +4,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 @Value(staticConstructor = "of")
-public class DiceIdAndValue {
+public class DieIdAndValue {
     @NonNull
     DieId dieId;
 
