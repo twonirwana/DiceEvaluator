@@ -9,8 +9,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -611,12 +612,12 @@ public class DiceEvaluatorTest {
     private static Stream<Arguments> generateRandomDiceData() {
         return Stream.of(
                 Arguments.of("ifE(1d20,1d20,1d20)", List.of(1, 1, 2), List.of(List.of("1"), List.of("1"), List.of("2"))),
-                Arguments.of("ifE(1d20,1d20,1d20)", List.of(3, 2), List.of(List.of("3"), List.of("2"))),
-                Arguments.of("ifE(1d20,1d20,1d20,1d20)", List.of(3, 4, 2, 4), List.of(List.of("3"), List.of("4"), List.of("4"))),
+                Arguments.of("ifE(1d20,1d20,1d20)", List.of(3, 2), List.of(List.of("3"), List.of("2"), List.of("20"))),
+                Arguments.of("ifE(1d20,1d20,1d20,1d20)", List.of(3, 4, 2, 4), List.of(List.of("3"), List.of("4"), List.of("2"), List.of("4"))),
                 Arguments.of("ifE(1d20,1,2)", List.of(1, 1, 2), List.of(List.of("1"))),
                 Arguments.of("ifE(1d20,2,3)", List.of(3, 2), List.of(List.of("3"))),
-                Arguments.of("ifE(1d20,4,1d20,4)", List.of(3, 4, 2, 4), List.of(List.of("3"))),
-                Arguments.of("ifE(3,4,1d20,4)", List.of(3, 4, 2, 4), List.of()),
+                Arguments.of("ifE(1d20,4,1d20,4)", List.of(3, 4, 2, 4), List.of(List.of("3"), List.of("4"))),
+                Arguments.of("ifE(3,4,1d20,4)", List.of(3, 4, 2, 4), List.of(List.of("3"))),
                 Arguments.of("1d6 + 3d20 + 10", List.of(3, 2, 1, 4), List.of(List.of("3"), List.of("2", "1", "4")))
         );
     }
@@ -771,13 +772,29 @@ public class DiceEvaluatorTest {
     }
 
     private static String getRandomElementsString(Roll roll) {
-        return roll.getRandomElementsInRoll().stream()
+        return groupRandomElements(roll).stream()
                 .map(l -> l.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
                         .toList())
                 .map(List::toString)
                 .collect(Collectors.joining(" "));
+    }
+
+    private static List<List<RandomElement>> groupRandomElements(Roll roll) {
+        List<RollId> rollIds = roll.getRandomElementsInRoll().stream()
+                .map(RandomElement::getDieId)
+                .map(DieId::getRollId)
+                .distinct()
+                .sorted()
+                .toList();
+
+        Map<RollId, List<RandomElement>> rollIdListMap = roll.getRandomElementsInRoll().stream()
+                .collect(Collectors.groupingBy(r -> r.getDieId().getRollId()));
+
+        return rollIds.stream()
+                .map(rid -> rollIdListMap.get(rid).stream().sorted(Comparator.comparing(RandomElement::getDieId)).toList())
+                .toList();
     }
 
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2},{3}")
@@ -809,18 +826,18 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(numberSupplier, 1000, 10_000, true);
 
         // List<Roll> res = underTest.evaluate("3d!6+(2r(2d8))");
-        List<Roll> res = underTest.evaluate("if(d6>?3,d8) + 1").getRolls();
-        System.out.println(res.size());
-        res.forEach(System.out::println);
-        res.forEach(r -> System.out.println(r.getResultString()));
+        RollResult res = underTest.evaluate("if(d6>?3,d8) + 1");
+        System.out.println(res.getRolls().size());
+        res.getRolls().forEach(System.out::println);
+        res.getRolls().forEach(r -> System.out.println(r.getResultString()));
         System.out.println(res);
-        System.out.println(res.getFirst().getExpression());
-        System.out.println(res.stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.stream().flatMap(Collection::stream)
-                        .map(re -> re.getDieId() + "=" + re.getRollElement().getValue()))
+        System.out.println(res.getExpression());
+        System.out.println(res.getAllRandomElements().stream()
+                .map(re -> re.getDieId() + "=" + re.getRollElement().getValue())
                 .collect(Collectors.joining(", ")));
-        res.forEach(r -> System.out.println(r.getRandomElementsInRoll()));
-        res.forEach(r -> System.out.println(getRandomElementsString(r)));
-        System.out.println(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
+        res.getRolls().forEach(r -> System.out.println(r.getRandomElementsInRoll()));
+        res.getRolls().forEach(r -> System.out.println(getRandomElementsString(r)));
+        System.out.println(res.getRolls().stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
     }
 
     @Test
@@ -831,15 +848,14 @@ public class DiceEvaluatorTest {
         );
         DiceEvaluator underTest = new DiceEvaluator(givenDiceNumberSupplier, 1000, 10_000, true);
 
-        List<Roll> res = underTest.evaluate("3d6+(2r(2d8))").getRolls();
+        RollResult res = underTest.evaluate("3d6+(2r(2d8))");
 
-        assertThat(res.size()).isEqualTo(1);
-        assertThat(values(res)).containsExactly("6", "6", "4", "8", "8", "8", "1");
-        assertThat(res.getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)
+        assertThat(res.getRolls().size()).isEqualTo(1);
+        assertThat(values(res.getRolls())).containsExactly("6", "6", "4", "8", "8", "8", "1");
+        assertThat(res.getAllRandomElements().stream()
                 .toList().toString())
                 .isEqualTo("[1de0i0r0=6∈[1...6], 1de0i1r0=6∈[1...6], 1de0i2r0=4∈[1...6], 9de0i0r0=8∈[1...8], 9de0i1r0=8∈[1...8], 9de1i0r0=8∈[1...8], 9de1i1r0=1∈[1...8]]");
-        assertThat((res.stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.stream().flatMap(Collection::stream)
+        assertThat((res.getRolls().stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.stream()
                 .map(re -> re.getDieId() + "=" + re.getRollElement().getValue())))).containsExactly(
                 "1de0i0r0=6",
                 "1de0i1r0=6",
@@ -848,7 +864,7 @@ public class DiceEvaluatorTest {
                 "9de0i1r0=8",
                 "9de1i0r0=8",
                 "9de1i1r0=1");
-        assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[6, 6, 4] [8, 8] [8, 1]");
+        assertThat(getRandomElementsString(res.getRolls().getFirst())).isEqualTo("[6, 6, 4] [8, 8] [8, 1]");
     }
 
     @Test
@@ -864,7 +880,6 @@ public class DiceEvaluatorTest {
         assertThat(res.size()).isEqualTo(1);
         assertThat(values(res)).contains("10", "11");
         assertThat(res.getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)
                 .map(Objects::toString))
                 .contains("1de0i2r0=10∈[1...6]", "9de1i1r0=11∈[1...8]");
     }
@@ -883,10 +898,9 @@ public class DiceEvaluatorTest {
         assertThat(res.size()).isEqualTo(1);
         assertThat(values(res)).containsExactly("6", "6", "4", "8", "8", "8", "1");
         assertThat(res.getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)
                 .toList().toString())
                 .isEqualTo("[1de0i0r0=6∈[1...6], 1de0i1r0=6∈[1...6], 1de0i2r0=4∈[1...6], 9de0i0r0=8∈[1...8], 9de0i1r0=8∈[1...8], 9de1i0r0=8∈[1...8], 9de1i1r0=1∈[1...8]]");
-        assertThat((res.stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.stream().flatMap(Collection::stream)
+        assertThat((res.stream().map(Roll::getRandomElementsInRoll).flatMap(r -> r.stream()
                 .map(re -> re.getDieId() + "=" + re.getRollElement().getValue())))).containsExactly(
                 "1de0i0r0=6",
                 "1de0i1r0=6",
@@ -911,12 +925,12 @@ public class DiceEvaluatorTest {
     void valRandomElementsInCorrectOrder() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5, 6), 1000, 10_000, true);
 
-        List<Roll> res = underTest.evaluate("val('$r',color(1d9,'blue')) val('$h',color(1d10,'purple_dark')) val('$s',('$r'+'$h')>=6c) val('$rt','$r'==10c) val('$ht','$h'==10c) val('$ho','$h'==1c) val('$2s',((('$rt'+'$ht'=))/2)*2) val('$ts',('$s'+'$2s'=)) concat('successes: ', '$ts', ifE('$ts',0,ifG('$ho',1,' bestial failure' , ''),''), ifE('$rt' mod 2, 1, ifE('$ht' mod 2, 1, ' messy critical', ''), ''))").getRolls();
+        RollResult res = underTest.evaluate("val('$r',color(1d9,'blue')) val('$h',color(1d10,'purple_dark')) val('$s',('$r'+'$h')>=6c) val('$rt','$r'==10c) val('$ht','$h'==10c) val('$ho','$h'==1c) val('$2s',((('$rt'+'$ht'=))/2)*2) val('$ts',('$s'+'$2s'=)) concat('successes: ', '$ts', ifE('$ts',0,ifG('$ho',1,' bestial failure' , ''),''), ifE('$rt' mod 2, 1, ifE('$ht' mod 2, 1, ' messy critical', ''), ''))");
 
-        assertThat(values(res)).containsExactly("successes: 0, blue:1, purple_dark:1");
-        assertThat(res.size()).isEqualTo(1);
-        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[[16de0i0r0=1∈[1...9]], [44de0i0r0=2∈[1...10]]]");
-        assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[1] [2]");
+        assertThat(values(res.getRolls())).containsExactly("successes: 0, blue:1, purple_dark:1");
+        assertThat(res.getRolls().size()).isEqualTo(1);
+        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[16de0i0r0=1∈[1...9]], [44de0i0r0=2∈[1...10]]]");
+        assertThat(getRandomElementsString(res.getRolls().getFirst())).isEqualTo("[1] [2]");
     }
 
     @ParameterizedTest(name = "{index} input:{0}, diceRolls:{1} -> {2}")
@@ -936,7 +950,7 @@ public class DiceEvaluatorTest {
         List<Roll> res = underTest.evaluate("val('1',1d6) if('1' =? 1,  '1' col 'red', '1')").getRolls();
 
         assertThat(res.getFirst().getRandomElementsInRoll()).hasSize(1);
-        assertThat(res.getFirst().getRandomElementsInRoll().getFirst().getFirst().getRollElement().getColor()).isEqualTo("red");
+        assertThat(res.getFirst().getRandomElementsInRoll().getFirst().getRollElement().getColor()).isEqualTo("red");
     }
 
     @Test
@@ -954,8 +968,7 @@ public class DiceEvaluatorTest {
 
         List<Roll> res = underTest.evaluate("(2d6=)d(2d6=)").getRolls();
         assertThat(res.getFirst().getElements()).hasSize(5);
-        assertThat(res.getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)).hasSize(9);
+        assertThat(res.getFirst().getRandomElementsInRoll()).hasSize(9);
         assertThat(res.getFirst().getChildrenRolls().stream().mapToLong(this::getNumberOfChildrenRolls).sum()).isEqualTo(0);
     }
 
@@ -965,8 +978,7 @@ public class DiceEvaluatorTest {
 
         List<Roll> res = underTest.evaluate("(2d6=)d(2d6=)").getRolls();
         assertThat(res.getFirst().getElements()).hasSize(5);
-        assertThat(res.getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)).hasSize(9);
+        assertThat(res.getFirst().getRandomElementsInRoll()).hasSize(9);
         assertThat(res.getFirst().getChildrenRolls().stream().mapToLong(this::getNumberOfChildrenRolls).sum()).isEqualTo(6);
     }
 
@@ -1161,7 +1173,6 @@ public class DiceEvaluatorTest {
         assertThat(values(res)).containsExactlyElementsOf(expected);
         assertThat(res.stream()
                 .flatMap(e -> e.getRandomElementsInRoll().stream())
-                .flatMap(Collection::stream)
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getColor)
         ).allMatch(expectedColor::equals);
@@ -1201,9 +1212,9 @@ public class DiceEvaluatorTest {
     @MethodSource("generateRandomDiceData")
     void getRandomElements(String expression, List<Integer> diceThrows, List<List<String>> expectedRandomElements) throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(diceThrows), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate(expression).getRolls();
+        RollResult res = underTest.evaluate(expression);
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(rl -> rl.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
@@ -1215,9 +1226,9 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements_regularDice() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("(2d4=)d6").getRolls();
+        RollResult res = underTest.evaluate("(2d4=)d6");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(rl -> rl.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
@@ -1225,7 +1236,7 @@ public class DiceEvaluatorTest {
                 ))
                 .containsExactly(List.of("1", "2"), List.of("4", "4", "5"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(4, 4), List.of(6, 6, 6));
     }
@@ -1233,9 +1244,9 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements_customDice() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 4, 4, 5), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("(2d4=)d[a/b/c/d/e/f]").getRolls();
+        RollResult res = underTest.evaluate("(2d4=)d[a/b/c/d/e/f]");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(rl -> rl.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
@@ -1243,23 +1254,22 @@ public class DiceEvaluatorTest {
                 ))
                 .containsExactly(List.of("1", "2"), List.of("d", "d", "e"));
 
-        assertThat(res.stream().map(r -> r.getRandomElementsInRoll().toString()))
-                .containsExactly("[[2de0i0r0=1∈[1...4], 2de0i1r0=2∈[1...4]], [6de0i0r0=d∈[a, b, c, d, e, f], 6de0i1r0=d∈[a, b, c, d, e, f], 6de0i2r0=e∈[a, b, c, d, e, f]]]");
+        assertThat(res.getGroupedRandomElements().toString())
+                .isEqualTo("[[2de0i0r0=1∈[1...4], 2de0i1r0=2∈[1...4]], [6de0i0r0=d∈[a, b, c, d, e, f], 6de0i1r0=d∈[a, b, c, d, e, f], 6de0i2r0=e∈[a, b, c, d, e, f]]]");
     }
 
     @Test
     void getRandomElements_value() throws ExpressionException {
-        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 10, 10), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("val('$1',d100) ifG('$1', 95, (d100 + '$1'=), ifL('$1', 6, ('$1' - d100=)))").getRolls();
+        DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(5, 10, 11), 1000, 10_000, true);
+        RollResult res = underTest.evaluate("val('$1',d100) ifG('$1', 95, (d100 + '$1'=), ifL('$1', 6, ('$1' - d100=)))");
 
-        assertThat(res).hasSize(1);
-        assertThat(res.getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("-5");
+        assertThat(res.getRolls()).hasSize(1);
+        assertThat(res.getRolls().getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("-6");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream()
-                        .flatMap(Collection::stream))
+        assertThat(res.getAllRandomElements().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getValue))
-                .containsExactly("5", "10");
+                .containsExactly("5", "10", "11");
 
     }
 
@@ -1267,12 +1277,12 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements_explode() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 2, 8, 3, 4), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("exp(2d6,1d8,1d10)").getRolls();
+        RollResult res = underTest.evaluate("exp(2d6,1d8,1d10)");
 
 
-        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("1", "2", "3", "4");
+        assertThat(res.getRolls().stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("1", "2", "3", "4");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(rl -> rl.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
@@ -1280,7 +1290,7 @@ public class DiceEvaluatorTest {
                 ))
                 .containsExactly(List.of("1", "2"), List.of("3", "4"), List.of("2"), List.of("8"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(6, 6), List.of(6, 6), List.of(8), List.of(10));
     }
@@ -1288,12 +1298,12 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements_replace_no_match() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 5), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("replace(3d6,[6],2d20)").getRolls();
+        RollResult res = underTest.evaluate("replace(3d6,[6],2d20)");
 
 
-        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("1", "2", "5");
+        assertThat(res.getRolls().stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("1", "2", "5");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(rl -> rl.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
@@ -1301,7 +1311,7 @@ public class DiceEvaluatorTest {
                 ))
                 .containsExactly(List.of("1", "2", "5"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(6, 6, 6));
     }
@@ -1309,11 +1319,11 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements_replace() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 5, 19, 18, 17, 16), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("replace(3d6,[1,5],2d20)").getRolls();
+        RollResult res = underTest.evaluate("replace(3d6,[1,5],2d20)");
 
-        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("19", "18", "2", "17", "16");
+        assertThat(res.getRolls().stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("19", "18", "2", "17", "16");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(rl -> rl.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
@@ -1321,7 +1331,7 @@ public class DiceEvaluatorTest {
                 ))
                 .containsExactly(List.of("1", "2", "5"), List.of("19", "18"), List.of("17", "16"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(6, 6, 6), List.of(20, 20), List.of(20, 20));
     }
@@ -1329,11 +1339,11 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements_replaceRollFind() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 1, 2, 3), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("replace(1d6, 1d6, 1d6, 1d8, 1d10)").getRolls();
+        RollResult res = underTest.evaluate("replace(1d6, 1d6, 1d6, 1d8, 1d10)");
 
-        assertThat(res.stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("2");
+        assertThat(res.getRolls().stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue)).containsExactly("2");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(rl -> rl.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
@@ -1341,7 +1351,7 @@ public class DiceEvaluatorTest {
                 ))
                 .containsExactly(List.of("1"), List.of("1"), List.of("2"), List.of("3"));
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(6), List.of(6), List.of(6), List.of(8));
     }
@@ -1349,74 +1359,70 @@ public class DiceEvaluatorTest {
     @Test
     void separatorTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("1d6,1d8").getRolls();
+        RollResult res = underTest.evaluate("1d6,1d8");
 
-        assertThat(res).hasSize(2);
-        assertThat(res.getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("1");
-        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("2");
+        assertThat(res.getRolls()).hasSize(2);
+        assertThat(res.getRolls().getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("1");
+        assertThat(res.getRolls().get(1).getElements().stream().map(RollElement::getValue)).containsExactly("2");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .flatMap(Collection::stream)
+        assertThat(res.getAllRandomElements().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getValue))
                 .containsExactly("1", "2");
-        assertThat(res.stream().map(Roll::getExpression))
+        assertThat(res.getRolls().stream().map(Roll::getExpression))
                 .containsExactly("1d6", "1d8");
     }
 
     @Test
     void spaceSeparatorTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("1d6 1d8").getRolls();
+        RollResult res = underTest.evaluate("1d6 1d8");
 
-        assertThat(res).hasSize(2);
-        assertThat(res.getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("1");
-        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("2");
+        assertThat(res.getRolls()).hasSize(2);
+        assertThat(res.getRolls().getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("1");
+        assertThat(res.getRolls().get(1).getElements().stream().map(RollElement::getValue)).containsExactly("2");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .flatMap(Collection::stream)
+        assertThat(res.getAllRandomElements().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getValue))
                 .containsExactly("1", "2");
-        assertThat(res.stream().map(Roll::getExpression))
+        assertThat(res.getRolls().stream().map(Roll::getExpression))
                 .containsExactly("1d6", "1d8");
     }
 
     @Test
     void getRandomElements_Repeat() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("5x1d6").getRolls();
+        RollResult res = underTest.evaluate("5x1d6");
 
-        assertThat(res).hasSize(5);
-        assertThat(res.getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("1");
-        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("2");
-        assertThat(res.get(2).getElements().stream().map(RollElement::getValue)).containsExactly("3");
-        assertThat(res.get(3).getElements().stream().map(RollElement::getValue)).containsExactly("4");
-        assertThat(res.get(4).getElements().stream().map(RollElement::getValue)).containsExactly("5");
+        assertThat(res.getRolls()).hasSize(5);
+        assertThat(res.getRolls().getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("1");
+        assertThat(res.getRolls().get(1).getElements().stream().map(RollElement::getValue)).containsExactly("2");
+        assertThat(res.getRolls().get(2).getElements().stream().map(RollElement::getValue)).containsExactly("3");
+        assertThat(res.getRolls().get(3).getElements().stream().map(RollElement::getValue)).containsExactly("4");
+        assertThat(res.getRolls().get(4).getElements().stream().map(RollElement::getValue)).containsExactly("5");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .flatMap(Collection::stream)
+        assertThat(res.getAllRandomElements().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getValue))
                 .containsExactly("1", "2", "3", "4", "5");
-        assertThat(res.stream().map(Roll::getExpression))
+        assertThat(res.getRolls().stream().map(Roll::getExpression))
                 .containsExactly("1d6", "1d6", "1d6", "1d6", "1d6");
     }
 
     @Test
     void getRandomElements_ListRepeat() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(1, 2, 3, 4, 5), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("5r1d6").getRolls();
+        RollResult res = underTest.evaluate("5r1d6");
 
-        assertThat(res).hasSize(1);
-        assertThat(res.getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("1", "2", "3", "4", "5");
+        assertThat(res.getRolls()).hasSize(1);
+        assertThat(res.getRolls().getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("1", "2", "3", "4", "5");
 
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
-                .flatMap(Collection::stream)
+        assertThat(res.getAllRandomElements().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getValue))
                 .containsExactly("1", "2", "3", "4", "5");
-        assertThat(res.getFirst().getExpression()).isEqualTo("5r1d6");
+        assertThat(res.getRolls().getFirst().getExpression()).isEqualTo("5r1d6");
     }
 
     @Test
@@ -1424,17 +1430,17 @@ public class DiceEvaluatorTest {
         //roll 4d6, reroll 1s once, drop lowest, rolled three times
 
         DiceEvaluator underTest = new DiceEvaluator(new RandomNumberSupplier(0L), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("3x4d6rr1k3").getRolls();
+        RollResult res = underTest.evaluate("3x4d6rr1k3");
 
-        assertThat(res).hasSize(3);
-        assertThat(res.getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("6", "3", "1");
-        assertThat(res.get(1).getElements().stream().map(RollElement::getValue)).containsExactly("6", "3", "3");
-        assertThat(res.get(2).getElements().stream().map(RollElement::getValue)).containsExactly("4", "4", "3");
+        assertThat(res.getRolls()).hasSize(3);
+        assertThat(res.getRolls().getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("6", "3", "1");
+        assertThat(res.getRolls().get(1).getElements().stream().map(RollElement::getValue)).containsExactly("6", "3", "3");
+        assertThat(res.getRolls().get(2).getElements().stream().map(RollElement::getValue)).containsExactly("4", "4", "3");
 
-        assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[2, 3, 1, 4] [1, 1, 6, 3]");
-        assertThat(getRandomElementsString(res.get(1))).isEqualTo("[2, 3, 6, 3]");
-        assertThat(getRandomElementsString(res.get(2))).isEqualTo("[3, 2, 4, 4]");
-        assertThat(res.stream().map(Roll::getExpression))
+        assertThat(getRandomElementsString(res.getRolls().getFirst())).isEqualTo("[2, 3, 1, 4] [1, 1, 6, 3]");
+        assertThat(getRandomElementsString(res.getRolls().get(1))).isEqualTo("[2, 3, 6, 3]");
+        assertThat(getRandomElementsString(res.getRolls().get(2))).isEqualTo("[3, 2, 4, 4]");
+        assertThat(res.getRolls().stream().map(Roll::getExpression))
                 .containsExactly("4d6rr1k3", "4d6rr1k3", "4d6rr1k3");
 
     }
@@ -1442,41 +1448,41 @@ public class DiceEvaluatorTest {
     @Test
     void getRandomElements_explodingDice() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 1, 4, 6, 6, 1, 5), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("(1d!2=)d!6").getRolls();
+        RollResult res = underTest.evaluate("(1d!2=)d!6");
 
-        assertThat(res).hasSize(1);
-        assertThat(res.getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("4", "6", "6", "1", "5");
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getRolls()).hasSize(1);
+        assertThat(res.getRolls().getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("4", "6", "6", "1", "5");
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(rl -> rl.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
                         .toList()
                 ))
                 .containsExactly(List.of("2", "1"), List.of("4", "6", "6", "1", "5"));
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(2, 2), List.of(6, 6, 6, 6, 6));
-        assertThat(res.getFirst().getExpression()).isEqualTo("(1d!2=)d!6");
+        assertThat(res.getRolls().getFirst().getExpression()).isEqualTo("(1d!2=)d!6");
     }
 
     @Test
     void getRandomElements_explodingAddDice() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(2, 1, 4, 6, 6, 1, 5), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("(1d!!2=)d!!6").getRolls();
+        RollResult res = underTest.evaluate("(1d!!2=)d!!6");
 
-        assertThat(res).hasSize(1);
-        assertThat(res.getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("4", "13", "5");
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getRolls()).hasSize(1);
+        assertThat(res.getRolls().getFirst().getElements().stream().map(RollElement::getValue)).containsExactly("4", "13", "5");
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(rl -> rl.stream()
                         .map(RandomElement::getRollElement)
                         .map(RollElement::getValue)
                         .toList()
                 ))
                 .containsExactly(List.of("2", "1"), List.of("4", "6", "6", "1", "5"));
-        assertThat(res.stream().flatMap(r -> r.getRandomElementsInRoll().stream())
+        assertThat(res.getGroupedRandomElements().stream()
                 .map(r -> r.stream().map(RandomElement::getMaxInc).collect(Collectors.toList())))
                 .containsExactly(List.of(2, 2), List.of(6, 6, 6, 6, 6));
-        assertThat(res.getFirst().getExpression()).isEqualTo("(1d!!2=)d!!6");
+        assertThat(res.getRolls().getFirst().getExpression()).isEqualTo("(1d!!2=)d!!6");
     }
 
     @Test
@@ -1504,13 +1510,13 @@ public class DiceEvaluatorTest {
     @Test
     void toStringColorTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("color(1d6,'red') + color(3d20,'blue')").getRolls();
+        RollResult res = underTest.evaluate("color(1d6,'red') + color(3d20,'blue')");
 
-        assertThat(res).hasSize(1);
-        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[[7de0i0r0=3∈[1...6]], [26de0i0r0=2∈[1...20], 26de0i1r0=1∈[1...20], 26de0i2r0=4∈[1...20]]]");
-        assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[3] [2, 1, 4]");
-        assertThat(res.getFirst().getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
-        assertThat(res.getFirst().getExpression()).isEqualTo("color(1d6,'red')+color(3d20,'blue')");
+        assertThat(res.getRolls()).hasSize(1);
+        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[7de0i0r0=3∈[1...6]], [26de0i0r0=2∈[1...20], 26de0i1r0=1∈[1...20], 26de0i2r0=4∈[1...20]]]");
+        assertThat(getRandomElementsString(res.getRolls().getFirst())).isEqualTo("[3] [2, 1, 4]");
+        assertThat(res.getRolls().getFirst().getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
+        assertThat(res.getRolls().getFirst().getExpression()).isEqualTo("color(1d6,'red')+color(3d20,'blue')");
     }
 
     @Test
@@ -1519,8 +1525,8 @@ public class DiceEvaluatorTest {
         RollResult res = underTest.evaluate("  d6 + ' test  t t' + d!6  ");
 
         assertThat(res.getRolls()).hasSize(1);
-        DieId diceId1 = res.getRolls().getFirst().getRandomElementsInRoll().getFirst().getFirst().getDieId();
-        DieId diceId2 = res.getRolls().getFirst().getRandomElementsInRoll().getLast().getFirst().getDieId();
+        DieId diceId1 = res.getRolls().getFirst().getRandomElementsInRoll().getFirst().getDieId();
+        DieId diceId2 = res.getRolls().getFirst().getRandomElementsInRoll().getLast().getDieId();
         assertThat(diceId1.toString()).isEqualTo("0de0i0r0");
         assertThat(diceId2.toString()).isEqualTo("20d!e0i0r0");
         assertThat(res.getExpression()).isEqualTo("d6 + ' test  t t' + d!6");
@@ -1532,41 +1538,37 @@ public class DiceEvaluatorTest {
     @Test
     void colTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("1d6 col 'red' +  3d20 col 'blue'").getRolls();
+        RollResult res = underTest.evaluate("1d6 col 'red' +  3d20 col 'blue'");
 
-        assertThat(res).hasSize(1);
-        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[[1de0i0r0=3∈[1...6]], [18de0i0r0=2∈[1...20], 18de0i1r0=1∈[1...20], 18de0i2r0=4∈[1...20]]]");
-        assertThat(res.getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)
+        assertThat(res.getRolls()).hasSize(1);
+        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[1de0i0r0=3∈[1...6]], [18de0i0r0=2∈[1...20], 18de0i1r0=1∈[1...20], 18de0i2r0=4∈[1...20]]]");
+        assertThat(res.getRolls().getFirst().getRandomElementsInRoll().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getColor)).containsExactly("red", "blue", "blue", "blue");
-        assertThat(res.getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)
+        assertThat(res.getRolls().getFirst().getRandomElementsInRoll().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getTag)).containsExactly("", "", "", "");
-        assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[3] [2, 1, 4]");
-        assertThat(res.getFirst().getResultString()).isEqualTo("3, 2, 1, 4");
-        assertThat(res.getFirst().getExpression()).isEqualTo("1d6col'red'+3d20col'blue'");
+        assertThat(getRandomElementsString(res.getRolls().getFirst())).isEqualTo("[3] [2, 1, 4]");
+        assertThat(res.getRolls().getFirst().getResultString()).isEqualTo("3, 2, 1, 4");
+        assertThat(res.getRolls().getFirst().getExpression()).isEqualTo("1d6col'red'+3d20col'blue'");
     }
 
     @Test
     void tagTest() throws ExpressionException {
         DiceEvaluator underTest = new DiceEvaluator(new GivenNumberSupplier(3, 2, 1, 4), 1000, 10_000, true);
-        List<Roll> res = underTest.evaluate("1d6 tag 'red' +  3d20 tag 'blue'").getRolls();
+        RollResult res = underTest.evaluate("1d6 tag 'red' +  3d20 tag 'blue'");
 
-        assertThat(res).hasSize(1);
-        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[[1de0i0r0=3∈[1...6]], [18de0i0r0=2∈[1...20], 18de0i1r0=1∈[1...20], 18de0i2r0=4∈[1...20]]]");
-        assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[3] [2, 1, 4]");
-        assertThat(res.getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)
+        assertThat(res.getRolls()).hasSize(1);
+        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[1de0i0r0=3∈[1...6]], [18de0i0r0=2∈[1...20], 18de0i1r0=1∈[1...20], 18de0i2r0=4∈[1...20]]]");
+        assertThat(getRandomElementsString(res.getRolls().getFirst())).isEqualTo("[3] [2, 1, 4]");
+        assertThat(res.getRolls().getFirst().getRandomElementsInRoll().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getColor)).containsExactly("", "", "", "");
-        assertThat(res.getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)
+        assertThat(res.getRolls().getFirst().getRandomElementsInRoll().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getTag)).containsExactly("", "", "", "");
-        assertThat(res.getFirst().getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
-        assertThat(res.getFirst().getExpression()).isEqualTo("1d6tag'red'+3d20tag'blue'");
+        assertThat(res.getRolls().getFirst().getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
+        assertThat(res.getRolls().getFirst().getExpression()).isEqualTo("1d6tag'red'+3d20tag'blue'");
     }
 
     @Test
@@ -1576,7 +1578,7 @@ public class DiceEvaluatorTest {
 
         assertThat(res).hasSize(1);
         assertThat(res.getFirst().getResultString()).isEqualTo("red:3, blue:3");
-        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[[11de0i0r0=3∈[1...6]]]");
+        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[11de0i0r0=3∈[1...6]]");
         assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[3]");
         assertThat(res.getFirst().getExpression()).isEqualTo("val('$r',1d6), color('$r','red')+color('$r','blue')");
     }
@@ -1588,7 +1590,7 @@ public class DiceEvaluatorTest {
 
         assertThat(res).hasSize(1);
         assertThat(res.getFirst().getResultString()).isEqualTo("3, 3");
-        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[[11de0i0r0=3∈[1...6]]]");
+        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[11de0i0r0=3∈[1...6]]");
         assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[3]");
         assertThat(res.getFirst().getExpression()).isEqualTo("val('$r',1d6), '$r'+'$r'");
     }
@@ -1600,7 +1602,7 @@ public class DiceEvaluatorTest {
 
         assertThat(res).hasSize(1);
         assertThat(res.getFirst().getResultString()).isEqualTo("c");
-        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[[10de0i0r0=3∈[1...6]]]");
+        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[10de0i0r0=3∈[1...6]]");
         assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[3]");
         assertThat(res.getFirst().getExpression()).isEqualTo("val('$r',1d6), if('$r'=?1,'a','$r'=?2,'b','c')");
     }
@@ -1766,7 +1768,6 @@ public class DiceEvaluatorTest {
         assertThat(res2.getRolls().getFirst().getResultString()).isEqualTo("a, a");
 
         List<DieIdAndValue> givenRolls = res.getRolls().getFirst().getRandomElementsInRoll().stream()
-                .flatMap(Collection::stream)
                 .map(RandomElement::getDiceIdAndValue)
                 .toList();
 

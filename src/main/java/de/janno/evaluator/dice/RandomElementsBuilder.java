@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Combines random elements of multiple sources. Random elements with the will overwrite elements with the diceId that where added bevor
@@ -22,7 +21,7 @@ public class RandomElementsBuilder {
         this.rollContext = rollContext;
     }
 
-    public static ImmutableList<ImmutableList<RandomElement>> fromRolls(@NonNull Collection<Roll> rolls, @NonNull RollContext rollContext) {
+    public static ImmutableList<RandomElement> fromRolls(@NonNull Collection<Roll> rolls, @NonNull RollContext rollContext) {
         return ofRolls(rolls, rollContext).build();
     }
 
@@ -36,7 +35,7 @@ public class RandomElementsBuilder {
 
     public static RandomElementsBuilder ofRolls(@NonNull Collection<Roll> rolls, @NonNull RollContext rollContext) {
         RandomElementsBuilder builder = new RandomElementsBuilder(rollContext);
-        rolls.forEach(r -> builder.addRandomElements(r.getRandomElementsInRoll().stream().flatMap(Collection::stream).toList()));
+        rolls.forEach(r -> builder.addRandomElements(r.getRandomElementsInRoll().stream().toList()));
         return builder;
     }
 
@@ -46,48 +45,28 @@ public class RandomElementsBuilder {
     }
 
     public RandomElementsBuilder addRoll(@NonNull Roll roll) {
-        this.randomElements.addAll(roll.getRandomElementsInRoll().stream().flatMap(Collection::stream).toList());
+        this.randomElements.addAll(roll.getRandomElementsInRoll().stream().toList());
         return this;
     }
 
     public RandomElementsBuilder addWithColor(@NonNull Roll roll, @NonNull String color) {
-        this.randomElements.addAll(roll.getRandomElementsInRoll().stream().flatMap(Collection::stream)
+        this.randomElements.addAll(roll.getRandomElementsInRoll().stream()
                 .map(r -> r.copyWithTagAndColor(color))
                 .toList());
         return this;
     }
 
-    public ImmutableList<ImmutableList<RandomElement>> build() {
+    public ImmutableList<RandomElement> build() {
 
         //This ensures that the last color application will overwrite the randomElements color
-        List<RandomElement> uniqueList = new ArrayList<>();
-        Map<DieId, Integer> dieIdIndexMap = new HashMap<>();
-        for (RandomElement re : randomElements) {
-            if (dieIdIndexMap.containsKey(re.getDieId())) {
-                int index = dieIdIndexMap.get(re.getDieId());
-                uniqueList.set(index, re);
-            } else {
-                int index = uniqueList.size();
-                uniqueList.add(re);
-                dieIdIndexMap.put(re.getDieId(), index);
-            }
-        }
-
-        rollContext.addRandomElements(uniqueList);
-
-        List<RollId> rollIds = uniqueList.stream()
-                .map(RandomElement::getDieId)
-                .map(DieId::getRollId)
-                .distinct()
-                .sorted()
-                .toList();
-
-        Map<RollId, List<RandomElement>> rollIdListMap = uniqueList.stream()
-                .collect(Collectors.groupingBy(r -> r.getDieId().getRollId()));
-
-        return rollIds.stream()
-                .map(rid -> rollIdListMap.get(rid).stream().sorted(Comparator.comparing(RandomElement::getDieId)).collect(ImmutableList.toImmutableList()))
+        Map<DieId, RandomElement> uniqueMap = new HashMap<>(randomElements.size());
+        randomElements.forEach(r -> uniqueMap.put(r.getDieId(), r));
+        ImmutableList<RandomElement> result = uniqueMap.values().stream()
+                .sorted(Comparator.comparing(RandomElement::getDieId))
                 .collect(ImmutableList.toImmutableList());
+        rollContext.addRandomElements(result);
+
+        return result;
     }
 
 

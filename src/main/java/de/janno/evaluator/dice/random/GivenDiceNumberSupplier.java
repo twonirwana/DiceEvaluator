@@ -1,8 +1,7 @@
 package de.janno.evaluator.dice.random;
 
-import com.google.common.annotations.VisibleForTesting;
-import de.janno.evaluator.dice.DieIdAndValue;
 import de.janno.evaluator.dice.DieId;
+import de.janno.evaluator.dice.DieIdAndValue;
 import de.janno.evaluator.dice.ExpressionException;
 import lombok.NonNull;
 

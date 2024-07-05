@@ -4,6 +4,11 @@ import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 import lombok.Value;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Value
 public class RollResult {
     /**
@@ -23,4 +28,20 @@ public class RollResult {
      */
     @NonNull
     ImmutableList<RandomElement> allRandomElements;
+
+    public ImmutableList<ImmutableList<RandomElement>> getGroupedRandomElements() {
+        List<RollId> rollIds = allRandomElements.stream()
+                .map(RandomElement::getDieId)
+                .map(DieId::getRollId)
+                .distinct()
+                .sorted()
+                .toList();
+
+        Map<RollId, List<RandomElement>> rollIdListMap = allRandomElements.stream()
+                .collect(Collectors.groupingBy(r -> r.getDieId().getRollId()));
+
+        return rollIds.stream()
+                .map(rid -> rollIdListMap.get(rid).stream().sorted(Comparator.comparing(RandomElement::getDieId)).collect(ImmutableList.toImmutableList()))
+                .collect(ImmutableList.toImmutableList());
+    }
 }

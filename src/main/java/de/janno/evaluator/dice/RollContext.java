@@ -7,7 +7,6 @@ import lombok.Getter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 
 public class RollContext {
@@ -17,16 +16,17 @@ public class RollContext {
     private final Map<ExpressionPosition, AtomicInteger> reEvaluationNumber;
     @Getter
     private final NumberSupplier numberSupplier;
-    private final Map<DieId, RandomElement> randomElements = new HashMap<>();
+    private final Map<DieId, RandomElement> randomElements;
 
     public RollContext(NumberSupplier numberSupplier) {
-        this(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), numberSupplier);
+        this(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), numberSupplier, new ConcurrentHashMap<>());
     }
 
-    private RollContext(Map<String, Roll> variables, Map<ExpressionPosition, AtomicInteger> reEvaluationNumber, NumberSupplier numberSupplier) {
+    private RollContext(Map<String, Roll> variables, Map<ExpressionPosition, AtomicInteger> reEvaluationNumber, NumberSupplier numberSupplier, Map<DieId, RandomElement> randomElements) {
         this.currentVariables = variables;
         this.reEvaluationNumber = reEvaluationNumber;
         this.numberSupplier = numberSupplier;
+        this.randomElements = randomElements;
     }
 
     public int getNextReEvaluationNumber(ExpressionPosition expressionPosition) {
@@ -34,11 +34,11 @@ public class RollContext {
     }
 
     public RollContext copy() {
-        return new RollContext(new ConcurrentHashMap<>(currentVariables), new ConcurrentHashMap<>(reEvaluationNumber), numberSupplier);
+        return new RollContext(new ConcurrentHashMap<>(currentVariables), new ConcurrentHashMap<>(reEvaluationNumber), numberSupplier, new ConcurrentHashMap<>(randomElements));
     }
 
     public RollContext copyWithEmptyVariables() {
-        return new RollContext(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(reEvaluationNumber), numberSupplier);
+        return new RollContext(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(reEvaluationNumber), numberSupplier, new ConcurrentHashMap<>(randomElements));
     }
 
     public void merge(RollContext rollContext) {
@@ -67,7 +67,7 @@ public class RollContext {
         uniqueList.forEach(r -> randomElements.put(r.getDieId(), r));
     }
 
-    public ImmutableList<RandomElement> getAllRandomElements (){
+    public ImmutableList<RandomElement> getAllRandomElements() {
         return randomElements.values().stream()
                 .sorted(Comparator.comparing(RandomElement::getDieId))
                 .collect(ImmutableList.toImmutableList());

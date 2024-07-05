@@ -8,7 +8,6 @@ import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,10 +24,9 @@ public class Roll {
 
     /**
      * all random elements that were involved in this roll, this can be more than the elements, because it includes also filtered elements
-     * The random elements are grouped by rollId
      */
     @NonNull
-    ImmutableList<ImmutableList<RandomElement>> randomElementsInRoll;
+    ImmutableList<RandomElement> randomElementsInRoll;
     /**
      * all rolls that produced this roll. The collection of the childrenRolls can be disabled and the list is then empty
      */
@@ -43,7 +41,7 @@ public class Roll {
 
     public Roll(@NonNull String expression,
                 @NonNull ImmutableList<RollElement> elements,
-                @NonNull ImmutableList<ImmutableList<RandomElement>> randomElementsInRoll,
+                @NonNull ImmutableList<RandomElement> randomElementsInRoll,
                 @NonNull ImmutableList<Roll> childrenRolls,
                 @NonNull ExpressionPosition expressionPosition,
                 int maxNumberOfElements,
@@ -57,15 +55,14 @@ public class Roll {
         if (elements.size() > maxNumberOfElements) {
             throw new ExpressionException("To many elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, elements.size()), expressionPosition);
         }
-        long numberOfRandomElementsInRoll = randomElementsInRoll.stream().mapToLong(List::size).sum();
+        long numberOfRandomElementsInRoll = randomElementsInRoll.size();
         if (numberOfRandomElementsInRoll > maxNumberOfElements) {
             throw new ExpressionException("To many random elements in roll '%s', max is %d but there where %d".formatted(expression, maxNumberOfElements, numberOfRandomElementsInRoll), expressionPosition);
         }
     }
 
-    private void validate(ImmutableList<ImmutableList<RandomElement>> randomElements) {
+    private void validate(ImmutableList<RandomElement> randomElements) {
         List<DieId> diceIdsWithDuplicatedRandomElements = randomElements.stream()
-                .flatMap(Collection::stream)
                 .collect(Collectors.groupingBy(RandomElement::getDieId)).values().stream()
                 .filter(l -> l.size() > 1)
                 .map(r -> r.getFirst().getDieId())
