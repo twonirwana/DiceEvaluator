@@ -8,7 +8,9 @@ import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -129,5 +131,21 @@ public class Roll {
 
     public boolean isElementsContainsElementWithValueAndTag(RollElement rollElement) {
         return elements.stream().anyMatch(e -> e.isEqualValueAndTag(rollElement));
+    }
+
+    public ImmutableList<ImmutableList<RandomElement>> getGroupedRandomElements() {
+        List<RollId> rollIds = randomElementsInRoll.stream()
+                .map(RandomElement::getDieId)
+                .map(DieId::getRollId)
+                .distinct()
+                .sorted()
+                .toList();
+
+        Map<RollId, List<RandomElement>> rollIdListMap = randomElementsInRoll.stream()
+                .collect(Collectors.groupingBy(r -> r.getDieId().getRollId()));
+
+        return rollIds.stream()
+                .map(rid -> rollIdListMap.get(rid).stream().sorted(Comparator.comparing(RandomElement::getDieId)).collect(ImmutableList.toImmutableList()))
+                .collect(ImmutableList.toImmutableList());
     }
 }
