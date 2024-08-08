@@ -20,7 +20,7 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
     implementation("com.google.guava:guava:33.2.1-jre")
-    implementation("org.apache.commons:commons-lang3:3.15.0")
+    implementation("org.apache.commons:commons-lang3:3.16.0")
 
     testCompileOnly("org.projectlombok:lombok:1.18.34")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
