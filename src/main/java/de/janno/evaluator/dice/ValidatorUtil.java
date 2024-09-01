@@ -68,14 +68,12 @@ public final class ValidatorUtil {
         }
     }
 
-    public static void checkRollSize(@NonNull ExpressionPosition expressionPosition, @NonNull Optional<List<Roll>> rolls, int minInc, int maxInc) throws ExpressionException {
-        String range = minInc == maxInc ? String.valueOf(minInc) : "%d-%d".formatted(minInc, maxInc);
+    public static void checkContainsSingleRoll(@NonNull ExpressionPosition expressionPosition, @NonNull Optional<List<Roll>> rolls, int position) throws ExpressionException {
         if (rolls.isEmpty()) {
-            throw new ExpressionException(String.format("'%s' requires as %s inputs but was empty", expressionPosition.getValue(), range), expressionPosition);
+            throw new ExpressionException(String.format("'%s' requires as %s inputs but was empty", expressionPosition.getValue(), position), expressionPosition);
         }
-        if (rolls.get().size() < minInc || rolls.get().size() > maxInc) {
-
-            throw new ExpressionException(String.format("'%s' requires as %s inputs but was '%s'", expressionPosition.getValue(), range, rolls.get().stream()
+        if (rolls.get().size() != 1) {
+            throw new ExpressionException(String.format("'%s' requires a single argument as %s input but was '%s'", expressionPosition.getValue(), position, rolls.get().stream()
                     .map(Roll::getElements).toList()
             ), expressionPosition);
         }

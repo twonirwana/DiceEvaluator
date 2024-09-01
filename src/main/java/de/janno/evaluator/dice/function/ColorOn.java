@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static de.janno.evaluator.dice.ValidatorUtil.checkContainsNoOrSingleElement;
-import static de.janno.evaluator.dice.ValidatorUtil.checkRollSize;
+import static de.janno.evaluator.dice.ValidatorUtil.checkContainsSingleRoll;
 
 public class ColorOn extends Function {
     public ColorOn(int maxNumberOfElements, boolean keepChildrenRolls) {
@@ -32,7 +32,7 @@ public class ColorOn extends Function {
                 for (int i = 1; i < arguments.size() - 1; i = i + 2) {
 
                     Optional<List<Roll>> inRolls = arguments.get(i).extendRoll(rollContext);
-                    checkRollSize(expressionPosition, inRolls, 1, 1);
+                    checkContainsSingleRoll(expressionPosition, inRolls, i + 1);
                     final Roll inRoll = inRolls.orElseThrow().getFirst();
                     allRolls.add(inRoll);
 
@@ -40,9 +40,9 @@ public class ColorOn extends Function {
                     for (RollElement rollElement : inputRollElements) {
                         if (inRoll.isElementsContainsElementWithValueAndTag(rollElement)) {
                             Optional<List<Roll>> colorRolls = arguments.get(i + 1).extendRoll(rollContext);
-                            checkRollSize(expressionPosition, colorRolls, 1, 1);
+                            checkContainsSingleRoll(expressionPosition, colorRolls, i + 2);
                             Roll colorRoll = colorRolls.orElseThrow().getFirst();
-                            checkContainsNoOrSingleElement(expressionPosition, colorRoll, "%d argument".formatted(i + 1));
+                            checkContainsNoOrSingleElement(expressionPosition, colorRoll, "%d argument".formatted(i + 2));
                             final String color = colorRoll.asSingleValue().orElse(RollElement.NO_COLOR);
                             allRolls.add(colorRoll);
                             currentIterationElements.add(new RollElement(rollElement.getValue(), rollElement.getTag(), color));
