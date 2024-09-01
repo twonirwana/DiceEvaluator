@@ -29,7 +29,7 @@ public class Tag extends Operator {
                 Roll right = rolls.get(1);
                 checkAllElementsAreSameTag(expressionPosition, left, right);
                 checkContainsSingleElement(expressionPosition, right, "second argument");
-                String tag = right.getElements().getFirst().getValue();
+                String tag = right.asSingleValue().orElseThrow();
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         left.getElements().stream()

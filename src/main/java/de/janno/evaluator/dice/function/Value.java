@@ -36,7 +36,7 @@ public class Value extends Function {
                 if (rolls.getFirst().getElements().isEmpty()) {
                     throw new ExpressionException(String.format("'%s' requires a non-empty input as first argument", expressionPosition.getValue()), expressionPosition);
                 }
-                String valName = rolls.getFirst().getElements().getFirst().getValue();
+                String valName = rolls.getFirst().asSingleValue().orElseThrow();
 
                 String expression = toExpression();
                 rollContext.putVariable(valName, new Roll(expression,

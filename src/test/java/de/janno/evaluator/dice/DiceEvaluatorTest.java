@@ -764,6 +764,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('$1',d6), val('$2',d4 + '$1'), '$2'", List.of(), "4, 6", "[9de0i0r0=6∈[1...6], 23de0i0r0=4∈[1...4]]"),
                 Arguments.of("val('$s',1), if(0=?1, '') + '$s'", List.of(), "1", "[]"),
                 Arguments.of("val('$s',1) if(0=?1, '') '$s'", List.of(), "1", "[]"),
+                Arguments.of("regex('12','(\\d)(\\d)','$2$1', '(.*)', '$1$1')", List.of(), "2121", "[]"),
 
                 //systems
                 Arguments.of(THE_ONE_RING, List.of(), " ⬟= ᚠ", "[34de0i0r0=12∈[1...12]]"),

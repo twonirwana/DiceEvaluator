@@ -59,6 +59,19 @@ public final class ValidatorUtil {
         }
     }
 
+    public static void checkRollSize(@NonNull ExpressionPosition expressionPosition, @NonNull Optional<List<Roll>> rolls, int minInc, int maxInc) throws ExpressionException {
+        String range = minInc == maxInc ? String.valueOf(minInc) : "%d-%d".formatted(minInc, maxInc);
+        if (rolls.isEmpty()) {
+            throw new ExpressionException(String.format("'%s' requires as %s inputs but was empty", expressionPosition.getValue(), range), expressionPosition);
+        }
+        if (rolls.get().size() < minInc || rolls.get().size() > maxInc) {
+
+            throw new ExpressionException(String.format("'%s' requires as %s inputs but was '%s'", expressionPosition.getValue(), range, rolls.get().stream()
+                    .map(Roll::getElements).toList()
+            ), expressionPosition);
+        }
+    }
+
     public static void checkAllElementsAreSameTag(@NonNull ExpressionPosition expressionPosition, @NonNull Roll... rolls) throws ExpressionException {
         Set<String> allElementTags = Arrays.stream(rolls).flatMap(r -> r.getElements().stream()).map(RollElement::getTag).collect(Collectors.toSet());
         if (allElementTags.size() != 1) {

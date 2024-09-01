@@ -28,7 +28,7 @@ public class Color extends Operator {
                 Roll right = rolls.get(1);
                 checkAllElementsAreSameTag(expressionPosition, left, right);
                 checkContainsSingleElement(expressionPosition, right, "second argument");
-                String color = right.getElements().getFirst().getValue();
+                String color = right.asSingleValue().orElseThrow();
                 //colors are applied to the random elements, so they can be used for dice images
                 RandomElementsBuilder builder = RandomElementsBuilder.empty(rollContext);
                 rolls.forEach(r -> builder.addWithColor(r, color));
