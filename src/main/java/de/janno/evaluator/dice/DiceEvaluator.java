@@ -99,7 +99,7 @@ public class DiceEvaluator {
                         .add(new IfGreater(maxNumberOfElements, keepChildrenRolls))
                         .add(new IfIn(maxNumberOfElements, keepChildrenRolls))
                         .add(new Replace(maxNumberOfElements, keepChildrenRolls))
-                        .add(new Regex(maxNumberOfElements, keepChildrenRolls))
+                        .add(new ColorOn(maxNumberOfElements, keepChildrenRolls))
                         .add(new Explode(maxNumberOfElements, keepChildrenRolls))
                         .add(new IfLesser(maxNumberOfElements, keepChildrenRolls))
                         .add(new GroupCount(maxNumberOfElements, keepChildrenRolls))

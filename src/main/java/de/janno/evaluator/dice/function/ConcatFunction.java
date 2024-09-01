@@ -22,7 +22,7 @@ public class ConcatFunction extends Function {
             public @NonNull Optional<List<Roll>> extendRoll(@NonNull RollContext rollContext) throws ExpressionException {
                 List<Roll> rolls = extendAllBuilder(arguments, rollContext);
                 if (rolls.isEmpty()) {
-                    return Optional.empty();
+                    return Optional.of(List.of());
                 }
                 String joined = rolls.stream()
                         .map(Roll::getResultString)

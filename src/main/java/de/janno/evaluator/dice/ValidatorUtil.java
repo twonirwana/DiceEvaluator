@@ -50,6 +50,15 @@ public final class ValidatorUtil {
         }
     }
 
+    public static void checkContainsNoOrSingleElement(@NonNull ExpressionPosition expressionPosition, @NonNull Roll roll, @NonNull String location) throws ExpressionException {
+        if (!(roll.getElements().size() == 1 || roll.getElements().isEmpty())) {
+            throw new ExpressionException(String.format("'%s' requires as %s a single or no element but was '%s'%s", expressionPosition.getValue(), location, roll.getElements().stream()
+                            .map(RollElement::getValue).toList(),
+                    getSumHelp(roll)
+            ), expressionPosition);
+        }
+    }
+
     public static void checkRollSize(@NonNull ExpressionPosition expressionPosition, @NonNull List<Roll> rolls, int minInc, int maxInc) throws ExpressionException {
         if (rolls.size() < minInc || rolls.size() > maxInc) {
             String range = minInc == maxInc ? String.valueOf(minInc) : "%d-%d".formatted(minInc, maxInc);

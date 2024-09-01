@@ -25,7 +25,8 @@ public interface RollBuilder {
     /**
      * Creates a concrete roll from a roll builder (applies all random function aka throwing the dice).
      * <p>
-     * Some functions or operators (e.g. val repeatList) produces empty results, they musst be filtered out or the argument count in functions are not correct.
+     * Some functions or operators (e.g. val) produces empty results, they are filtered and therefore don't influence the argument count in functions.
+     * This makes it possible use a val function inside an if function because if the val would return an empty list then it would be an argument for if.
      * This is not a problem in operators because there the number of arguments is always correct because val is already pushed on the result stack
      */
     @NonNull

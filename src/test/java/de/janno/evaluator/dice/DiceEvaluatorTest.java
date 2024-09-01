@@ -603,6 +603,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("1 - [3/a]", "'-' requires as right input only decimals or elements that are on the left side '[1]' but was '[3, a]'"),
                 Arguments.of("val('a')", "'val' requires as 2 inputs but was '[[a]]'"),
                 Arguments.of("val('',d6)", "'val' requires a non-empty input as first argument"),
+                Arguments.of("colorOn(2d6,'white')", "'colorOn' requires an odd number of arguments but was 2"),
 
                 Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
@@ -764,7 +765,11 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('$1',d6), val('$2',d4 + '$1'), '$2'", List.of(), "4, 6", "[9de0i0r0=6∈[1...6], 23de0i0r0=4∈[1...4]]"),
                 Arguments.of("val('$s',1), if(0=?1, '') + '$s'", List.of(), "1", "[]"),
                 Arguments.of("val('$s',1) if(0=?1, '') '$s'", List.of(), "1", "[]"),
-                Arguments.of("regex('12','(\\d)(\\d)','$2$1', '(.*)', '$1$1')", List.of(), "2121", "[]"),
+                Arguments.of("colorOn(3d6,[1/2],'white')", List.of(6, 2, 1), "6, 2-c:white, 1-c:white", "[9de0i0r0=6∈[1...6], 9de0i1r0=2∈[1...6], 9de0i2r0=1∈[1...6]]"),
+                Arguments.of("colorOn(3d6 col 'red', [1/2],'')", List.of(6, 2, 1), "6-c:red, 2, 1", "[9de0i0r0=6∈[1...6], 9de0i1r0=2∈[1...6], 9de0i2r0=1∈[1...6]]"),
+                Arguments.of("colorOn('',[1/2],'white')", List.of(), "", "[]"),
+                Arguments.of("colorOn(3d6,[1/2],'white')", List.of(6, 5, 5), "6, 5, 5", "[9de0i0r0=6∈[1...6], 9de0i1r0=5∈[1...6], 9de0i2r0=5∈[1...6]]"),
+                Arguments.of("colorOn(4d6 col 'red',[1/2],'white', 3, 'black', 1, 'green')", List.of(4, 3, 2, 1), "4-c:red, 3-c:black, 2-c:white, 1-c:green", "[9de0i0r0=4∈[1...6], 9de0i1r0=3∈[1...6], 9de0i2r0=2∈[1...6], 9de0i3r0=1∈[1...6]]"),
 
                 //systems
                 Arguments.of(THE_ONE_RING, List.of(), " ⬟= ᚠ", "[34de0i0r0=12∈[1...12]]"),
