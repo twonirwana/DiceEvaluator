@@ -701,11 +701,11 @@ public class DiceEvaluatorTest {
                 Arguments.of("(d4)d!(d6)", List.of(2, 6, 6, 4, 3), "6, 4, 3", "[1de0i0r0=2∈[1...4], 4d!e0i0r0=6∈[1...6], 4d!e0i0r1=4∈[1...6], 4d!e0i1r0=3∈[1...6], 7de0i0r0=6∈[1...6]]"),
                 Arguments.of("(d4)d!!(d6)", List.of(2, 6, 6, 4, 3), "10, 3", "[1de0i0r0=2∈[1...4], 4d!!e0i0r0=6∈[1...6], 4d!!e0i0r1=4∈[1...6], 4d!!e0i1r0=3∈[1...6], 8de0i0r0=6∈[1...6]]"),
 
-                Arguments.of("d6 col 'red' ", List.of(), "6-c:red", "[0de0i0r0=6∈[1...6]]"),
-                Arguments.of("d6 col d6 ", List.of(), "6-c:6", "[0de0i0r0=6∈[1...6], 7de0i0r0=6∈[1...6]]"),
-                Arguments.of("d[a,b,c,d,e,f] col 'red'", List.of(), "f-c:red", "[0de0i0r0=f∈[a, b, c, d, e, f]]"),
-                Arguments.of("d!6 col 'red'", List.of(6, 3), "6-c:red, 3-c:red", "[0d!e0i0r0=6∈[1...6], 0d!e0i0r1=3∈[1...6]]"),
-                Arguments.of("d!!6 col 'red'", List.of(6, 3), "9-c:red", "[0d!!e0i0r0=6∈[1...6], 0d!!e0i0r1=3∈[1...6]]"),
+                Arguments.of("d6 col 'red' ", List.of(), "6-c:red", "[0de0i0r0=6-c:red∈[1...6]]"),
+                Arguments.of("d6 col d6 ", List.of(), "6-c:6", "[0de0i0r0=6-c:6∈[1...6], 7de0i0r0=6-c:6∈[1...6]]"),
+                Arguments.of("d[a,b,c,d,e,f] col 'red'", List.of(), "f-c:red", "[0de0i0r0=f-c:red∈[a, b, c, d, e, f]]"),
+                Arguments.of("d!6 col 'red'", List.of(6, 3), "6-c:red, 3-c:red", "[0d!e0i0r0=6-c:red∈[1...6], 0d!e0i0r1=3-c:red∈[1...6]]"),
+                Arguments.of("d!!6 col 'red'", List.of(6, 3), "9-c:red", "[0d!!e0i0r0=6-c:red∈[1...6], 0d!!e0i0r1=3-c:red∈[1...6]]"),
 
                 Arguments.of("d6 tag 'red' ", List.of(), "6-t:red", "[0de0i0r0=6∈[1...6]]"),
                 Arguments.of("d6 tag d6 ", List.of(), "6-t:6", "[0de0i0r0=6∈[1...6], 7de0i0r0=6∈[1...6]]"),
@@ -770,12 +770,12 @@ public class DiceEvaluatorTest {
                 Arguments.of("val('$s',1), if(0=?1, '') + '$s'", List.of(), "1", "[]"),
                 Arguments.of("val('$s',1) if(0=?1, '') '$s'", List.of(), "1", "[]"),
 
-                Arguments.of("colorOn(3d6,[1/2],'white')", List.of(6, 2, 1), "6, 2-c:white, 1-c:white", "[9de0i0r0=6∈[1...6], 9de0i1r0=2∈[1...6], 9de0i2r0=1∈[1...6]]"),
-                Arguments.of("colorOn(3d6 col 'red', [1/2],'')", List.of(6, 2, 1), "6-c:red, 2, 1", "[9de0i0r0=6∈[1...6], 9de0i1r0=2∈[1...6], 9de0i2r0=1∈[1...6]]"),
+                Arguments.of("colorOn(3d6,[1/2],'white')", List.of(6, 2, 1), "6, 2-c:white, 1-c:white", "[9de0i0r0=6∈[1...6], 9de0i1r0=2-c:white∈[1...6], 9de0i2r0=1-c:white∈[1...6]]"),
+                Arguments.of("colorOn(3d6 col 'red', [1/2],'')", List.of(6, 2, 1), "6-c:red, 2, 1", "[9de0i0r0=6-c:red∈[1...6], 9de0i1r0=2∈[1...6], 9de0i2r0=1∈[1...6]]"),
                 Arguments.of("colorOn('',[1/2],'white')", List.of(), "", "[]"),
                 Arguments.of("colorOn(val('a',1),1,'white')", List.of(), "", "[]"),
                 Arguments.of("colorOn(3d6,[1/2],'white')", List.of(6, 5, 5), "6, 5, 5", "[9de0i0r0=6∈[1...6], 9de0i1r0=5∈[1...6], 9de0i2r0=5∈[1...6]]"),
-                Arguments.of("colorOn(4d6 col 'red',[1/2],'white', 3, 'black', 1, 'green')", List.of(4, 3, 2, 1), "4-c:red, 3-c:black, 2-c:white, 1-c:green", "[9de0i0r0=4∈[1...6], 9de0i1r0=3∈[1...6], 9de0i2r0=2∈[1...6], 9de0i3r0=1∈[1...6]]"),
+                Arguments.of("colorOn(4d6 col 'red',[1/2],'white', 3, 'black', 1, 'green')", List.of(4, 3, 2, 1), "4-c:red, 3-c:black, 2-c:white, 1-c:green", "[9de0i0r0=4-c:red∈[1...6], 9de0i1r0=3-c:black∈[1...6], 9de0i2r0=2-c:white∈[1...6], 9de0i3r0=1-c:green∈[1...6]]"),
 
                 //systems
                 Arguments.of(THE_ONE_RING, List.of(), " ⬟= ᚠ", "[34de0i0r0=12∈[1...12]]"),
@@ -834,19 +834,17 @@ public class DiceEvaluatorTest {
 
     @Test
     void debug() throws ExpressionException {
-        GivenNumberSupplier numberSupplier = new GivenNumberSupplier(3);
+        GivenNumberSupplier numberSupplier = new GivenNumberSupplier(3, 1, 2);
         DiceEvaluator underTest = new DiceEvaluator(numberSupplier, 1000, 10_000, true);
 
         // List<Roll> res = underTest.evaluate("3d!6+(2r(2d8))");
-        RollResult res = underTest.evaluate("if(d6>?3,d8) + 1");
+        RollResult res = underTest.evaluate("colorOn(3d6,[1/2],'white')");
         System.out.println(res.getRolls().size());
         res.getRolls().forEach(System.out::println);
         res.getRolls().forEach(r -> System.out.println(r.getResultString()));
         System.out.println(res);
         System.out.println(res.getExpression());
-        System.out.println(res.getAllRandomElements().stream()
-                .map(re -> re.getDieId() + "=" + re.getRollElement().getValue())
-                .collect(Collectors.joining(", ")));
+        System.out.println(res.getAllRandomElements());
         res.getRolls().forEach(r -> System.out.println(r.getRandomElementsInRoll()));
         res.getRolls().forEach(r -> System.out.println(getRandomElementsString(r)));
         System.out.println(res.getRolls().stream().flatMap(r -> r.getElements().stream()).map(RollElement::getValue).toList());
@@ -941,7 +939,7 @@ public class DiceEvaluatorTest {
 
         assertThat(values(res.getRolls())).containsExactly("successes: 0, blue:1, purple_dark:1");
         assertThat(res.getRolls().size()).isEqualTo(1);
-        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[16de0i0r0=1∈[1...9]], [44de0i0r0=2∈[1...10]]]");
+        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[16de0i0r0=1-c:blue∈[1...9]], [44de0i0r0=2-c:purple_dark∈[1...10]]]");
         assertThat(getRandomElementsString(res.getRolls().getFirst())).isEqualTo("[1] [2]");
     }
 
@@ -1525,7 +1523,7 @@ public class DiceEvaluatorTest {
         RollResult res = underTest.evaluate("color(1d6,'red') + color(3d20,'blue')");
 
         assertThat(res.getRolls()).hasSize(1);
-        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[7de0i0r0=3∈[1...6]], [26de0i0r0=2∈[1...20], 26de0i1r0=1∈[1...20], 26de0i2r0=4∈[1...20]]]");
+        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[7de0i0r0=3-c:red∈[1...6]], [26de0i0r0=2-c:blue∈[1...20], 26de0i1r0=1-c:blue∈[1...20], 26de0i2r0=4-c:blue∈[1...20]]]");
         assertThat(getRandomElementsString(res.getRolls().getFirst())).isEqualTo("[3] [2, 1, 4]");
         assertThat(res.getRolls().getFirst().getResultString()).isEqualTo("red:3, blue:2, blue:1, blue:4");
         assertThat(res.getRolls().getFirst().getExpression()).isEqualTo("color(1d6,'red')+color(3d20,'blue')");
@@ -1553,7 +1551,7 @@ public class DiceEvaluatorTest {
         RollResult res = underTest.evaluate("1d6 col 'red' +  3d20 col 'blue'");
 
         assertThat(res.getRolls()).hasSize(1);
-        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[1de0i0r0=3∈[1...6]], [18de0i0r0=2∈[1...20], 18de0i1r0=1∈[1...20], 18de0i2r0=4∈[1...20]]]");
+        assertThat(res.getGroupedRandomElements().toString()).isEqualTo("[[1de0i0r0=3-c:red∈[1...6]], [18de0i0r0=2-c:blue∈[1...20], 18de0i1r0=1-c:blue∈[1...20], 18de0i2r0=4-c:blue∈[1...20]]]");
         assertThat(res.getRolls().getFirst().getRandomElementsInRoll().stream()
                 .map(RandomElement::getRollElement)
                 .map(RollElement::getColor)).containsExactly("red", "blue", "blue", "blue");
@@ -1590,7 +1588,7 @@ public class DiceEvaluatorTest {
 
         assertThat(res).hasSize(1);
         assertThat(res.getFirst().getResultString()).isEqualTo("red:3, blue:3");
-        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[11de0i0r0=3∈[1...6]]");
+        assertThat(res.getFirst().getRandomElementsInRoll().toString()).isEqualTo("[11de0i0r0=3-c:blue∈[1...6]]");
         assertThat(getRandomElementsString(res.getFirst())).isEqualTo("[3]");
         assertThat(res.getFirst().getExpression()).isEqualTo("val('$r',1d6), color('$r','red')+color('$r','blue')");
     }

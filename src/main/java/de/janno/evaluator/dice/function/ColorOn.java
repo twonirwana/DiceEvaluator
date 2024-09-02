@@ -29,33 +29,46 @@ public class ColorOn extends Function {
                 }
                 ImmutableList.Builder<Roll> allRolls = ImmutableList.<Roll>builder().addAll(input.get());
                 ImmutableList<RollElement> inputRollElements = input.get().stream().flatMap(r -> r.getElements().stream()).collect(ImmutableList.toImmutableList());
-                for (int i = 1; i < arguments.size() - 1; i = i + 2) {
+                ImmutableList<RandomElement> inputRandomElements = input.get().stream().flatMap(r -> r.getRandomElementsInRoll().stream()).collect(ImmutableList.toImmutableList());
 
+                for (int i = 1; i < arguments.size() - 1; i = i + 2) {
                     Optional<List<Roll>> inRolls = arguments.get(i).extendRoll(rollContext);
                     checkContainsSingleRoll(expressionPosition, inRolls, i + 1);
                     final Roll inRoll = inRolls.orElseThrow().getFirst();
                     allRolls.add(inRoll);
+                    Optional<List<Roll>> colorRolls = arguments.get(i + 1).extendRoll(rollContext);
+                    checkContainsSingleRoll(expressionPosition, colorRolls, i + 2);
+                    Roll colorRoll = colorRolls.orElseThrow().getFirst();
+                    checkContainsNoOrSingleElement(expressionPosition, colorRoll, "%d argument".formatted(i + 2));
+                    final String color = colorRoll.asSingleValue().orElse(RollElement.NO_COLOR);
 
                     ImmutableList.Builder<RollElement> currentIterationElements = ImmutableList.builder();
                     for (RollElement rollElement : inputRollElements) {
                         if (inRoll.isElementsContainsElementWithValueAndTag(rollElement)) {
-                            Optional<List<Roll>> colorRolls = arguments.get(i + 1).extendRoll(rollContext);
-                            checkContainsSingleRoll(expressionPosition, colorRolls, i + 2);
-                            Roll colorRoll = colorRolls.orElseThrow().getFirst();
-                            checkContainsNoOrSingleElement(expressionPosition, colorRoll, "%d argument".formatted(i + 2));
-                            final String color = colorRoll.asSingleValue().orElse(RollElement.NO_COLOR);
-                            allRolls.add(colorRoll);
                             currentIterationElements.add(new RollElement(rollElement.getValue(), rollElement.getTag(), color));
                         } else {
                             currentIterationElements.add(rollElement);
                         }
                     }
                     inputRollElements = currentIterationElements.build();
+                    ImmutableList.Builder<RandomElement> currentIterationRandomElements = ImmutableList.builder();
+
+                    for (RandomElement randomElement : inputRandomElements) {
+                        if (inRoll.isElementsContainsElementWithValueAndTag(randomElement.getRollElement())) {
+                            currentIterationRandomElements.add(randomElement.copyWithTagAndColor(color));
+                        } else {
+                            currentIterationRandomElements.add(randomElement);
+                        }
+                    }
+                    inputRandomElements = currentIterationRandomElements.build();
                 }
+
+                RandomElementsBuilder builder = RandomElementsBuilder.empty(rollContext);
+                builder.addRandomElements(inputRandomElements);
 
                 return Optional.of(ImmutableList.of(new Roll(toExpression(),
                         inputRollElements,
-                        RandomElementsBuilder.fromRolls(allRolls.build(), rollContext),
+                        builder.build(),
                         allRolls.build(),
                         expressionPosition,
                         maxNumberOfElements, keepChildrenRolls)));
