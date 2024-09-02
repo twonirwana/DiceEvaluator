@@ -50,10 +50,30 @@ public final class ValidatorUtil {
         }
     }
 
+    public static void checkContainsNoOrSingleElement(@NonNull ExpressionPosition expressionPosition, @NonNull Roll roll, @NonNull String location) throws ExpressionException {
+        if (!(roll.getElements().size() == 1 || roll.getElements().isEmpty())) {
+            throw new ExpressionException(String.format("'%s' requires as %s a single or no element but was '%s'%s", expressionPosition.getValue(), location, roll.getElements().stream()
+                            .map(RollElement::getValue).toList(),
+                    getSumHelp(roll)
+            ), expressionPosition);
+        }
+    }
+
     public static void checkRollSize(@NonNull ExpressionPosition expressionPosition, @NonNull List<Roll> rolls, int minInc, int maxInc) throws ExpressionException {
         if (rolls.size() < minInc || rolls.size() > maxInc) {
             String range = minInc == maxInc ? String.valueOf(minInc) : "%d-%d".formatted(minInc, maxInc);
             throw new ExpressionException(String.format("'%s' requires as %s inputs but was '%s'", expressionPosition.getValue(), range, rolls.stream()
+                    .map(Roll::getElements).toList()
+            ), expressionPosition);
+        }
+    }
+
+    public static void checkContainsSingleRoll(@NonNull ExpressionPosition expressionPosition, @NonNull Optional<List<Roll>> rolls, int position) throws ExpressionException {
+        if (rolls.isEmpty()) {
+            throw new ExpressionException(String.format("'%s' requires as %s inputs but was empty", expressionPosition.getValue(), position), expressionPosition);
+        }
+        if (rolls.get().size() != 1) {
+            throw new ExpressionException(String.format("'%s' requires a single argument as %s input but was '%s'", expressionPosition.getValue(), position, rolls.get().stream()
                     .map(Roll::getElements).toList()
             ), expressionPosition);
         }

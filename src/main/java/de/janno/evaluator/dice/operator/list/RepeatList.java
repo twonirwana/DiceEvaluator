@@ -30,7 +30,7 @@ public class RepeatList extends Operator {
                     throw new ExpressionException(String.format("The number of list repeat must between 0-20 but was %d", left), expressionPosition);
                 }
                 if (left == 0) {
-                    return Optional.empty();
+                    return Optional.of(List.of());
                 }
 
                 RollBuilder right = operands.get(1);

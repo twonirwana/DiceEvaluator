@@ -75,6 +75,13 @@ public class Roll {
         }
     }
 
+    public Optional<String> asSingleValue() {
+        if (elements.size() == 1) {
+            return Optional.of(elements.getFirst().getValue());
+        }
+        return Optional.empty();
+    }
+
     public Optional<Integer> asInteger() {
         if (elements.size() == 1) {
             return elements.getFirst().asInteger();
