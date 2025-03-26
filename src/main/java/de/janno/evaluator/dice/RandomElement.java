@@ -4,16 +4,12 @@ import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 import lombok.Value;
 
-import javax.annotation.Nullable;
-
-
 @Value
 public class RandomElement {
 
     @NonNull
     RollElement rollElement;
 
-    @Nullable
     ImmutableList<String> randomSelectedFrom;
 
     int numberSupplierValue;
@@ -21,10 +17,8 @@ public class RandomElement {
     @NonNull
     DieId dieId;
 
-    @Nullable
     Integer minInc;
 
-    @Nullable
     Integer maxInc;
 
     public RandomElement(@NonNull RollElement rollElement, @NonNull ImmutableList<String> randomSelectedFrom, @NonNull DieId dieId, int numberSupplierValue) {
@@ -36,9 +30,9 @@ public class RandomElement {
     }
 
     private RandomElement(@NonNull RollElement rollElement,
-                          @Nullable ImmutableList<String> randomSelectedFrom,
-                          @Nullable Integer minInc,
-                          @Nullable Integer maxInc,
+                          ImmutableList<String> randomSelectedFrom,
+                          Integer minInc,
+                          Integer maxInc,
                           @NonNull DieId dieId,
                           int numberSupplierValue) {
         this.rollElement = rollElement;

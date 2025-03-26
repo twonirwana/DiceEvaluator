@@ -3,7 +3,6 @@ package de.janno.evaluator.dice;
 import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -110,8 +109,8 @@ public class Tokenizer {
     }
 
     private int findNextMatchForErrorMessage(String current) {
-        int i=0;
-        while(!current.isEmpty()){
+        int i = 0;
+        while (!current.isEmpty()) {
             i++;
             current = current.substring(1);
             try {
@@ -188,7 +187,7 @@ public class Tokenizer {
         return Optional.of(brackets.toString());
     }
 
-    private Operator.OperatorType determineAndValidateOperatorType(@NonNull Token token, @Nullable Token left, @Nullable Token right, boolean lastOperatorWasUnaryLeft) throws ExpressionException {
+    private Operator.OperatorType determineAndValidateOperatorType(@NonNull Token token, Token left, Token right, boolean lastOperatorWasUnaryLeft) throws ExpressionException {
         //todo cleanup
 
         //operator is already checked
