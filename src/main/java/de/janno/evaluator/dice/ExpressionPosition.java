@@ -4,8 +4,6 @@ import com.google.common.base.Joiner;
 import lombok.NonNull;
 import lombok.Value;
 
-import javax.annotation.Nullable;
-
 
 @Value
 public class ExpressionPosition implements Comparable<ExpressionPosition> {
@@ -15,12 +13,10 @@ public class ExpressionPosition implements Comparable<ExpressionPosition> {
     /**
      * A non operator/function extension on the left, like a parentheses. Needed to build the expression back together.
      */
-    @Nullable
     String leftExtension;
     /**
      * A non operator/function extension on the right, like a parentheses. Needed to build the expression back together.
      */
-    @Nullable
     String rightExtension;
 
     public static ExpressionPosition of(final int startInc, final String value) {
