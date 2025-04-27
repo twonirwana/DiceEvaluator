@@ -92,6 +92,7 @@ public class DiceEvaluator {
                         .add(new SortDesc(maxNumberOfElements, keepChildrenRolls))
                         .add(new Min(maxNumberOfElements, keepChildrenRolls))
                         .add(new Max(maxNumberOfElements, keepChildrenRolls))
+                        .add(new Round(maxNumberOfElements, keepChildrenRolls))
                         .add(new Cancel(maxNumberOfElements, keepChildrenRolls))
                         .add(new Double(maxNumberOfElements, keepChildrenRolls))
                         .add(new IfEqual(maxNumberOfElements, keepChildrenRolls))
