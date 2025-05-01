@@ -46,6 +46,7 @@ public final class OperatorOrder {
                     .add(ExplodingAddDice.class)
                     .add(ExplodingDice.class)
                     .add(RegularDice.class)
+                    .add(FromTo.class) //must be before dice, so it can be used to create lists for custom dice
                     .build();
 
     public static int getOderNumberOf(Class<? extends Operator> operatorDefinitionClass) {

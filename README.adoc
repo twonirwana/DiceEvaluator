@@ -97,6 +97,7 @@ All operators are case insensitiv.
 |Exploding Add Dice |`<numberOfDice>d!!<numberOfFaces>` |`3d!!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the die previous resul total. A roll of the reroll the sum of the value. |30 |left for binary and right for unary |none or a single positiv integer number (max 1000) |a single integer number
 |Exploding Dice |`<numberOfDice>d!<numberOfFaces>` |`4d!6` or `d!6` |Throws dice and any time the max value of a die is rolled, that die is re-rolled and added to the dice set total. A reroll will be represented as two dice roll elements |31 |left for binary and right for unary |none or a single integer number (max 1000) |a single positiv integer number
 |Regular Dice |`<numberOfDice>d<numberOfFaces>` |`3d20`, `d20` or `3d[2/4/8]` |Throws a number of dice given by the left number. The number sides are given by the right number. If the right side a list, an element of the list is randomly picked. The roll is a list with the dice throw |32 |left for binary and right for unary |none or a single integer number (max 1000) |a single positiv number or multiple elements
+|From-To List |`<fromNumber>...<toNumber>` |`1d-10...10` | Create a list of numbers from `<fromNumber>` (including) to  `<toNumber>` (including). The limit are 100 elments in the list. `-2...2` result in `[-2,-1,0,1,2]`. |33 |left | a single integer |a single integer bigger or equal than the left number
 |===
 
 === Functions

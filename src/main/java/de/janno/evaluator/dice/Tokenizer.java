@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 
 public class Tokenizer {
-    private final static String ALL_NUMBER_REGEX = "\\d+\\.?\\d*";
+    private final static String ALL_NUMBER_REGEX = "\\d+(\\.\\d+)?";
     private final static Pattern SMALL_DECIMAL_PATTERN = Pattern.compile("\\d{1,9}\\.\\d{1,9}");
     private final static Pattern SMALL_INTEGER_PATTERN = Pattern.compile("\\d{1,9}");
     private final ImmutableList<TokenBuilder> tokenBuilders;
