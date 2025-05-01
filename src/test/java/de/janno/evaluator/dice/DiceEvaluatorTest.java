@@ -174,6 +174,7 @@ public class DiceEvaluatorTest {
                 Arguments.of("1...6", List.of(), List.of(1, 2, 3, 4, 5, 6)),
                 Arguments.of("-3...2", List.of(), List.of(-3, -2, -1, 0, 1, 2)),
                 Arguments.of("2...2", List.of(), List.of(2)),
+                Arguments.of("2d(0...9)", List.of(1, 2), List.of(0, 1)),
 
                 //empty
                 Arguments.of("", null, List.of())
@@ -845,7 +846,7 @@ public class DiceEvaluatorTest {
         DiceEvaluator underTest = new DiceEvaluator(numberSupplier, 1000, 10_000, true);
 
         // List<Roll> res = underTest.evaluate("3d!6+(2r(2d8))");
-        RollResult res = underTest.evaluate("2d3...7");
+        RollResult res = underTest.evaluate("colorOn(3d6,[1/2],'white')");
         System.out.println(res.getRolls().size());
         res.getRolls().forEach(System.out::println);
         res.getRolls().forEach(r -> System.out.println(r.getResultString()));
