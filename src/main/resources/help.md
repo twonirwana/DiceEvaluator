@@ -8,6 +8,7 @@
 | Keep Lowest          | l          | 3d6l2              |
 | Sum                  | =          | 3d6=               |
 | Add to List          | +          | 3d6+2d12           |
+| From-To List         | ...        | (-10...10)         |
 | Concatenate          | _          | 3d6 _ 'dmg'        |
 | Negative add to List | -          | 3d6-2d12 or -2d6   |
 | Decimal Divide       | //         | 2/6                |
@@ -44,9 +45,10 @@
 | Max                  | max()      | max(3d4, 8)        |
 | Chancel              | chancel()  | chancel(8d10,10,1) |
 | Replace              | replace()  | replace(6d10,1,2)  |
-| Color On             | colorOn()  | colorOn(d6,6,'red')|
+| Color On             | colorOn()  | colorOn(d6,6,'red') |
 | Explode              | exp()      | exp(d6,1,2)        |
 | If                   | if()       | if(d6=?6,'Y','N')  |
 | Group Count          | groupC()   | groupC(20d6)       |
 | Concatenate          | concat()   | concat('Att:',d20) |
 | Value                | val()      | val('$1',10d10)    |
+| Round                | round()    | round(1.2,'UP')    |
