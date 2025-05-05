@@ -39,6 +39,7 @@ public final class OperatorOrder {
                     .add(KeepLowest.class)
                     //dice should be first
                     .add(AddToList.class)
+                    .add(FromTo.class) //must after negate to have -3...3
                     .add(NegateAddRemove.class)
                     .add(Reroll.class)
                     .add(Tag.class)

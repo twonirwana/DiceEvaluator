@@ -3,8 +3,8 @@ package de.janno.evaluator.dice;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
-import de.janno.evaluator.dice.function.Double;
 import de.janno.evaluator.dice.function.*;
+import de.janno.evaluator.dice.function.Double;
 import de.janno.evaluator.dice.operator.bool.*;
 import de.janno.evaluator.dice.operator.die.*;
 import de.janno.evaluator.dice.operator.list.*;
@@ -72,6 +72,7 @@ public class DiceEvaluator {
                         .add(new GreaterEqualThanFilter(maxNumberOfElements, keepChildrenRolls))
                         .add(new LesserEqualThanFilter(maxNumberOfElements, keepChildrenRolls))
                         .add(new EqualFilter(maxNumberOfElements, keepChildrenRolls))
+                        .add(new FromTo(maxNumberOfElements, keepChildrenRolls))
                         .add(new Count(maxNumberOfElements, keepChildrenRolls))
                         .add(new Reroll(maxNumberOfElements, keepChildrenRolls))
                         .add(new EqualBool(maxNumberOfElements, keepChildrenRolls))

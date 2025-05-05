@@ -171,6 +171,10 @@ public class DiceEvaluatorTest {
 
                 Arguments.of("6r replace(exp(d[0/0/1/1/'2#'/2],2),'2#','2')", List.of(1, 2, 3, 4, 5, 6, 6, 1), List.of(0, 0, 1, 1, 2, 2, 0)),
 
+                Arguments.of("1...6", List.of(), List.of(1, 2, 3, 4, 5, 6)),
+                Arguments.of("-3...2", List.of(), List.of(-3, -2, -1, 0, 1, 2)),
+                Arguments.of("2...2", List.of(), List.of(2)),
+                Arguments.of("2d(0...9)", List.of(1, 2), List.of(0, 1)),
 
                 //empty
                 Arguments.of("", null, List.of())
@@ -608,6 +612,10 @@ public class DiceEvaluatorTest {
                 Arguments.of("colorOn(1,val('a',1),'white')", "'colorOn' requires as 2 inputs but was empty"),
                 Arguments.of("colorOn(1,2x2,'white')", "'colorOn' requires a single argument as 2 input but was '[[2], [2]]'"),
                 Arguments.of("colorOn(1,1,val('a',1))", "'colorOn' requires as 3 inputs but was empty"),
+                Arguments.of("3...2", "The left number must be smaller or equal than the right number"),
+                Arguments.of("1...-1", "The left number must be smaller or equal than the right number"),
+                Arguments.of("'a'...1", "'...' requires as left input a single decimal but was '[a]'"),
+                Arguments.of("0...10000", "The list is limited to 100 elements"),
 
                 Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
