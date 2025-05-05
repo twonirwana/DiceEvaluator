@@ -368,6 +368,63 @@ public class DiceEvaluatorTest {
                 Arguments.of("(4//3)+(1//3)+1<1", List.of(), List.of("0.33333")),
                 Arguments.of("(4//3)+(1//3)+1<=1", List.of(), List.of("0.33333", "1")),
 
+                //rounding
+                Arguments.of("round(0.4, 'UP')", List.of(), List.of("1")),
+                Arguments.of("round(0.4, 'UP', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.5, 'UP', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.6, 'UP', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.4, 'UP', 1)", List.of(), List.of("0.4")),
+                Arguments.of("round(0.4, 'UP', -1)", List.of(), List.of("1E+1")),
+                Arguments.of("round(0.4, 'UP', 2)", List.of(), List.of("0.40")),
+
+                Arguments.of("round(0.4, 'DOWN')", List.of(), List.of("0")),
+                Arguments.of("round(0.4, 'DOWN', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.5, 'DOWN', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.6, 'DOWN', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.4, 'DOWN', 1)", List.of(), List.of("0.4")),
+                Arguments.of("round(0.4, 'DOWN', -1)", List.of(), List.of("0E+1")),
+                Arguments.of("round(0.4, 'DOWN', 2)", List.of(), List.of("0.40")),
+
+                Arguments.of("round(0.4, 'CEILING')", List.of(), List.of("1")),
+                Arguments.of("round(0.4, 'CEILING', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.5, 'CEILING', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.6, 'CEILING', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.4, 'CEILING', 1)", List.of(), List.of("0.4")),
+                Arguments.of("round(0.4, 'CEILING', -1)", List.of(), List.of("1E+1")),
+                Arguments.of("round(0.4, 'CEILING', 2)", List.of(), List.of("0.40")),
+
+                Arguments.of("round(0.4, 'FLOOR')", List.of(), List.of("0")),
+                Arguments.of("round(0.4, 'FLOOR', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.5, 'FLOOR', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.6, 'FLOOR', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.4, 'FLOOR', 1)", List.of(), List.of("0.4")),
+                Arguments.of("round(0.4, 'FLOOR', -1)", List.of(), List.of("0E+1")),
+                Arguments.of("round(0.4, 'FLOOR', 2)", List.of(), List.of("0.40")),
+
+                Arguments.of("round(0.4, 'HALF_UP')", List.of(), List.of("0")),
+                Arguments.of("round(0.4, 'HALF_UP', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.5, 'HALF_UP', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.6, 'HALF_UP', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.4, 'HALF_UP', 1)", List.of(), List.of("0.4")),
+                Arguments.of("round(0.4, 'HALF_UP', -1)", List.of(), List.of("0E+1")),
+                Arguments.of("round(0.4, 'HALF_UP', 2)", List.of(), List.of("0.40")),
+
+                Arguments.of("round(0.4, 'HALF_DOWN')", List.of(), List.of("0")),
+                Arguments.of("round(0.4, 'HALF_DOWN', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.5, 'HALF_DOWN', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.6, 'HALF_DOWN', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.4, 'HALF_DOWN', 1)", List.of(), List.of("0.4")),
+                Arguments.of("round(0.4, 'HALF_DOWN', -1)", List.of(), List.of("0E+1")),
+                Arguments.of("round(0.4, 'HALF_DOWN', 2)", List.of(), List.of("0.40")),
+
+                Arguments.of("round(0.4, 'HALF_EVEN')", List.of(), List.of("0")),
+                Arguments.of("round(0.4, 'HALF_EVEN', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.5, 'HALF_EVEN', 0)", List.of(), List.of("0")),
+                Arguments.of("round(0.6, 'HALF_EVEN', 0)", List.of(), List.of("1")),
+                Arguments.of("round(0.4, 'HALF_EVEN', 1)", List.of(), List.of("0.4")),
+                Arguments.of("round(0.4, 'HALF_EVEN', -1)", List.of(), List.of("0E+1")),
+                Arguments.of("round(0.4, 'HALF_EVEN', 2)", List.of(), List.of("0.40")),
+
                 //bool
                 Arguments.of("!'false'", List.of(), List.of("true")),
                 Arguments.of("!'true'", List.of(), List.of("false")),
@@ -616,6 +673,12 @@ public class DiceEvaluatorTest {
                 Arguments.of("1...-1", "The left number must be smaller or equal than the right number"),
                 Arguments.of("'a'...1", "'...' requires as left input a single decimal but was '[a]'"),
                 Arguments.of("0...10000", "The list is limited to 100 elements"),
+
+                Arguments.of("round(2d6,'UP')", "'round' requires as first argument input a single decimal but was '[2, 3]'. Try to sum the numbers together like ((2d6=)"),
+                Arguments.of("round('a','UP')", "'round' requires as first argument input a single decimal but was '[a]'"),
+                Arguments.of("round(1.4)", "'round' requires as 2-3 inputs but was '[[1.4]]'"),
+                Arguments.of("round(1.4, 2)", "The second element must be a single value of: UP, DOWN, CEILING, FLOOR, HALF_UP, HALF_DOWN, HALF_EVEN but was: 2"),
+                Arguments.of("round(1.4, 'upper')", "The second element must be a single value of: UP, DOWN, CEILING, FLOOR, HALF_UP, HALF_DOWN, HALF_EVEN but was: upper"),
 
                 Arguments.of("d", "Operator d has right associativity but the right value was: empty")
 
