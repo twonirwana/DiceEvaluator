@@ -55,16 +55,6 @@ tasks.jacocoTestReport {
 }
 publishing {
     println("Version: " + gitVersion())
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/twonirwana/DiceEvaluator")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
 
     publications {
         create<MavenPublication>("mavenJava") {
@@ -106,8 +96,8 @@ signing {
 nexusPublishing {
     repositories {
         sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
         }
     }
 }
