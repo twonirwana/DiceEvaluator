@@ -19,7 +19,7 @@ repositories {
 dependencies {
     compileOnly("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
-    implementation("com.google.guava:guava:33.4.8-jre")
+    implementation("com.google.guava:guava:33.5.0-jre")
     implementation("org.apache.commons:commons-lang3:3.18.0")
 
     testCompileOnly("org.projectlombok:lombok:1.18.42")
