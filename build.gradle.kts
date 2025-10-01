@@ -23,8 +23,8 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.19.0")
 
     testCompileOnly("org.projectlombok:lombok:1.18.42")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.14.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:6.0.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:3.27.6")
 
