@@ -17,12 +17,12 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.projectlombok:lombok:1.18.46")
-    annotationProcessor("org.projectlombok:lombok:1.18.46")
+    compileOnly("org.projectlombok:lombok:1.18.48")
+    annotationProcessor("org.projectlombok:lombok:1.18.48")
     implementation("com.google.guava:guava:33.7.1-jre")
     implementation("org.apache.commons:commons-lang3:3.20.0")
 
-    testCompileOnly("org.projectlombok:lombok:1.18.46")
+    testCompileOnly("org.projectlombok:lombok:1.18.48")
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testImplementation("org.junit.jupiter:junit-jupiter-params:6.1.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
